@@ -32,6 +32,12 @@ The plugin is designed to be generic and modular so each piece can be replaced l
 
 ```lua
 require("mojo").setup({
+  lsp = {
+    enabled = true,
+  },
+  format = {
+    enabled = true,
+  },
   treesitter = {
     enabled = true,
   },
