@@ -23,6 +23,7 @@ The plugin is designed to be generic and modular so each piece can be replaced l
   "Sarctiann/mojo.nvim",
   dev = true,
   dir = "~/Documents/SARCTIANN/LuaCode/custom_plugins/mojo.nvim",
+  main = "mojo",
   opts = {},
 }
 ```
