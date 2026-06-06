@@ -68,3 +68,10 @@ to reflect the new recommended path.
 - `AGENTS.md` is for contributors and AI agents: sovereignty rules, conventions.
 - `docs/superpowers/specs/` — design documents and specs.
 - Commit messages use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`).
+
+### Workflow
+1. **One branch per task** — each item in `docs/TODO.md` is done in a separate
+   branch from `main`. No mixing concerns.
+2. **No commits without request** — never commit unless I explicitly ask.
+3. **Merge then next** — once tested and committed, merge to `main`, then
+   start the next task on a fresh branch.
