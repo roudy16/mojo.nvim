@@ -2,13 +2,18 @@ local env = require("mojo.env")
 
 local M = {}
 
+--- @type table<string, boolean>
 local shells = { zsh = true, bash = true, fish = true, sh = true, dash = true, ksh = true }
 
+--- @param bufname string
+--- @return string|nil
 local function terminal_cmd_from_bufname(bufname)
   local cmd = bufname:match(":([^:]+)$")
   return cmd and vim.fn.fnamemodify(cmd, ":t") or nil
 end
 
+--- @param buf integer
+--- @return boolean
 local function is_shell_terminal(buf)
   local bufname = vim.api.nvim_buf_get_name(buf)
   local cmd = terminal_cmd_from_bufname(bufname)
@@ -18,6 +23,7 @@ local function is_shell_terminal(buf)
   return shells[cmd] == true or cmd == vim.fn.fnamemodify(vim.o.shell, ":t")
 end
 
+--- @param opts Mojo-lang.TerminalConfig|nil
 function M.setup(opts)
   opts = opts or {}
   if opts.enabled == false or opts.auto_activate == false then

@@ -1,29 +1,47 @@
+--- @class Mojo-lang.DetectedEnv
+--- @field type "pixi"|"venv"
+--- @field root string
+--- @field env_name string|nil
+--- @field env_dir string|nil
+--- @field bin_dir string|nil
+--- @field activate_cmd string|nil
+
 local M = {}
 local debug = require("mojo.debug")
 
+--- @type table<string, Mojo-lang.DetectedEnv|false>
 local cache = {}
 
+--- @param path string|nil
+--- @param markers string[]|nil
+--- @return string|nil
 local function root_for(path, markers)
   path = path or vim.fn.getcwd()
   markers = markers or { "pixi.toml", "pyproject.toml", ".pixi", ".venv" }
   return vim.fs.root(path .. "/.", markers)
 end
 
+--- @param path string|nil
+--- @return boolean|nil
 local function has_file(path)
   return path and vim.uv.fs_stat(path) ~= nil
 end
 
+--- @param path string|nil
+--- @return boolean|nil
 local function has_dir(path)
   return path and vim.uv.fs_stat(path) and vim.uv.fs_stat(path).type == "directory"
 end
 
+--- @param root string
+--- @return string|nil, string|nil
 local function first_pixi_env(root)
   local envs_dir = vim.fs.joinpath(root, ".pixi", "envs")
   if not has_dir(envs_dir) then
     return nil, nil
   end
 
-  local envs = {}
+  local envs = {} --- @type string[]
   for name, entry_type in vim.fs.dir(envs_dir) do
     if entry_type == "directory" then
       table.insert(envs, name)
@@ -40,7 +58,7 @@ local function first_pixi_env(root)
     return a < b
   end)
 
-  local env_name = envs[1]
+  local env_name = envs[1] --- @type string|nil
   if not env_name then
     return nil, nil
   end
@@ -48,6 +66,9 @@ local function first_pixi_env(root)
   return env_name, vim.fs.joinpath(envs_dir, env_name)
 end
 
+--- @param root string
+--- @param binary string
+--- @return string|nil
 local function find_pixi_binary(root, binary)
   local envs_dir = vim.fs.joinpath(root, ".pixi", "envs")
   if not has_dir(envs_dir) then
@@ -66,14 +87,16 @@ local function find_pixi_binary(root, binary)
   return nil
 end
 
+--- @param key string
+--- @param value string|nil
 local function env_prepend(key, value)
   if not value or value == "" then
     return
   end
 
   local current = vim.env[key] or ""
-  local parts = {}
-  local seen = {}
+  local parts = {} --- @type string[]
+  local seen = {} --- @type table<string, boolean>
 
   local function add(part)
     if part ~= "" and not seen[part] then
@@ -90,6 +113,8 @@ local function env_prepend(key, value)
   vim.env[key] = table.concat(parts, ":")
 end
 
+--- @param path string|nil
+--- @return Mojo-lang.DetectedEnv|nil
 function M.activate_for_dir(path)
   local env = M.detect(path)
   if not env then
@@ -124,6 +149,8 @@ function M.activate_for_dir(path)
   return env
 end
 
+--- @param path string|nil
+--- @return Mojo-lang.DetectedEnv|nil
 function M.detect(path)
   local root = root_for(path)
   if not root then
@@ -156,7 +183,7 @@ function M.detect(path)
     debug.log("detect_pixi", function()
       return { root = root, env_name = env_name or "none", env_dir = pixi_env or "none" }
     end)
-    return cache[root]
+    return cache[root] or nil
   end
 
   local venv_dir = vim.fs.joinpath(root, ".venv")
@@ -172,7 +199,7 @@ function M.detect(path)
     debug.log("detect_venv", function()
       return { root = root, env_dir = venv_dir }
     end)
-    return cache[root]
+    return cache[root] or nil
   end
 
   cache[root] = false
@@ -182,6 +209,8 @@ function M.detect(path)
   return nil
 end
 
+--- @param path string|nil
+--- @return string|nil
 function M.get_mojo_cmd(path)
   local env = M.detect(path)
   if env and env.bin_dir then
@@ -201,6 +230,8 @@ function M.get_mojo_cmd(path)
   return vim.fn.executable("mojo") == 1 and "mojo" or nil
 end
 
+--- @param path string|nil
+--- @return string[]|nil
 function M.get_lsp_cmd(path)
   local env = M.detect(path)
   if env and env.bin_dir then
@@ -236,6 +267,8 @@ function M.get_lsp_cmd(path)
   return nil
 end
 
+--- @param path string|nil
+--- @return string|nil
 function M.activate_command(path)
   local env = M.detect(path)
   if not env then
@@ -244,6 +277,10 @@ function M.activate_command(path)
   return env.activate_cmd
 end
 
+--- @param channel integer
+--- @param path string|nil
+--- @param delay_ms integer|nil
+--- @return boolean
 function M.activate_in_terminal(channel, path, delay_ms)
   local command = M.activate_command(path)
   if not command then

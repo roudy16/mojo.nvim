@@ -7,7 +7,7 @@ The plugin is designed to be generic and modular so each piece can be replaced l
 
 ## What it provides
 
-- `.mojo` filetype detection
+- `.mojo` and `🔥` filetype detection
 - Treesitter parser registration for Mojo
 - Environment helpers for Pixi and virtualenv projects
 - Optional LSP and formatter adapters

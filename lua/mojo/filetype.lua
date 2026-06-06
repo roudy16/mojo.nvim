@@ -4,6 +4,7 @@ function M.setup()
   vim.filetype.add({
     extension = {
       mojo = "mojo",
+      ["🔥"] = "mojo",
     },
   })
 end

@@ -1,5 +1,7 @@
 local M = {}
 
+--- @param parser Mojo-lang.TreesitterParserConfig|nil
+--- @return boolean
 function M.register(parser)
   local ok, parsers = pcall(require, "nvim-treesitter.parsers")
   if not ok then
@@ -19,6 +21,7 @@ function M.register(parser)
   return true
 end
 
+--- @param opts Mojo-lang.TreesitterConfig|nil
 function M.setup(opts)
   opts = opts or {}
   if opts.enabled == false then

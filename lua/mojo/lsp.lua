@@ -3,6 +3,8 @@ local debug = require("mojo.debug")
 
 local M = {}
 
+--- @param root_markers string[]|nil
+--- @return fun(fname: string|nil): string
 local function root_dir(root_markers)
   root_markers = root_markers or { "pixi.toml", "pyproject.toml", ".pixi", ".venv" }
   return function(fname)
@@ -11,6 +13,8 @@ local function root_dir(root_markers)
   end
 end
 
+--- @param user_opts Mojo-lang.LspConfig|nil
+--- @return table
 function M.opts(user_opts)
   user_opts = user_opts or {}
   local opts = vim.tbl_deep_extend("force", {
@@ -34,6 +38,8 @@ function M.opts(user_opts)
   return opts
 end
 
+--- @param user_opts Mojo-lang.LspConfig|nil
+--- @return boolean
 function M.setup(user_opts)
   local ok, lspconfig = pcall(require, "lspconfig")
   if not ok then

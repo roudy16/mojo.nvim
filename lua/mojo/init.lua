@@ -8,6 +8,8 @@ local M = {}
 M.hooks = hooks.defaults
 M.debug = debug
 
+--- @param user_config Mojo-lang.Config|nil
+--- @return Mojo-lang.Config
 function M.setup(user_config)
   local opts = config.setup(user_config)
   M.hooks = hooks.merge(opts.hooks)
