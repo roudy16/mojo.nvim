@@ -1,4 +1,4 @@
-# mojo.nvim
+# 🔥 mojo.nvim
 
 Neovim integration for [Mojo](https://www.modular.com/mojo).
 
@@ -40,19 +40,74 @@ Auto-activates the project environment in new shell terminal buffers.
 
 ## Installation
 
-### lazy.nvim
+<details open>
+<summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a></summary>
 
 ```lua
 {
   "Sarctiann/mojo.nvim",
-  dev = true,
-  dir = "~/Documents/SARCTIANN/LuaCode/custom_plugins/mojo.nvim",
   main = "mojo",
   opts = {},
 }
 ```
 
-### Setup
+</details>
+
+<details>
+<summary><a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a></summary>
+
+```lua
+use {
+  "Sarctiann/mojo.nvim",
+  config = function()
+    require("mojo").setup({})
+  end,
+}
+```
+
+</details>
+
+<details>
+<summary><a href="https://github.com/echasnovski/mini.deps">mini.deps</a></summary>
+
+```lua
+local add = MiniDeps.add
+
+add({
+  source = "Sarctiann/mojo.nvim",
+  depends = {},
+})
+
+require("mojo").setup({})
+```
+
+</details>
+
+<details>
+<summary><a href="https://github.com/tpope/vim-plug">vim-plug</a></summary>
+
+```vim
+Plug 'Sarctiann/mojo.nvim'
+
+lua << EOF
+require("mojo").setup({})
+EOF
+```
+
+</details>
+
+<details>
+<summary><a href="https://github.com/lumen-oss/rocks.nvim">rocks.nvim</a></summary>
+
+Run `:Rocks install mojo.nvim` then add to your init.lua:
+
+```lua
+require("mojo").setup({})
+```
+
+</details>
+
+## Setup
 
 ```lua
 require("mojo").setup({
@@ -64,7 +119,52 @@ require("mojo").setup({
 })
 ```
 
-### LazyVim adapters
+**Note:** `opts` (lazy.nvim) and `setup()` accept the same config table.
+
+## Integrations
+
+<details open>
+<summary>🔧 LSP (nvim-lspconfig)</summary>
+
+```lua
+require("mojo").setup({
+  lsp = { enabled = true },
+})
+```
+
+This registers `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
+resolution (finds the binary in the active Pixi/venv environment).
+
+</details>
+
+<details open>
+<summary>🎨 Formatting (conform.nvim)</summary>
+
+```lua
+require("mojo").setup({
+  format = { enabled = true },
+})
+```
+
+This configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
+
+</details>
+
+<details open>
+<summary>🌳 Treesitter (nvim-treesitter)</summary>
+
+```lua
+require("mojo").setup({
+  treesitter = { enabled = true },
+})
+```
+
+This registers the Mojo parser with `nvim-treesitter`.
+
+</details>
+
+<details>
+<summary>🚀 LazyVim</summary>
 
 ```lua
 local mojo = require("mojo.adapters.lazyvim")
@@ -84,6 +184,225 @@ local mojo = require("mojo.adapters.lazyvim")
   opts = function(_, opts) return mojo.format(opts) end,
 }
 ```
+
+</details>
+
+<details>
+<summary>🔍 Linting (nvim-lint)</summary>
+
+```lua
+require("lint").linters_by_ft = {
+  mojo = { "mojo" },
+}
+```
+
+**Note:** Full adapter integration is tracked in TODO.md (P2 #13).
+The `mojo-lint` adapter in `lua/mojo/adapters/nvim-lint.lua` will wrap `mojo format --check`
+as a lint source when implemented.
+
+</details>
+
+<details>
+<summary>✨ Autocompletion (nvim-cmp)</summary>
+
+nvim-cmp works out of the box with LSP configured via this plugin. No additional
+Mojo-specific cmp source is needed — `mojo-lsp-server` provides completion items
+through the standard LSP protocol.
+
+```lua
+require("cmp").setup({
+  sources = {
+    { name = "nvim_lsp" },  -- Mojo LSP completions come through here
+  },
+})
+```
+
+</details>
+
+<details>
+<summary>✨ Autocompletion (blink.cmp)</summary>
+
+blink.cmp works out of the box with LSP configured via this plugin.
+
+```lua
+require("blink.cmp").setup({
+  sources = {
+    default = { "lsp" },
+  },
+})
+```
+
+</details>
+
+<details>
+<summary>📋 Snippets (LuaSnip)</summary>
+
+Place Mojo snippets in `~/.config/nvim/snippets/mojo.lua` or use a snippet
+collection like `friendly-snippets` (which includes Python snippets that overlap
+with Mojo syntax).
+
+```lua
+require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets" })
+```
+
+</details>
+
+<details>
+<summary>🐛 Debugging (nvim-dap)</summary>
+
+**Note:** Mojo debugging support depends on Modular shipping a DAP adapter.
+When available, an adapter in `lua/mojo/adapters/nvim-dap.lua` will register it.
+This section will be updated with configuration examples at that point.
+
+For now, if you have a compatible debugger, configure it manually:
+
+```lua
+require("dap").adapters.mojo = {
+  type = "executable",
+  command = "mojo",
+  args = { "debug" },
+}
+```
+
+</details>
+
+<details>
+<summary>🧪 Testing (neotest)</summary>
+
+**Note:** A neotest adapter for Mojo (`lua/mojo/adapters/neotest.lua`) will be
+implemented when a standard Mojo test runner interface is established. This
+section will be updated with configuration examples at that point.
+
+For now, run tests directly:
+
+```bash
+mojo test
+```
+
+</details>
+
+<details>
+<summary>🔭 telescope.nvim</summary>
+
+telescope works with Mojo files out of the box. No additional configuration needed.
+
+```lua
+require("telescope").setup({})
+```
+
+Mojo files are picked up by default pickers (`find_files`, `live_grep`, etc.).
+
+</details>
+
+<details>
+<summary>⌨️ which-key.nvim</summary>
+
+If you define Mojo-specific keymaps, which-key will discover them automatically.
+
+```lua
+require("which-key").add({
+  { "<leader>m", group = "Mojo" },
+  { "<leader>mr", "<cmd>MojoRun<CR>", desc = "Run Mojo file" },
+  { "<leader>mt", "<cmd>MojoTest<CR>", desc = "Run Mojo tests" },
+})
+```
+
+</details>
+
+<details>
+<summary>⚠️ trouble.nvim</summary>
+
+trouble.nvim works with LSP diagnostics, which mojo-lsp-server provides
+automatically. No additional Mojo-specific configuration needed.
+
+```lua
+require("trouble").setup({})
+```
+
+</details>
+
+<details>
+<summary>📊 lualine.nvim</summary>
+
+Show the active Mojo environment in your statusline:
+
+```lua
+require("lualine").setup({
+  sections = {
+    lualine_x = {
+      {
+        function()
+          local env = require("mojo.env").detect()
+          if env and env.type == "pixi" then return " " end
+          if env and env.type == "venv" then return " " end
+          return ""
+        end,
+      },
+    },
+  },
+})
+```
+
+</details>
+
+<details>
+<summary>🪐 AstroNvim</summary>
+
+In `~/.config/nvim/lua/community.lua` or your user config:
+
+```lua
+return {
+  "Sarctiann/mojo.nvim",
+  opts = {
+    lsp = { enabled = true },
+    format = { enabled = true },
+    treesitter = { enabled = true },
+  },
+}
+```
+
+</details>
+
+<details>
+<summary>⚡ NvChad</summary>
+
+In `~/.config/nvim/lua/custom/plugins.lua`:
+
+```lua
+return {
+  {
+    "Sarctiann/mojo.nvim",
+    config = function()
+      require("mojo").setup({
+        lsp = { enabled = true },
+        format = { enabled = true },
+        treesitter = { enabled = true },
+      })
+    end,
+  },
+}
+```
+
+</details>
+
+<details>
+<summary>🏁 kickstart.nvim</summary>
+
+In your `init.lua`, add mojo.nvim to the plugins table:
+
+```lua
+{
+  "Sarctiann/mojo.nvim",
+  main = "mojo",
+  opts = {
+    lsp = { enabled = true },
+    format = { enabled = true },
+    treesitter = { enabled = true },
+  },
+},
+```
+
+</details>
 
 ## Configuration
 

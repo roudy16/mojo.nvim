@@ -200,6 +200,34 @@ This violates the single-concern-per-module principle.
 
 ---
 
+### 13. Support popular Neovim tools with README documentation
+
+**Scope:** Ongoing — new tools are added here as they're identified.
+Each tool follows: Research → Adapter (if needed) → README section.
+
+**Initial batch:**
+
+| Tool | Research | Adapter | README | Status |
+|------|----------|---------|--------|--------|
+| nvim-lint | ⬜ | ⬜ | ⬜ | 🔴 |
+| nvim-cmp | ⬜ | ⬜ | ⬜ | 🔴 |
+| blink.cmp | ⬜ | ⬜ | ⬜ | 🔴 |
+| LuaSnip | ⬜ | ⬜ | ⬜ | 🔴 |
+| nvim-dap | ⬜ | ⬜ | ⬜ | 🔴 |
+| neotest | ⬜ | ⬜ | ⬜ | 🔴 |
+| telescope.nvim | ⬜ | ⬜ | ⬜ | 🔴 |
+| which-key.nvim | ⬜ | ⬜ | ⬜ | 🔴 |
+| trouble.nvim | ⬜ | ⬜ | ⬜ | 🔴 |
+| lualine.nvim | ⬜ | ⬜ | ⬜ | 🔴 |
+| AstroNvim | ⬜ | ⬜ | ⬜ | 🔴 |
+| NvChad | ⬜ | ⬜ | ⬜ | 🔴 |
+| kickstart.nvim | ⬜ | ⬜ | ⬜ | 🔴 |
+
+**Adding new tools:** Append a new row when a tool is identified.
+Process: research → create adapter (if needed) → add README section → check off columns.
+
+---
+
 ## P3 — Polish
 
 ### 11. Decouple debug.lua from config.options
