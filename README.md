@@ -19,23 +19,29 @@ activation — designed so each piece can be swapped when
 ## Features
 
 ### Filetype
+
 `.mojo` and `🔥` files are automatically recognized as `mojo` filetype.
 
 ### Environment
+
 Detects Pixi (`pixi.toml` / `.pixi/`) and virtualenv (`.venv/`) projects and
 activates them for LSP, formatting, and terminal buffers transparently.
 
 ### Treesitter
+
 Registers the Mojo parser with `nvim-treesitter`.
 
 ### LSP
+
 Configures `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
 resolution (finds the binary in the active Pixi/venv environment).
 
 ### Format
+
 Configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
 
 ### Terminal
+
 Auto-activates the project environment in new shell terminal buffers.
 
 ## Installation
@@ -123,7 +129,7 @@ require("mojo").setup({
 
 ## Integrations
 
-<details open>
+<details>
 <summary>🔧 LSP (nvim-lspconfig)</summary>
 
 ```lua
@@ -137,7 +143,7 @@ resolution (finds the binary in the active Pixi/venv environment).
 
 </details>
 
-<details open>
+<details>
 <summary>🎨 Formatting (conform.nvim)</summary>
 
 ```lua
@@ -150,7 +156,7 @@ Configures `mojo format` via `conform.nvim` with environment-aware binary resolu
 
 </details>
 
-<details open>
+<details>
 <summary>🌳 Treesitter (nvim-treesitter)</summary>
 
 ```lua
