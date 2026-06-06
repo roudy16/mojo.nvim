@@ -132,7 +132,7 @@ require("mojo").setup({
 })
 ```
 
-This registers `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
+Registers `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
 resolution (finds the binary in the active Pixi/venv environment).
 
 </details>
@@ -146,7 +146,7 @@ require("mojo").setup({
 })
 ```
 
-This configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
+Configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
 
 </details>
 
@@ -159,7 +159,7 @@ require("mojo").setup({
 })
 ```
 
-This registers the Mojo parser with `nvim-treesitter`.
+Registers the Mojo parser with `nvim-treesitter`.
 
 </details>
 
@@ -183,223 +183,6 @@ local mojo = require("mojo.adapters.lazyvim")
 { "stevearc/conform.nvim",
   opts = function(_, opts) return mojo.format(opts) end,
 }
-```
-
-</details>
-
-<details>
-<summary>🔍 Linting (nvim-lint)</summary>
-
-```lua
-require("lint").linters_by_ft = {
-  mojo = { "mojo" },
-}
-```
-
-**Note:** Full adapter integration is tracked in TODO.md (P2 #13).
-The `mojo-lint` adapter in `lua/mojo/adapters/nvim-lint.lua` will wrap `mojo format --check`
-as a lint source when implemented.
-
-</details>
-
-<details>
-<summary>✨ Autocompletion (nvim-cmp)</summary>
-
-nvim-cmp works out of the box with LSP configured via this plugin. No additional
-Mojo-specific cmp source is needed — `mojo-lsp-server` provides completion items
-through the standard LSP protocol.
-
-```lua
-require("cmp").setup({
-  sources = {
-    { name = "nvim_lsp" },  -- Mojo LSP completions come through here
-  },
-})
-```
-
-</details>
-
-<details>
-<summary>✨ Autocompletion (blink.cmp)</summary>
-
-blink.cmp works out of the box with LSP configured via this plugin.
-
-```lua
-require("blink.cmp").setup({
-  sources = {
-    default = { "lsp" },
-  },
-})
-```
-
-</details>
-
-<details>
-<summary>📋 Snippets (LuaSnip)</summary>
-
-Place Mojo snippets in `~/.config/nvim/snippets/mojo.lua` or use a snippet
-collection like `friendly-snippets` (which includes Python snippets that overlap
-with Mojo syntax).
-
-```lua
-require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets" })
-```
-
-</details>
-
-<details>
-<summary>🐛 Debugging (nvim-dap)</summary>
-
-**Note:** Mojo debugging support depends on Modular shipping a DAP adapter.
-When available, an adapter in `lua/mojo/adapters/nvim-dap.lua` will register it.
-This section will be updated with configuration examples at that point.
-
-For now, if you have a compatible debugger, configure it manually:
-
-```lua
-require("dap").adapters.mojo = {
-  type = "executable",
-  command = "mojo",
-  args = { "debug" },
-}
-```
-
-</details>
-
-<details>
-<summary>🧪 Testing (neotest)</summary>
-
-**Note:** A neotest adapter for Mojo (`lua/mojo/adapters/neotest.lua`) will be
-implemented when a standard Mojo test runner interface is established. This
-section will be updated with configuration examples at that point.
-
-For now, run tests directly:
-
-```bash
-mojo test
-```
-
-</details>
-
-<details>
-<summary>🔭 telescope.nvim</summary>
-
-telescope works with Mojo files out of the box. No additional configuration needed.
-
-```lua
-require("telescope").setup({})
-```
-
-Mojo files are picked up by default pickers (`find_files`, `live_grep`, etc.).
-
-</details>
-
-<details>
-<summary>⌨️ which-key.nvim</summary>
-
-If you define Mojo-specific keymaps, which-key will discover them automatically.
-
-```lua
-require("which-key").add({
-  { "<leader>m", group = "Mojo" },
-  { "<leader>mr", "<cmd>MojoRun<CR>", desc = "Run Mojo file" },
-  { "<leader>mt", "<cmd>MojoTest<CR>", desc = "Run Mojo tests" },
-})
-```
-
-</details>
-
-<details>
-<summary>⚠️ trouble.nvim</summary>
-
-trouble.nvim works with LSP diagnostics, which mojo-lsp-server provides
-automatically. No additional Mojo-specific configuration needed.
-
-```lua
-require("trouble").setup({})
-```
-
-</details>
-
-<details>
-<summary>📊 lualine.nvim</summary>
-
-Show the active Mojo environment in your statusline:
-
-```lua
-require("lualine").setup({
-  sections = {
-    lualine_x = {
-      {
-        function()
-          local env = require("mojo.env").detect()
-          if env and env.type == "pixi" then return " " end
-          if env and env.type == "venv" then return " " end
-          return ""
-        end,
-      },
-    },
-  },
-})
-```
-
-</details>
-
-<details>
-<summary>🪐 AstroNvim</summary>
-
-In `~/.config/nvim/lua/community.lua` or your user config:
-
-```lua
-return {
-  "Sarctiann/mojo.nvim",
-  opts = {
-    lsp = { enabled = true },
-    format = { enabled = true },
-    treesitter = { enabled = true },
-  },
-}
-```
-
-</details>
-
-<details>
-<summary>⚡ NvChad</summary>
-
-In `~/.config/nvim/lua/custom/plugins.lua`:
-
-```lua
-return {
-  {
-    "Sarctiann/mojo.nvim",
-    config = function()
-      require("mojo").setup({
-        lsp = { enabled = true },
-        format = { enabled = true },
-        treesitter = { enabled = true },
-      })
-    end,
-  },
-}
-```
-
-</details>
-
-<details>
-<summary>🏁 kickstart.nvim</summary>
-
-In your `init.lua`, add mojo.nvim to the plugins table:
-
-```lua
-{
-  "Sarctiann/mojo.nvim",
-  main = "mojo",
-  opts = {
-    lsp = { enabled = true },
-    format = { enabled = true },
-    treesitter = { enabled = true },
-  },
-},
 ```
 
 </details>
@@ -447,3 +230,15 @@ All options and their defaults:
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory.
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers.
 - Treesitter is isolated behind `lua/mojo/treesitter.lua` so the parser backend can be replaced later.
+
+### Tools that work without Mojo-specific config
+
+These tools work with Mojo files through standard Neovim protocols — no adapter or
+Mojo-specific configuration is required:
+
+- **telescope.nvim** — picks up `.mojo`/`.🔥` files in standard pickers
+- **trouble.nvim** — displays diagnostics from `mojo-lsp-server` automatically
+- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source
+- **which-key.nvim** — discovers any Mojo-related keymaps you define
+
+Adapter-based integration for other tools is tracked in `docs/TODO.md` (P2 #13).
