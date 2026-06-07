@@ -65,3 +65,4 @@ function M.activate_in_terminal(channel, path, delay_ms)
 end
 
 return M
+

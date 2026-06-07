@@ -162,7 +162,11 @@ M.types = {
 
 --- @type Mojo-lang.Snippet[]
 M.snippets = {
-	{ trigger = "fn", body = "fn ${1:name}(${2})$3 -> ${4:Type}:\n\t$0", description = "fn definition with return type" },
+	{
+		trigger = "fn",
+		body = "fn ${1:name}(${2})$3 -> ${4:Type}:\n\t$0",
+		description = "fn definition with return type",
+	},
 	{ trigger = "sfn", body = "fn ${1:name}(${2})${3}:\n\t$0", description = "fn definition without return type" },
 	{ trigger = "struct", body = "struct ${1:Name}:\n\t$0", description = "struct definition" },
 	{ trigger = "trait", body = "trait ${1:Name}:\n\t$0", description = "trait definition" },
@@ -206,3 +210,4 @@ function M.all_items()
 end
 
 return M
+

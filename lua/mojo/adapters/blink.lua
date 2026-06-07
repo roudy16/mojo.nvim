@@ -87,7 +87,7 @@ function M.opts(opts)
 	return {
 		sources = {
 			completion = {
-				enabled_providers = { "lsp", "mojo", "snippets", "path", "buffer" },
+				enabled_providers = { "lsp", "mojo", "snippets", "buffer", "path" },
 			},
 		},
 		providers = {
@@ -126,4 +126,3 @@ function M.setup(opts)
 end
 
 return M
-
