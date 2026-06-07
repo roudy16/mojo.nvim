@@ -13,6 +13,7 @@ activation — designed so each piece can be swapped when
 - Environment helpers for Pixi and virtualenv projects
 - LSP and formatter integration (opt-in, via `nvim-lspconfig` / `conform.nvim`)
 - Terminal environment auto-activation
+- Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
 - LazyVim adapter helpers
 - EmmyLua type annotations (module: `Mojo-lang`)
 
@@ -175,6 +176,49 @@ Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
 </details>
 
 <details>
+<summary>✨ Completion (nvim-cmp / blink.cmp)</summary>
+
+Provides Mojo keywords, builtins, stdlib types, and snippets through your
+completion engine. **Opt-in** — set `completion = { enabled = true }` in setup.
+
+```lua
+require("mojo").setup({
+  completion = { enabled = true },
+})
+```
+
+The plugin auto-detects whether `blink.cmp` or `nvim-cmp` is installed and
+configures the appropriate source. To force a specific engine, use the
+`adapter` option:
+
+```lua
+-- Force blink.cmp
+require("mojo").setup({
+  completion = {
+    enabled = true,
+    adapter = function(opts)
+      require("mojo.adapters.blink").setup(opts)
+    end,
+  },
+})
+
+-- Force nvim-cmp
+require("mojo").setup({
+  completion = {
+    enabled = true,
+    adapter = function(opts)
+      require("mojo.adapters.nvim-cmp").setup(opts)
+    end,
+  },
+})
+```
+
+Includes 56 keywords, 42 built-in functions, 34 standard-library types,
+and 13 common snippets (`fn`, `struct`, `trait`, `vdef`, etc.).
+
+</details>
+
+<details>
 <summary>🚀 LazyVim</summary>
 
 ```lua
@@ -193,6 +237,14 @@ local mojo = require("mojo.adapters.lazyvim")
 -- conform.nvim
 { "stevearc/conform.nvim",
   opts = function(_, opts) return mojo.format(opts) end,
+}
+
+-- blink.cmp (or nvim-cmp)
+{ "saghen/blink.cmp",
+  opts = function(_, opts)
+    local cmp_opts = mojo.completion(opts)
+    return vim.tbl_deep_extend("force", opts, cmp_opts)
+  end,
 }
 ```
 
@@ -221,6 +273,9 @@ All options and their defaults:
     enabled = false,
     formatter_name = "mojo",
   },
+  completion = {
+    enabled = false,
+  },
   debug = false,
   hooks = {},
 }
@@ -240,7 +295,7 @@ Mojo-specific configuration is required:
 
 - **telescope.nvim** — picks up `.mojo`/`.🔥` files in standard pickers
 - **trouble.nvim** — displays diagnostics from `mojo-lsp-server` automatically
-- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source
+- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source; Mojo-specific completions require enabling the adapter
 - **which-key.nvim** — discovers any Mojo-related keymaps you define
 
 Adapter-based integration for other tools is tracked in `docs/TODO.md` (P2 #13).
