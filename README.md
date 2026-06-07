@@ -188,7 +188,7 @@ require("mojo").setup({
 ```
 
 The plugin auto-detects whether `blink.cmp` or `nvim-cmp` is installed and
-configures the appropriate source. To force a specific engine, use the
+configures the appropriate source — no extra plugins required. To force a specific engine, use the
 `adapter` option:
 
 ```lua

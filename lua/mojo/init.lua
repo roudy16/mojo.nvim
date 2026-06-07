@@ -60,10 +60,8 @@ function M.setup(user_config)
 		local cmp_opts = opts.completion
 		if cmp_opts.adapter then
 			cmp_opts.adapter(cmp_opts)
-		else
-			if not require("mojo.adapters.blink").setup(cmp_opts) then
-				require("mojo.adapters.nvim-cmp").setup(cmp_opts)
-			end
+		elseif not require("mojo.adapters.blink").setup(cmp_opts) then
+			require("mojo.adapters.nvim-cmp").setup(cmp_opts)
 		end
 	end
 
