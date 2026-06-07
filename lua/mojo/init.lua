@@ -1,6 +1,5 @@
 local config = require("mojo.config")
 local hooks = require("mojo.hooks")
-local env = require("mojo.env")
 local debug = require("mojo.debug")
 
 local M = {}
@@ -25,31 +24,35 @@ function M.setup(user_config)
 		}
 	end)
 
-	vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
-		pattern = "*.mojo",
-		callback = function(ev)
-			local path = vim.api.nvim_buf_get_name(ev.buf)
-			debug.log("activate_for_dir", function()
-				return { path = path }
-			end)
-			env.activate_for_dir(path)
-		end,
-	})
-
 	if opts.filetype and opts.filetype.enabled ~= false then
 		require("mojo.filetype").setup()
 	end
 
 	if opts.treesitter and opts.treesitter.enabled ~= false then
-		require("mojo.treesitter").setup(opts.treesitter)
+		local ts_opts = opts.treesitter
+		if ts_opts.adapter then
+			ts_opts.adapter(ts_opts)
+		else
+			require("mojo.adapters.treesitter").setup(ts_opts)
+		end
 	end
 
 	if opts.lsp and opts.lsp.enabled ~= false then
-		require("mojo.lsp").setup(opts.lsp)
+		local lsp_opts = opts.lsp
+		if lsp_opts.adapter then
+			lsp_opts.adapter(lsp_opts)
+		else
+			require("mojo.adapters.lspconfig").setup(lsp_opts)
+		end
 	end
 
 	if opts.format and opts.format.enabled ~= false then
-		require("mojo.format").setup(opts.format)
+		local fmt_opts = opts.format
+		if fmt_opts.adapter then
+			fmt_opts.adapter(fmt_opts)
+		else
+			require("mojo.adapters.conform").setup(fmt_opts)
+		end
 	end
 
 	if opts.terminal and opts.terminal.enabled ~= false then
