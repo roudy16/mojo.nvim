@@ -108,16 +108,11 @@ adapter extraction refactor.
 
 ---
 
-### 7. Clean up old docs/superpowers/
+### ~~7. Clean up old docs/superpowers/~~ ✅
 
-**Why:** `docs/superpowers/plans/2026-06-05-mojo.nvim.md` is an old
-implementation plan with unchecked checkboxes. It's stale and misleading.
-
-**Task:**
-
-- Remove `docs/superpowers/plans/` directory (or archive it)
-- Ensure `docs/superpowers/specs/2026-06-05-mojo.nvim-design.md` accurately
-  reflects the current and planned architecture
+**Resolution:** Removed `docs/superpowers/plans/` entirely (all plans were stale
+or already executed). Updated `specs/2026-06-05-mojo.nvim-design.md` to reflect
+the current adapter-based architecture.
 
 ---
 
