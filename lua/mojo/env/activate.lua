@@ -22,8 +22,15 @@ function M.activate_for_dir(path)
 	if env.type == "pixi" then
 		vim.env.CONDA_PREFIX = env.env_dir
 		vim.env.MODULAR_HOME = vim.fs.joinpath(env.env_dir, "share", "max")
-		util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", vim.fs.joinpath(env.env_dir, "lib"))
-		util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", vim.fs.joinpath(env.env_dir, "lib", "swift"))
+		local lib_path = vim.fs.joinpath(env.env_dir, "lib")
+		local swift_lib_path = vim.fs.joinpath(env.env_dir, "lib", "swift")
+		if vim.fn.has("mac") == 1 then
+			util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", lib_path)
+			util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", swift_lib_path)
+		else
+			util.env_prepend("LD_LIBRARY_PATH", lib_path)
+			util.env_prepend("LD_LIBRARY_PATH", swift_lib_path)
+		end
 	elseif env.type == "venv" then
 		vim.env.VIRTUAL_ENV = env.env_dir
 	end
