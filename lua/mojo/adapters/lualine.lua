@@ -88,7 +88,7 @@ function M.setup(opts)
 		return false
 	end
 
-	local orig_setup = nil
+	local orig_setup
 	local function wrap_setup(lualine)
 		orig_setup = lualine.setup
 		lualine.setup = function(config)
@@ -100,6 +100,7 @@ function M.setup(opts)
 	end
 
 	local orig_require = _G.require
+	---@diagnostic disable-next-line: duplicate-set-field
 	_G.require = function(modname)
 		if modname == "lualine" then
 			_G.require = orig_require

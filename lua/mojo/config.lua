@@ -67,18 +67,18 @@ M.defaults = {
 		enabled = true,
 	},
 	lsp = {
-		enabled = false,
+		enabled = true,
 		root_markers = { "pixi.toml", "pyproject.toml", ".pixi", ".venv" },
 	},
 	format = {
-		enabled = false,
+		enabled = true,
 		formatter_name = "mojo",
 	},
 	completion = {
-		enabled = false,
+		enabled = true,
 	},
 	statusline = {
-		enabled = false,
+		enabled = true,
 		icon = "🔥",
 		show_env_name = true,
 		colored = true,

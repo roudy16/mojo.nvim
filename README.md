@@ -11,11 +11,12 @@ activation — designed so each piece can be swapped when
 - `.mojo` and `🔥` filetype detection
 - Treesitter parser registration for Mojo
 - Environment helpers for Pixi and virtualenv projects
-- LSP and formatter integration (opt-in, via `nvim-lspconfig` / `conform.nvim`)
+- LSP and formatter integration (via `nvim-lspconfig` / `conform.nvim`)
 - Terminal environment auto-activation
 - Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
+- lualine.nvim statusline integration
+- 4-space indentation for Mojo files
 - LazyVim, AstroNvim, NvChad, and kickstart.nvim adapter helpers
-- lualine.nvim statusline integration (opt-in)
 - EmmyLua type annotations (module: `Mojo-lang`)
 
 ## Features
@@ -50,6 +51,10 @@ Configures `mojo format` via `conform.nvim` with environment-aware binary resolu
 ### Terminal
 
 Auto-activates the project environment in new shell terminal buffers.
+
+### Indentation
+
+Sets 4-space indentation for Mojo files (matching Python-style conventions).
 
 ## Installation
 
@@ -124,13 +129,11 @@ require("mojo").setup({})
 
 ```lua
 require("mojo").setup({
-  debug = true,       -- writes mojo-debug.log to cwd
-  lsp = { enabled = true },
-  format = { enabled = true },
-  treesitter = { enabled = true },
-  terminal = { enabled = true },
+  debug = true, -- writes mojo-debug.log to cwd
 })
 ```
+
+All features are enabled by default. Pass `enabled = false` to disable any feature.
 
 **Note:** `opts` (lazy.nvim) and `setup()` accept the same config table.
 
@@ -139,58 +142,58 @@ require("mojo").setup({
 <details>
 <summary>🔧 LSP (nvim-lspconfig)</summary>
 
+Enabled by default. Configures `mojo-lsp-server` via `nvim-lspconfig` with
+environment-aware binary resolution (finds the binary in the active Pixi/venv environment).
+
+To disable:
+
 ```lua
 require("mojo").setup({
-  lsp = { enabled = true },
+  lsp = { enabled = false },
 })
 ```
-
-Registers `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
-resolution (finds the binary in the active Pixi/venv environment).
 
 </details>
 
 <details>
 <summary>🎨 Formatting (conform.nvim)</summary>
 
+Enabled by default. Configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
+
+To disable:
+
 ```lua
 require("mojo").setup({
-  format = { enabled = true },
+  format = { enabled = false },
 })
 ```
-
-Configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
 
 </details>
 
 <details>
 <summary>🌳 Treesitter (nvim-treesitter)</summary>
 
+Enabled by default. Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
+
+To disable:
+
 ```lua
 require("mojo").setup({
-  treesitter = { enabled = true },
+  treesitter = { enabled = false },
 })
 ```
-
-Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
 
 </details>
 
 <details>
 <summary>✨ Completion (nvim-cmp / blink.cmp)</summary>
 
-Provides Mojo keywords, builtins, stdlib types, and snippets through your
-completion engine. **Opt-in** — set `completion = { enabled = true }` in setup.
+Enabled by default. Provides Mojo keywords, builtins, stdlib types, and snippets through your
+completion engine.
 
 The static source supplies keyword/builtin/type/snippet completions at word
 boundaries. After `.`, it returns nothing — letting `mojo-lsp-server` provide
 contextual method/property completions through the LSP protocol.
-
-```lua
-require("mojo").setup({
-  completion = { enabled = true },
-})
-```
 
 The plugin auto-detects whether `blink.cmp` or `nvim-cmp` is installed and
 configures the appropriate source — no extra plugins required. To force a specific engine, use the
@@ -200,7 +203,6 @@ configures the appropriate source — no extra plugins required. To force a spec
 -- Force blink.cmp
 require("mojo").setup({
   completion = {
-    enabled = true,
     adapter = function(opts)
       require("mojo.adapters.blink").setup(opts)
     end,
@@ -210,7 +212,6 @@ require("mojo").setup({
 -- Force nvim-cmp
 require("mojo").setup({
   completion = {
-    enabled = true,
     adapter = function(opts)
       require("mojo.adapters.nvim-cmp").setup(opts)
     end,
@@ -251,6 +252,9 @@ local mojo = require("mojo.adapters.lazyvim")
     return vim.tbl_deep_extend("force", opts, cmp_opts)
   end,
 }
+
+-- lualine.nvim (auto-injected, no adapter needed)
+-- The mojo component is automatically added to lualine_x on setup.
 ```
 
 </details>
@@ -258,21 +262,14 @@ local mojo = require("mojo.adapters.lazyvim")
 <details>
 <summary>📊 Statusline (lualine.nvim)</summary>
 
-Shows the Mojo icon and active environment (pixi/venv) in your statusline
-when editing `.mojo` files. Enable from the main setup:
-
-```lua
-require("mojo").setup({
-  statusline = { enabled = true },
-})
-```
+Enabled by default. Shows the Mojo icon and active environment (pixi/venv)
+in your statusline when editing `.mojo` files.
 
 Customize the display:
 
 ```lua
 require("mojo").setup({
   statusline = {
-    enabled = true,
     icon = "🔥",           -- icon shown for Mojo buffers
     show_env_name = true,  -- show active pixi/venv environment name
     colored = true,        -- orange text highlight
@@ -303,15 +300,7 @@ Add mojo.nvim to your user configuration (`lua/plugins/mojo.lua`):
 
 ```lua
 return {
-  {
-    "Sarctiann/mojo.nvim",
-    opts = {
-      lsp = { enabled = true },
-      format = { enabled = true },
-      treesitter = { enabled = true },
-      terminal = { enabled = true },
-    },
-  },
+  { "Sarctiann/mojo.nvim" },
 }
 ```
 
@@ -327,17 +316,7 @@ Add mojo.nvim to your `lua/custom/plugins/init.lua` (or a separate plugins file)
 
 ```lua
 return {
-  {
-    "Sarctiann/mojo.nvim",
-    config = function()
-      require("mojo").setup({
-        lsp = { enabled = true },
-        format = { enabled = true },
-        treesitter = { enabled = true },
-        terminal = { enabled = true },
-      })
-    end,
-  },
+  { "Sarctiann/mojo.nvim" },
 }
 ```
 
@@ -353,18 +332,7 @@ is installed via `:TSInstall mojo` or let the plugin handle it.
 Add mojo.nvim to your `init.lua` after the kickstart plugins section:
 
 ```lua
--- Add to your plugin spec (lazy.nvim format)
-{
-  'Sarctiann/mojo.nvim',
-  config = function()
-    require('mojo').setup({
-      lsp = { enabled = true },
-      format = { enabled = true },
-      treesitter = { enabled = true },
-      terminal = { enabled = true },
-    })
-  end,
-},
+{ 'Sarctiann/mojo.nvim' },
 ```
 
 kickstart.nvim already includes `nvim-lspconfig` and `nvim-treesitter` —
@@ -399,18 +367,18 @@ All options and their defaults:
     enabled = true,
   },
   lsp = {
-    enabled = false,
+    enabled = true,
     root_markers = { "pixi.toml", "pyproject.toml", ".pixi", ".venv" },
   },
   format = {
-    enabled = false,
+    enabled = true,
     formatter_name = "mojo",
   },
   completion = {
-    enabled = false,
+    enabled = true,
   },
   statusline = {
-    enabled = false,
+    enabled = true,
     icon = "🔥",
     show_env_name = true,
     colored = true,
@@ -426,6 +394,7 @@ All options and their defaults:
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory.
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers.
 - Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds.
+- Mojo files use 4-space indentation (configured via `ftplugin/mojo.lua`).
 
 ### Tools that work without Mojo-specific config
 
@@ -434,7 +403,7 @@ Mojo-specific configuration is required:
 
 - **telescope.nvim** — picks up `.mojo`/`.🔥` files in standard pickers
 - **trouble.nvim** — displays diagnostics from `mojo-lsp-server` automatically
-- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source; Mojo-specific completions require enabling the adapter
+- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source
 - **which-key.nvim** — discovers any Mojo-related keymaps you define
 
-Adapter-based integration for other tools is tracked in `docs/TODO.md` (P2 #13).
+Adapter-based integration for other tools is tracked in `docs/TODO.md`.

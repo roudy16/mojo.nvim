@@ -16,10 +16,11 @@
 
 | Tool           | Needs adapter? | Needs README? | Notes                              |
 | -------------- | -------------- | ------------- | ---------------------------------- |
-| lualine.nvim   | Yes            | Done          | Adapter + statusline component        |
+| lualine.nvim   | Yes            | Done          | Adapter + statusline component     |
 | AstroNvim      | No             | Done          | Config format in README            |
 | NvChad         | No             | Done          | Config format in README            |
 | kickstart.nvim | No             | Done          | Minimal config in README           |
+| ftplugin/mojo  | Yes            | Done          | 4-space indentation                  |
 | nvim-dap       | Blocked        | Blocked       | No Mojo DAP adapter exists yet     |
 | neotest        | Blocked        | Blocked       | `mojo test` not stable yet         |
 | nvim-lint      | Blocked        | Blocked       | No Mojo linter binary exists       |
