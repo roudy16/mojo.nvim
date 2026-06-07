@@ -15,25 +15,25 @@
 
 ## P0 — Sovereignty Violations (must fix)
 
-### 1. Re-implement tree-sitter-mojo parser in-repo
+### ~~1. Re-implement tree-sitter-mojo parser in-repo~~ ✅
 
 **Rule violated:** #3 (No Third-Party Mojo Plugin Dependencies)
 
-**Why:** `lua/mojo/config.lua:57` and `lua/mojo/treesitter.lua:13` reference
-`github.com/oaustegard/tree-sitter-mojo` — a third-party Mojo-specific parser.
-The plugin cannot be self-sufficient for Treesitter while depending on an
-external parser repo.
+**Resolution:** The tree-sitter-mojo grammar was adopted into `tree-sitter/mojo/`
+as a self-hosted copy. The parser grammar is now part of this repository.
+`lua/mojo/treesitter.lua` computes the local path dynamically via `debug.getinfo()`
+and points nvim-treesitter to `tree-sitter/mojo/` using the `location` field.
 
-**Task:** Fork/reimplement the Mojo Treesitter grammar in this repository so
-the parser is built and maintained here. The existing `treesitter.lua` module
-should load the local parser instead of referencing an external URL.
+**Files changed:**
 
-**Files affected:**
+- `tree-sitter/mojo/` — grammar source files added
+- `lua/mojo/config.lua` — removed `url`/`revision` from defaults
+- `lua/mojo/treesitter.lua` — uses local parser path
+- `README.md` — reflects self-hosted parser
+- `LICENSE` — added MIT attribution for upstream contributors
+- `.gitignore` — merged grammar entries
 
-- `lua/mojo/config.lua` — remove `url`/`revision` from defaults
-- `lua/mojo/treesitter.lua` — rewrite to use local parser
-- `lua/mojo/init.lua` — update wiring if API changes
-- `README.md` — update to reflect self-hosted parser
+**Branch:** `feat/self-host-treesitter-parser`
 
 ---
 

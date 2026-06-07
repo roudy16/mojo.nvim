@@ -29,7 +29,8 @@ activates them for LSP, formatting, and terminal buffers transparently.
 
 ### Treesitter
 
-Registers the Mojo parser with `nvim-treesitter`.
+Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
+The grammar files live in `tree-sitter/mojo/` — no external parser repo required.
 
 ### LSP
 
@@ -165,7 +166,7 @@ require("mojo").setup({
 })
 ```
 
-Registers the Mojo parser with `nvim-treesitter`.
+Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
 
 </details>
 
@@ -207,15 +208,6 @@ All options and their defaults:
   },
   treesitter = {
     enabled = true,
-    parser = {
-      install_info = {
-        url = "https://github.com/oaustegard/tree-sitter-mojo",
-        revision = "v1.0",
-        queries = "queries",
-      },
-      filetype = "mojo",
-      tier = 2,
-    },
   },
   lsp = {
     enabled = false,
@@ -235,7 +227,7 @@ All options and their defaults:
 - The plugin does not ship the Mojo LSP binary or official toolchain.
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory.
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers.
-- Treesitter is isolated behind `lua/mojo/treesitter.lua` so the parser backend can be replaced later.
+- Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`.
 
 ### Tools that work without Mojo-specific config
 
