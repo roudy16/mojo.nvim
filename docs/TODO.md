@@ -180,12 +180,11 @@ Process: research → create adapter (if needed) → add README section → chec
 
 ## P3 — Polish
 
-### 11. Decouple debug.lua from config.options
+### ~~11. Decouple debug.lua from config.options~~ ✅
 
-**Why:** `lua/mojo/debug.lua:39` reads `config.options` directly. This creates
-an implicit ordering dependency (config must be set up before debug works).
+**Why:** `debug.lua` read `config.options` directly, creating an implicit ordering dependency.
 
-**Fix:** Pass the debug flag explicitly through module setup or function args.
+**Resolution:** Added `M.setup({ debug = boolean })` to `debug.lua`. `init.lua` now calls `debug.setup({ debug = opts.debug })` explicitly after config merge. Removed the `require("mojo.config")` dependency from `debug.lua`.
 
 ---
 
