@@ -12,4 +12,3 @@ M.get_mojo_cmd = bin.get_mojo_cmd
 M.get_lsp_cmd = bin.get_lsp_cmd
 
 return M
-

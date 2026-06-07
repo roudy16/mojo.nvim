@@ -31,7 +31,7 @@ function M.setup(user_config)
 
 	if opts.treesitter and opts.treesitter.enabled ~= false then
 		local ts_opts = opts.treesitter
-		if ts_opts.adapter then
+		if ts_opts and ts_opts.adapter then
 			ts_opts.adapter(ts_opts)
 		else
 			require("mojo.adapters.treesitter").setup(ts_opts)
@@ -40,7 +40,7 @@ function M.setup(user_config)
 
 	if opts.lsp and opts.lsp.enabled ~= false then
 		local lsp_opts = opts.lsp
-		if lsp_opts.adapter then
+		if lsp_opts and lsp_opts.adapter then
 			lsp_opts.adapter(lsp_opts)
 		else
 			require("mojo.adapters.lspconfig").setup(lsp_opts)
@@ -49,7 +49,7 @@ function M.setup(user_config)
 
 	if opts.format and opts.format.enabled ~= false then
 		local fmt_opts = opts.format
-		if fmt_opts.adapter then
+		if fmt_opts and fmt_opts.adapter then
 			fmt_opts.adapter(fmt_opts)
 		else
 			require("mojo.adapters.conform").setup(fmt_opts)
@@ -58,7 +58,7 @@ function M.setup(user_config)
 
 	if opts.completion and opts.completion.enabled then
 		local cmp_opts = opts.completion
-		if cmp_opts.adapter then
+		if cmp_opts and cmp_opts.adapter then
 			cmp_opts.adapter(cmp_opts)
 		elseif not require("mojo.adapters.blink").setup(cmp_opts) then
 			require("mojo.adapters.nvim-cmp").setup(cmp_opts)
@@ -73,4 +73,3 @@ function M.setup(user_config)
 end
 
 return M
-
