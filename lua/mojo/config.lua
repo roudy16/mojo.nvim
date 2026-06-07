@@ -13,10 +13,12 @@
 --- @class Mojo-lang.LspConfig
 --- @field enabled boolean|nil
 --- @field root_markers string[]|nil
+--- @field adapter (fun(opts: Mojo-lang.LspConfig): boolean)|nil
 
 --- @class Mojo-lang.FormatConfig
 --- @field enabled boolean|nil
 --- @field formatter_name string|nil
+--- @field adapter (fun(opts: Mojo-lang.FormatConfig): boolean)|nil
 
 --- @class Mojo-lang.Hooks
 --- @field resolve_root (fun(path: string|nil, markers: string[]|nil): string|nil)|nil
