@@ -14,7 +14,8 @@ activation — designed so each piece can be swapped when
 - LSP and formatter integration (opt-in, via `nvim-lspconfig` / `conform.nvim`)
 - Terminal environment auto-activation
 - Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
-- LazyVim adapter helpers
+- LazyVim, AstroNvim, NvChad, and kickstart.nvim adapter helpers
+- lualine.nvim statusline integration (opt-in)
 - EmmyLua type annotations (module: `Mojo-lang`)
 
 ## Features
@@ -254,6 +255,134 @@ local mojo = require("mojo.adapters.lazyvim")
 
 </details>
 
+<details>
+<summary>📊 Statusline (lualine.nvim)</summary>
+
+Shows the Mojo icon and active environment (pixi/venv) in your statusline
+when editing `.mojo` files. Enable from the main setup:
+
+```lua
+require("mojo").setup({
+  statusline = { enabled = true },
+})
+```
+
+Customize the display:
+
+```lua
+require("mojo").setup({
+  statusline = {
+    enabled = true,
+    icon = "🔥",           -- icon shown for Mojo buffers
+    show_env_name = true,  -- show active pixi/venv environment name
+    colored = true,        -- orange text highlight
+  },
+})
+```
+
+For a custom devicon (requires `nvim-tree/nvim-web-devicons`):
+
+```lua
+require("nvim-web-devicons").setup({
+  override = {
+    mojo = {
+      icon = "🔥",
+      color = "#ff6f00",
+      name = "Mojo",
+    },
+  },
+})
+```
+
+</details>
+
+<details>
+<summary>🌌 AstroNvim</summary>
+
+Add mojo.nvim to your user configuration (`lua/plugins/mojo.lua`):
+
+```lua
+return {
+  {
+    "Sarctiann/mojo.nvim",
+    opts = {
+      lsp = { enabled = true },
+      format = { enabled = true },
+      treesitter = { enabled = true },
+      terminal = { enabled = true },
+    },
+  },
+}
+```
+
+AstroNvim already manages `nvim-lspconfig`, `nvim-treesitter`, and `conform.nvim` —
+mojo.nvim hooks into them automatically. No additional adapter needed.
+
+</details>
+
+<details>
+<summary>🎨 NvChad</summary>
+
+Add mojo.nvim to your `lua/custom/plugins/init.lua` (or a separate plugins file):
+
+```lua
+return {
+  {
+    "Sarctiann/mojo.nvim",
+    config = function()
+      require("mojo").setup({
+        lsp = { enabled = true },
+        format = { enabled = true },
+        treesitter = { enabled = true },
+        terminal = { enabled = true },
+      })
+    end,
+  },
+}
+```
+
+NvChad uses `nvim-lspconfig` and `conform.nvim` under the hood — mojo.nvim
+integrates with them automatically. For Treesitter, ensure the mojo parser
+is installed via `:TSInstall mojo` or let the plugin handle it.
+
+</details>
+
+<details>
+<summary>🚀 kickstart.nvim</summary>
+
+Add mojo.nvim to your `init.lua` after the kickstart plugins section:
+
+```lua
+-- Add to your plugin spec (lazy.nvim format)
+{
+  'Sarctiann/mojo.nvim',
+  config = function()
+    require('mojo').setup({
+      lsp = { enabled = true },
+      format = { enabled = true },
+      treesitter = { enabled = true },
+      terminal = { enabled = true },
+    })
+  end,
+},
+```
+
+kickstart.nvim already includes `nvim-lspconfig` and `nvim-treesitter` —
+mojo.nvim integrates with them automatically. The formatter requires
+`conform.nvim` (add it if not present):
+
+```lua
+{
+  'stevearc/conform.nvim',
+  opts = {},
+  config = function(_, opts)
+    require('conform').setup(opts)
+  end,
+},
+```
+
+</details>
+
 ## Configuration
 
 All options and their defaults:
@@ -279,6 +408,12 @@ All options and their defaults:
   },
   completion = {
     enabled = false,
+  },
+  statusline = {
+    enabled = false,
+    icon = "🔥",
+    show_env_name = true,
+    colored = true,
   },
   debug = false,
   hooks = {},

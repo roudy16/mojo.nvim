@@ -22,6 +22,7 @@ function M.setup(user_config)
 			lsp = opts.lsp and opts.lsp.enabled ~= false,
 			format = opts.format and opts.format.enabled ~= false,
 			terminal = opts.terminal and opts.terminal.enabled ~= false,
+			statusline = opts.statusline and opts.statusline.enabled ~= false,
 		}
 	end)
 
@@ -62,6 +63,15 @@ function M.setup(user_config)
 			cmp_opts.adapter(cmp_opts)
 		elseif not require("mojo.adapters.blink").setup(cmp_opts) then
 			require("mojo.adapters.nvim-cmp").setup(cmp_opts)
+		end
+	end
+
+	if opts.statusline and opts.statusline.enabled ~= false then
+		local sl_opts = opts.statusline
+		if sl_opts and sl_opts.adapter then
+			sl_opts.adapter(sl_opts)
+		else
+			require("mojo.adapters.lualine").setup(sl_opts)
 		end
 	end
 
