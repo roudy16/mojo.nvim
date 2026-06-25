@@ -93,9 +93,12 @@
 (escape_sequence) @escape
 
 ; Docstrings — first expression of a function body that is a string.
-
-(function_definition
-  body: (block (expression_statement (string) @string.doc)))
+; Disabled: tree-sitter reports this pattern as impossible in the current
+; grammar (the path through `_statement` → `_simple_statements` → inlined
+; `_simple_statement` → `expression_statement` → `string` requires wildcard
+; matching that the query compiler rejects as impossible).
+; (function_definition
+;   body: (block (expression_statement (string) @string.doc)))
 
 (interpolation
   "{" @punctuation.special
@@ -196,7 +199,6 @@
   "fn"
   "struct"
   "trait"
-  "alias"
   "type"
   "var"
   "comptime"
@@ -204,7 +206,7 @@
   "capturing"
   "escaping"
   "thin"
-  "register_passable"
+
   "abi"
   "where"
   "owned"
