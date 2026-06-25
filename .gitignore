@@ -6,4 +6,5 @@ node_modules
 build
 /target/
 parser.so
+parser.dylib
 *.log
