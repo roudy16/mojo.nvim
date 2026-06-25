@@ -13,6 +13,7 @@
 ### Task 1: Rename debug.lua → log.lua
 
 **Files:**
+
 - Rename: `lua/mojo/debug.lua` → `lua/mojo/log.lua`
 - Modify: `lua/mojo/init.lua`
 - Modify: `lua/mojo/lsp.lua`
@@ -28,12 +29,12 @@ Content is identical — copy `lua/mojo/debug.lua` to `lua/mojo/log.lua` as-is.
 
 In each file, replace `require("mojo.debug")` with `require("mojo.log")`:
 
-| File | Line | Change |
-|------|------|--------|
-| `lua/mojo/init.lua:3` | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
-| `lua/mojo/lsp.lua:2` | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
-| `lua/mojo/env/detect.lua:2` | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
-| `lua/mojo/env/bin.lua:3` | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
+| File                          | Line                                  | Change                            |
+| ----------------------------- | ------------------------------------- | --------------------------------- |
+| `lua/mojo/init.lua:3`         | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
+| `lua/mojo/lsp.lua:2`          | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
+| `lua/mojo/env/detect.lua:2`   | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
+| `lua/mojo/env/bin.lua:3`      | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
 | `lua/mojo/env/activate.lua:3` | `local debug = require("mojo.debug")` | `local log = require("mojo.log")` |
 
 - [ ] **Step 3: Update references from `debug.log` to `log.log`**
@@ -41,6 +42,7 @@ In each file, replace `require("mojo.debug")` with `require("mojo.log")`:
 Same 5 files — rename all `debug.log(` → `log.log(`, `debug.setup(` → `log.setup(`.
 
 In `init.lua`, also update:
+
 ```diff
 - local debug = require("mojo.log")
 + local log = require("mojo.log")
@@ -63,6 +65,7 @@ rm lua/mojo/debug.lua
 ```bash
 rg 'require\("mojo\.debug"\)' lua/
 ```
+
 Expected: no matches
 
 - [ ] **Step 6: Commit**
@@ -76,6 +79,7 @@ git add -A && git commit -m "refactor: rename debug.lua → log.lua"
 ### Task 2: Add get_dap_cmd to env/bin.lua
 
 **Files:**
+
 - Modify: `lua/mojo/env/bin.lua`
 
 - [ ] **Step 1: Add get_dap_cmd after get_lsp_cmd**
@@ -128,6 +132,7 @@ Note: Returns `cmd, env_dir`. The `env_dir` is needed so the caller can set `CON
 ```bash
 rg 'function M\.' lua/mojo/env/bin.lua
 ```
+
 Expected: `get_mojo_cmd`, `get_lsp_cmd`, `get_dap_cmd`
 
 - [ ] **Step 3: Commit**
@@ -141,6 +146,7 @@ git add -A && git commit -m "feat: add get_dap_cmd to env/bin.lua"
 ### Task 3: Export get_dap_cmd from env/init.lua
 
 **Files:**
+
 - Modify: `lua/mojo/env/init.lua`
 
 - [ ] **Step 1: Add get_dap_cmd to the public API**
@@ -162,6 +168,7 @@ git add -A && git commit -m "feat: export get_dap_cmd from env module"
 ### Task 4: Add DapConfig class + defaults to config.lua
 
 **Files:**
+
 - Modify: `lua/mojo/config.lua`
 
 - [ ] **Step 1: Add DapConfig class annotation after StatuslineConfig**
@@ -208,6 +215,7 @@ git add -A && git commit -m "feat: add DapConfig to config.lua"
 ### Task 5: Create adapters/dap.lua
 
 **Files:**
+
 - Create: `lua/mojo/adapters/dap.lua`
 
 - [ ] **Step 1: Write the adapter module**
@@ -289,6 +297,7 @@ return M
 ```
 
 **Key design decisions:**
+
 - `command` is a function (lazy eval) so we get the current buffer's env, not the setup-time env
 - `adapter` passes `CONDA_PREFIX` so `mojo-lldb-dap` wrapper can find `_mojo-lldb-dap` and the visualizers
 - `env_dir` is the pixi/venv root (e.g., `.pixi/envs/default`) — this is what `mojo-lldb-dap` expects as `$CONDA_PREFIX`
@@ -306,6 +315,7 @@ git add -A && git commit -m "feat: create adapters/dap.lua with launch configs"
 ### Task 6: Wire dap in init.lua
 
 **Files:**
+
 - Modify: `lua/mojo/init.lua`
 
 - [ ] **Step 1: Add dap setup block after statusline**
@@ -365,6 +375,7 @@ git add -A && git commit -m "feat: wire dap adapter in init.lua"
 ### Task 7: Add nvim-dap section to README
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Add dap section after completion section**
@@ -386,12 +397,14 @@ require("mojo").setup({
 ```
 
 Provides four launch configurations:
+
 - **Debug Mojo File** — compiles and debugs the current `.mojo` file (uses `mojoFile`)
 - **Debug Mojo File (with args)** — same, with prompts for program arguments
 - **Debug Binary** — debug a pre-compiled binary
 - **Attach to Process** — attach by PID
 
 Default keybindings (via nvim-dap):
+
 - `<F5>` — start/continue debugging
 - `<F10>` — step over
 - `<F11>` — step into

@@ -62,4 +62,41 @@ function M.get_lsp_cmd(path)
 	return nil
 end
 
+--- @param path string|nil
+--- @return string[]|nil, string|nil
+function M.get_dap_cmd(path)
+	local env = detect.detect(path)
+	if env and env.bin_dir then
+		local bin = vim.fs.joinpath(env.bin_dir, "mojo-lldb-dap")
+		if util.has_file(bin) then
+			log.log("dap_cmd", function()
+				return { path = path or vim.fn.getcwd(), cmd = bin, source = "bin_dir" }
+			end)
+			return { bin }, env.env_dir
+		end
+	end
+
+	if env and env.type == "pixi" then
+		local bin = util.find_pixi_binary(env.root, "mojo-lldb-dap")
+		if bin then
+			log.log("dap_cmd", function()
+				return { path = path or vim.fn.getcwd(), cmd = bin, source = "pixi_envs" }
+			end)
+			return { bin }, env.env_dir
+		end
+	end
+
+	if vim.fn.executable("mojo-lldb-dap") == 1 then
+		log.log("dap_cmd", function()
+			return { path = path or vim.fn.getcwd(), cmd = "mojo-lldb-dap", source = "path" }
+		end)
+		return { "mojo-lldb-dap" }, nil
+	end
+
+	log.log("dap_cmd_miss", function()
+		return { path = path or vim.fn.getcwd() }
+	end)
+	return nil, nil
+end
+
 return M
