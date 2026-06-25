@@ -17,21 +17,22 @@
  (#match? @constructor "^[A-Z]"))
 
 ((identifier) @constant
- (#match? @constant "^[A-Z][A-Z_]*$"))
+ (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
 
 ; Builtin functions
-
+;
 ; Audited against Mojo stdlib tag mojo/v1.0.0b1 (std/prelude/__init__.mojo).
 ; Python-only names (exec, eval, callable, compile, vars, bool, int, float,
 ; list, dict, set, str, tuple, ...) dropped — Mojo's equivalents are
 ; capitalized types (Bool, Int, Float64, List, Dict, ...) and already match
 ; the @constructor rule above. Lowercase Mojo-prelude callables retained;
 ; idiomatic Mojo builtins (abort, debug_assert, external_call, ...) added.
+
 ((call
   function: (identifier) @function.builtin)
  (#match?
    @function.builtin
-    "^(abort|abs|all|any|ascii|atof|atol|bin|breakpoint|chr|constrained|debug_assert|divmod|enumerate|external_call|hash|hex|input|iter|len|map|materialize|max|min|next|oct|open|ord|partition|pow|print|range|rebind|rebind_var|reflect|repr|reversed|round|slice|sort|swap|zip)$"))
+   "^(abort|abs|all|always_inline|any|ascii|atof|atol|bin|breakpoint|chr|constrained|debug_assert|divmod|enumerate|external_call|hash|hex|input|iter|len|map|materialize|max|min|next|oct|open|ord|partition|pow|print|range|rebind|rebind_var|reflect|repr|reversed|round|slice|sort|swap|unroll|zip|__mlir_attr|__mlir_op|__mlir_type)$"))
 
 ; Decorators — the "@" symbol is highlighted separately from the identifier
 ; so that both always receive a colour, regardless of whether the name is
@@ -47,15 +48,6 @@
 (decorator
   (attribute
     attribute: (identifier) @attribute))
-
-(decorator
-  (call
-    (identifier) @attribute))
-
-(decorator
-  (call
-    (attribute
-      attribute: (identifier) @attribute)))
 
 ; Built-in decorators (recognized after the generic @attribute rules above
 ; so their more-specific capture takes precedence on match).
@@ -100,9 +92,27 @@
 (string) @string
 (escape_sequence) @escape
 
+; Docstrings — first expression of a function body that is a string.
+
+(function_definition
+  body: (block (expression_statement (string) @string.doc)))
+
 (interpolation
   "{" @punctuation.special
   "}" @punctuation.special) @embedded
+
+; Punctuation brackets
+
+[
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+] @punctuation.bracket
+
+; Operators
 
 [
   "-"
@@ -140,7 +150,11 @@
   "is"
   "not"
   "or"
+  "is not"
+  "not in"
 ] @operator
+
+; General keywords (Python-compatible)
 
 [
   "as"
@@ -176,33 +190,30 @@
   "case"
 ] @keyword
 
-; Mojo-specific declaration keywords. The grammar accepts each as an
-; anonymous string token (see grammar.js: `fn` in function_definition,
-; `raises` in raises_clause, etc.), so literal-token highlighting fires.
+; Mojo-specific declaration and effect keywords
 
 [
   "fn"
-  "var"
   "struct"
   "trait"
   "alias"
+  "type"
+  "var"
   "comptime"
-] @keyword
-
-(raises_clause) @keyword
-
-"raises" @keyword
-
-; Mojo 1.0 function effects — appear in function signatures after parameters.
-
-[
+  "raises"
+  "capturing"
+  "escaping"
   "thin"
   "register_passable"
+  "abi"
+  "where"
+  "owned"
+  "unified"
+  "inferred"
 ] @keyword
 
-; Mojo argument-convention keywords. Appear only inside `mojo_parameter`
-; (see grammar.js: argument_convention). Captured as @keyword.modifier so
-; themes can color them distinctly from control-flow keywords.
+; Mojo argument-convention keywords — highlighted as @keyword.modifier so
+; themes can colour them distinctly from control-flow keywords.
 
 [
   "borrowed"
@@ -220,3 +231,13 @@
 (capture_list
   "{" @punctuation.bracket
   "}" @punctuation.bracket)
+
+; MLIR interop — __mlir_type, __mlir_op and __mlir_attr backtick fragments.
+
+(mlir_type "." @punctuation.special (#set! "priority" 110))
+(mlir_type "," @punctuation (#set! "priority" 110))
+(mlir_type) @type
+
+(mlir_fragment (type) @type (#set! "priority" 110))
+(mlir_fragment (integer) @number (#set! "priority" 110))
+(mlir_fragment (mlir_punctuation) @operator (#set! "priority" 110))
