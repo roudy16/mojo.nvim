@@ -18,8 +18,9 @@ needs to be rewritten — the rest of the plugin and user configuration stays un
 ### 3. No Third-Party Mojo Plugin Dependencies
 Any Mojo-specific Neovim tool created by a third party must be re-implemented in this
 repository rather than added as a dependency. The plugin must be self-sufficient for
-Mojo work. Generic tools (`nvim-lspconfig`, `nvim-treesitter`, `conform.nvim`) remain
-optional backends — the plugin adapts to them, not the other way around.
+Mojo work. Generic tools (`nvim-lspconfig`, `nvim-treesitter`, `conform.nvim`,
+`nvim-dap`) remain optional backends — the plugin adapts to them, not the other way
+around.
 
 ### 4. Adapter Pattern for Generic Extensions
 Integration with generic Neovim plugin ecosystems (LazyVim, lazy.nvim, etc.) must be
@@ -28,9 +29,10 @@ the plugin's internal API into the shape the generic plugin expects. They must n
 become hard dependencies.
 
 ### 5. Zero-Bundle for Official Binaries
-The plugin must never bundle Modular's official binaries (LSP server, formatter, CLI
-tools). It discovers them through environment helpers that search Pixi environments,
-virtualenvs, and system PATH. Users always get their own managed binaries.
+The plugin must never bundle Modular's official binaries (LSP server, formatter, DAP
+server, CLI tools). It discovers them through environment helpers that search Pixi
+environments, virtualenvs, and system PATH. Users always get their own managed
+binaries.
 
 ### 6. Environmental Autonomy
 The plugin must detect and activate the correct language environment (Pixi, venv)
@@ -60,8 +62,11 @@ to reflect the new recommended path.
 
 ### Dependencies
 - No `require()` of a third-party Mojo-specific plugin.
-- Generic plugins (`lspconfig`, `nvim-treesitter`, `conform`) use `pcall` — optional.
+- Generic plugins (`lspconfig`, `nvim-treesitter`, `conform`, `nvim-dap`) use
+  `pcall` — optional.
 - If a generic plugin is missing, the feature degrades gracefully (returns `false`).
+- DAP adapter (`mojo-lldb-dap`) discovery follows same pattern as LSP server:
+  env-resolution first, PATH fallback.
 
 ### Documentation
 - `README.md` is for users: installation, setup, features. No internal rules.

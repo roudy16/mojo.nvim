@@ -10,17 +10,252 @@
 
 ---
 
-## Support popular Neovim tools with README documentation
+## VS Code Extension Feature Audit
+
+> Based on `modular-mojotools.vscode-mojo` v26.6.0 (2026-06-24).
+> Key: ✅ in mojo.nvim | 🟡 partial | ❌ missing | ⏳ blocked (no upstream binary)
+
+### SDK Detection & Status Bar
+
+| VS Code Feature                             | Status | Notes                                                       |
+| ------------------------------------------- | ------ | ----------------------------------------------------------- |
+| SDK auto-detection (pixi + venv + PATH)     | ✅     | `env/detect.lua` — pixi `.pixi` + `.venv`, filesystem-first |
+| Status bar: SDK version / clickable warning | 🟡     | lualine adapter shows env type/name but NOT SDK version     |
+| LSP status bar (running/stopped/crashed)    | ❌     | No status bar indicator for LSP health                      |
+| Crashed-state distinction (26.6.0)          | ❌     | No LSP crash detection at all                               |
+| Click-to-restart LSP from status bar        | ❌     |                                                             |
+| `Mojo: Refresh SDK Detection` command       | ❌     | No user-facing command to re-detect                         |
+| `mojo.sdk.path` override setting            | ❌     | mojo.nvim has auto-detect only, no manual override          |
+| `mojo.preferWorkspaceEnv` setting           | ❌     | Always prefers workspace; no user-configurable priority     |
+| `.derived/` monorepo SDK detection          | ❌     | Not scanned                                                 |
+| Python extension integration                | ❌     | Doesn't use Python extension at all (good for autonomy)     |
+| SDK version display                         | ❌     | No version parsing from `modular.cfg` or `mojo --version`   |
+
+### LSP Features
+
+| VS Code Feature                       | Status | Notes                                             |
+| ------------------------------------- | ------ | ------------------------------------------------- |
+| Code completion                       | ✅     | Via nvim-cmp & blink.cmp adapters                 |
+| Hover / doc hints                     | ✅     | LSP provides it, but no keybinding documented     |
+| Signature help (overloaded functions) | ❌     | LSP provides it, no keybinding or docs            |
+| Go to symbol                          | ✅     | LSP provides it via telescope/trouble             |
+| Outline view                          | ❌     | LSP provides it; need to document `/docs`         |
+| Code diagnostics                      | ✅     | Via LSP health in trouble/telescope               |
+| Quick fixes / code actions            | ❌     | Lightbulb; would need adapter or mapping          |
+| Doc string code blocks LSP            | 🟡     | LSP provides it automatically; no mention in docs |
+| Filter diagnostics in docstrings      | ❌     | Config option missing                             |
+| `mojo.lsp.includeDirs`                | ❌     | Not exposed in LSP config                         |
+| Stop LSP server command               | ❌     | No user-facing command                            |
+| Restart extension command             | ❌     | No wrapper/command                                |
+| Inline error display                  | ❌     | No Error Lens equivalent                          |
+
+### Debugging
+
+| VS Code Feature                    | Status | Notes                                   |
+| ---------------------------------- | ------ | --------------------------------------- |
+| LLDB debug adapter                 | ✅     | `mojo-lldb-dap` → DAP server nativo LLDB, `_mojo-lldb-dap` (arm64) |
+| AOT compile + LLDB attach (26.6.0) | ✅     | Soportado vía `mojoFile` — DAP server compila `.mojo` internamente |
+| Debug Mojo File action             | ❌     | Falta adapter/config nvim-dap                                      |
+| `mojoFile` (JIT compile on launch) | ❌     | Propiedad `mojoFile` soportada por el DAP server                   |
+| `buildArgs` in debug config        | ❌     | Propiedad `buildArgs` soportada por el DAP server                  |
+| Attach to process                  | ❌     | Propiedad `pid`/`program`/`waitFor` soportada                      |
+| `mojo debug --vscode` support      | 🟡     | No necesario; DAP server es más directo                            |
+| Mojo data formatters (visualizers) | ❌     | `lldbDataFormatters.py` + `mlirDataFormatters.py` en lib/         |
+| LLDB init/pre-run/post-run cmds    | ❌     | Comandos LLDB pre/post lanzamiento soportados                      |
+
+### Run
+
+| VS Code Feature              | Status | Notes                                                      |
+| ---------------------------- | ------ | ---------------------------------------------------------- |
+| Run Mojo File                | 🟡     | Terminal module exists but no explicit run command exposed |
+| Run in Dedicated Terminal    | 🟡     | Terminal reuse by bufname possible but not exposed         |
+| Right-click / contextual run | ❌     | No Neovim equivalent (could add `:MojoRun`)                |
+| Command palette run actions  | ❌     | No user commands                                           |
+
+### Formatting
+
+| VS Code Feature          | Status | Notes                                           |
+| ------------------------ | ------ | ----------------------------------------------- |
+| Format Document          | ✅     | Via conform.nvim adapter `adapters/conform.lua` |
+| Format on Save           | ✅     | Standard conform.nvim feature, documented       |
+| Default formatter config | ✅     | In README                                       |
+
+### Other
+
+| VS Code Feature              | Status | Notes                             |
+| ---------------------------- | ------ | --------------------------------- |
+| Syntax highlighting          | ✅     | Via treesitter + filetype         |
+| `comptime` keyword support   | ✅     | Treesitter parses it              |
+| Function modifier syntax     | ✅     | Treesitter handles `var`          |
+| Restart extension command    | ❌     | No user-facing command            |
+| Terminal env auto-activation | ✅     | `terminal.lua` — TermOpen autocmd |
+
+---
+
+## P0 — Sovereignty Gaps
+
+### 14. SDK version detection in status bar
+
+**Why:** VS Code shows SDK version + clickable warning. Users need to know which Mojo they're on.
+
+**Scope:**
+
+- Parse version from `modular.cfg` and/or `mojo --version`
+- Expose via env module
+- Update lualine adapter to show version
+- Add `MojoVersion` component for non-lualine statuslines
+
+### 15. SDK path override setting
+
+**Why:** VS Code has `mojo.sdk.path` for CI/remote environments.
+
+**Scope:**
+
+- Add `mojo.sdk.path` config field
+- Add `MOJO_SDK_PATH` env var fallback
+- Bypass auto-detection when set
+- Validate path and surface errors
+
+### 16. SDK refresh command
+
+**Why:** `Mojo: Refresh SDK Detection` clears cache and re-detects.
+
+**Scope:**
+
+- Add `:MojoRefreshSDK` user command
+- Clear detect.lua cache
+- Re-trigger LSP restart if running
+
+### 17. `.derived/` monorepo SDK detection
+
+**Why:** VS Code scans `.derived/` as an SDK source.
+
+**Scope:** Add `.derived/` dir check before pixi/venv in `detect.lua`.
+
+### 18. nvim-dap integration (mojo-lldb-dap adapter)
+
+**Why:** Tenemos `mojo-lldb-dap` (DAP server LLDB-based) en el SDK. `_mojo-lldb-dap` es un binario arm64 que implementa DAP completo con soporte para `mojoFile` (compila `.mojo` sobre la marcha), `buildArgs`, attach, y más. El wrapper `mojo-lldb-dap` importa visualizers Mojo via `CONDA_PREFIX`.
+
+**Arquitectura:**
+- `mojo-lldb-dap` → shell script wrapper que usa `$CONDA_PREFIX/bin/_mojo-lldb-dap`
+- `_mojo-lldb-dap` → binario arm64, DAP server LLDB-based (Apple's lldb-dap adaptado)
+- Visualizers en `$CONDA_PREFIX/lib/lldb-visualizers/` (lldbDataFormatters.py + mlirDataFormatters.py)
+
+**Scope:**
+- Detectar `mojo-lldb-dap` vía env module (misma mecánica que `mojo-lsp-server`)
+- Crear adapter nvim-dap con `type = "executable"` y env correcto (CONDA_PREFIX)
+- Keyboard: `mojoFile` → debug de archivo actual, `program` → debug de binario, `attach` → attach PID
+- Exponer `buildArgs`, `initCommands`, `stopOnEntry`, etc.
+- Documentar en README la configuración básica
+
+**DAP configs a soportar:**
+| Config | VS Code equiv | Descripción |
+| ------ | ------------- | ----------- |
+| Debug current Mojo file | `mojo.file.debug` | Usa `mojoFile` = `${file}`, compila y debuggea |
+| Debug binary | `program` | Debuggea binario precompilado |
+| Attach to process | `mojo.debug.attach-to-process` | Attach por PID/nombre |
+
+---
+
+## P1 — Feature Parity
+
+### 19. LSP status bar indicator
+
+**Why:** VS Code shows LSP server state (running/stopped/crashed) with click-to-restart.
+
+**Scope:**
+
+- New module `lua/mojo/status.lua` for custom status components
+- Track LSP client state via `vim.lsp` handlers
+- Expose as viml `g:mojo_lsp_status` or function
+- Create adapter for lualine (and maybe for upstream statuscol.nvim etc.)
+
+### 20. LSP crash detection & recovery
+
+**Why:** 26.6.0 distinguishes capped-out (repeated crashes) from normal stopped.
+
+**Scope:**
+
+- Track restart count per session
+- Surface capped-out state distinctly
+- Provide restart with backoff
+
+### 21. Signature help keybinding & docs
+
+**Why:** VS Code documents `ctrl+shift+space` for overloaded function scrolling.
+
+**Scope:**
+
+- Map `<C-S-space>` or document that `<C-x><C-o>` shows it
+- Add to README or docs
+
+### 22. Code actions / quick fixes
+
+**Why:** LSP provides textDocument/codeAction but no mojo.nvim adapter exposes it.
+
+**Scope:** Document `vim.lsp.buf.code_action()` mapping, or provide a wrapper.
+
+### 23. Doc string diagnostics filter
+
+**Why:** 26.1.0 added option to filter diagnostics in docstrings.
+
+**Scope:**
+
+- Add `lsp.filter_docstring_diagnostics` config option
+- Implement filter in LSP handler
+
+### 24. `mojo.lsp.includeDirs` setting
+
+**Why:** Lets users add extra include paths for LSP.
+
+**Scope:**
+
+- Add `lsp.include_dirs` to config
+- Pass via `settings` in LSP config
+
+### 25. Restart & stop LSP commands
+
+**Why:** `Mojo: Restart the extension` is a documented VS Code troubleshooting tool.
+
+**Scope:**
+
+- `:MojoRestartLSP` — stop + start LSP
+- `:MojoStopLSP` — stop only (26.2.0 feature)
+- Bind to `<leader>mr` or similar
+
+### 26. Run Mojo file commands
+
+**Why:** VS Code provides run + dedicated terminal run.
+
+**Scope:**
+
+- `:MojoRun` — run current file in shared terminal
+- `:MojoRunDedicated` — run in per-file terminal
+- Port of `mojo-terminal` code or reuse terminal.lua
+
+---
+
+## P2 — Quality & Completeness
+
+### 27. Support popular Neovim tools with README documentation
 
 **Scope:** Ongoing — new tools are added here as they're identified.
 
-| Tool           | Needs adapter? | Needs README? | Notes                              |
-| -------------- | -------------- | ------------- | ---------------------------------- |
-| lualine.nvim   | Yes            | Done          | Adapter + statusline component     |
-| AstroNvim      | No             | Done          | Config format in README            |
-| NvChad         | No             | Done          | Config format in README            |
-| kickstart.nvim | No             | Done          | Minimal config in README           |
-| ftplugin/mojo  | Yes            | Done          | 4-space indentation                  |
-| nvim-dap       | Blocked        | Blocked       | No Mojo DAP adapter exists yet     |
-| neotest        | Blocked        | Blocked       | `mojo test` not stable yet         |
-| nvim-lint      | Blocked        | Blocked       | No Mojo linter binary exists       |
+| Tool           | Needs adapter? | Needs README? | Notes                                                                   |
+| -------------- | -------------- | ------------- | ----------------------------------------------------------------------- |
+| nvim-cmp       | Done           | Done          | `adapters/nvim-cmp.lua` — context-aware: returns empty after `.` or `:` |
+| blink.cmp      | Done           | Done          | `adapters/blink.lua` — native blink.cmp Source provider, context-aware  |
+| LuaSnip        | No             | No            | Snippets served through completion adapters                             |
+| telescope.nvim | No             | No            | Works automatically                                                     |
+| which-key.nvim | No             | No            | Works automatically                                                     |
+| trouble.nvim   | No             | No            | Works automatically                                                     |
+| lualine.nvim   | No             | Yes (minimal) | Could document Mojo filetype icon; SDK version display                  |
+| nvim-dap       | ❌ Missing     | ❌ Missing     | `mojo-lldb-dap` existe — adapter nvim-dap pendiente                      |
+| neotest        | ⏳ Blocked     | ⏳ Blocked    | `mojo test` not stable yet                                              |
+| nvim-lint      | ⏳ Blocked     | ⏳ Blocked    | No Mojo linter binary exists                                            |
+| AstroNvim      | No             | Yes           | Docs section showing config format                                      |
+| NvChad         | No             | Yes           | Docs section showing config format                                      |
+| kickstart.nvim | No             | Yes           | Docs section showing minimal config                                     |
+| ftplugin/mojo  | Yes            | Done          | 4-space indentation                                                     |
+
+**Remaining work:** lualine icon + SDK version docs, AstroNvim/NvChad/kickstart config sections.
