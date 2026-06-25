@@ -15,6 +15,7 @@ activation — designed so each piece can be swapped when
 - Terminal environment auto-activation
 - Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
 - lualine.nvim statusline integration
+- Debugging support via nvim-dap + mojo-lldb-dap
 - 4-space indentation for Mojo files
 - LazyVim, AstroNvim, NvChad, and kickstart.nvim adapter helpers
 - EmmyLua type annotations (module: `Mojo-lang`)
@@ -225,6 +226,35 @@ and 13 common snippets (`fn`, `struct`, `trait`, `vdef`, etc.).
 </details>
 
 <details>
+<summary>🐛 Debugging (nvim-dap)</summary>
+
+Opt-in. Debug `.mojo` files via nvim-dap and the official `mojo-lldb-dap` DAP server
+(shipped in the Mojo SDK).
+
+Requires [nvim-dap](https://github.com/mfussenegger/nvim-dap):
+
+```lua
+require("mojo").setup({
+  dap = { enabled = true },
+})
+```
+
+Provides four launch configurations:
+- **Debug Mojo File** — compiles and debugs the current `.mojo` file (uses `mojoFile`)
+- **Debug Mojo File (with args)** — same, with prompts for program arguments
+- **Debug Binary** — debug a pre-compiled binary
+- **Attach to Process** — attach by PID
+
+Default keybindings (via nvim-dap):
+- `<F5>` — start/continue debugging
+- `<F10>` — step over
+- `<F11>` — step into
+- `<F12>` — step out
+- `<leader>db` — toggle breakpoint
+
+</details>
+
+<details>
 <summary>🚀 LazyVim</summary>
 
 ```lua
@@ -391,6 +421,7 @@ All options and their defaults:
 ## Notes
 
 - The plugin does not ship the Mojo LSP binary or official toolchain.
+- The plugin does not ship nvim-dap; debugging is opt-in via `dap.enabled = true`.
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory.
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers.
 - Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds.
