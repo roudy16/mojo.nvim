@@ -23,6 +23,7 @@ function M.setup(user_config)
 			format = opts.format and opts.format.enabled ~= false,
 			terminal = opts.terminal and opts.terminal.enabled ~= false,
 			statusline = opts.statusline and opts.statusline.enabled ~= false,
+			dap = opts.dap and opts.dap.enabled == true,
 		}
 	end)
 
@@ -77,6 +78,15 @@ function M.setup(user_config)
 
 	if opts.terminal and opts.terminal.enabled ~= false then
 		require("mojo.terminal").setup(opts.terminal)
+	end
+
+	if opts.dap and opts.dap.enabled then
+		local dap_opts = opts.dap
+		if dap_opts and dap_opts.adapter then
+			dap_opts.adapter(dap_opts)
+		else
+			require("mojo.adapters.dap").setup(dap_opts)
+		end
 	end
 
 	return opts
