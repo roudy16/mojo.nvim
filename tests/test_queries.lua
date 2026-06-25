@@ -125,7 +125,7 @@ for _, filepath in ipairs(mojo_files) do
     check("(function_definition name: (identifier) @function)", 4, "function_definition")
     check("(call function: (identifier) @function)", 3, "call")
     check("[(none) (true) (false)] @constant.builtin", 1, "constant.builtin")
-    check("[\"(\" \")\" \"[\" \"]\"] @punctuation.bracket", 2, "punctuation.bracket")
+    check("[\"(\" \")\" \"[\" \"]\"] @punctuation.bracket", 4, "punctuation.bracket")
     check("(type (identifier) @type)", 5, "type annotation")
     check("(attribute attribute: (identifier) @property)", 1, "property")
   end

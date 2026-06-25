@@ -104,15 +104,16 @@
   "{" @punctuation.special
   "}" @punctuation.special) @embedded
 
-; Punctuation brackets
+; Punctuation brackets.
+; `{`/`}` excluded — tree-sitter's query optimizer rejects bare matching
+; of these tokens because they only appear inside compound nodes
+; (dictionary, set, struct_literal, result_convention, etc.).
 
 [
   "("
   ")"
   "["
   "]"
-  "{"
-  "}"
 ] @punctuation.bracket
 
 ; Operators
@@ -227,12 +228,11 @@
   "deinit"
 ] @keyword.modifier
 
-; Capture list punctuation — `{` and `}` in capture context is syntactically
-; distinct from dictionary/block braces.
+; Capture list punctuation — `[` and `]` inside `fn() capturing[...]`.
 
 (capture_list
-  "{" @punctuation.bracket
-  "}" @punctuation.bracket)
+  "[" @punctuation.bracket
+  "]" @punctuation.bracket)
 
 ; MLIR interop — __mlir_type, __mlir_op and __mlir_attr backtick fragments.
 
