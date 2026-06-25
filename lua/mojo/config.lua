@@ -32,6 +32,10 @@
 --- @field enabled boolean|nil
 --- @field adapter (fun(opts: Mojo-lang.CompletionConfig): boolean)|nil
 
+--- @class Mojo-lang.DapConfig
+--- @field enabled boolean|nil
+--- @field adapter (fun(opts: Mojo-lang.DapConfig): boolean)|nil
+
 --- @class Mojo-lang.StatuslineConfig
 --- @field enabled boolean|nil
 --- @field icon string|nil
@@ -50,6 +54,7 @@
 --- @field format Mojo-lang.FormatConfig|nil
 --- @field completion Mojo-lang.CompletionConfig|nil
 --- @field statusline Mojo-lang.StatuslineConfig|nil
+--- @field dap Mojo-lang.DapConfig|nil
 --- @field debug boolean|nil
 --- @field hooks Mojo-lang.Hooks|nil
 
@@ -82,6 +87,9 @@ M.defaults = {
 		icon = "🔥",
 		show_env_name = true,
 		colored = true,
+	},
+	dap = {
+		enabled = false,
 	},
 	debug = false,
 	hooks = {},
