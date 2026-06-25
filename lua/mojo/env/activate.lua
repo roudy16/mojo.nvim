@@ -1,6 +1,6 @@
 local detect = require("mojo.env.detect")
 local util = require("mojo.env.util")
-local debug = require("mojo.debug")
+local log = require("mojo.log")
 
 local M = {}
 
@@ -9,7 +9,7 @@ local M = {}
 function M.activate_for_dir(path)
 	local env = detect.detect(path)
 	if not env then
-		debug.log("activate_skip", function()
+		log.log("activate_skip", function()
 			return { path = path or vim.fn.getcwd() }
 		end)
 		return nil
@@ -35,7 +35,7 @@ function M.activate_for_dir(path)
 		vim.env.VIRTUAL_ENV = env.env_dir
 	end
 
-	debug.log("activate", function()
+	log.log("activate", function()
 		return {
 			type = env.type,
 			root = env.root,

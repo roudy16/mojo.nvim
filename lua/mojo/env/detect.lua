@@ -1,5 +1,5 @@
 local util = require("mojo.env.util")
-local debug = require("mojo.debug")
+local log = require("mojo.log")
 
 local M = {}
 
@@ -11,14 +11,14 @@ local cache = {}
 function M.detect(path)
 	local root = util.root_for(path)
 	if not root then
-		debug.log("detect_miss", function()
+		log.log("detect_miss", function()
 			return { path = path or vim.fn.getcwd() }
 		end)
 		return nil
 	end
 
 	if cache[root] ~= nil then
-		debug.log("detect_cache", function()
+		log.log("detect_cache", function()
 			return { root = root, hit = true, type = cache[root] and cache[root].type or "none" }
 		end)
 		return cache[root] or nil
@@ -37,7 +37,7 @@ function M.detect(path)
 			activate_cmd = env_name and string.format('eval "$(pixi shell-hook --environment %s)"', env_name)
 				or 'eval "$(pixi shell-hook)"',
 		}
-		debug.log("detect_pixi", function()
+		log.log("detect_pixi", function()
 			return { root = root, env_name = env_name or "none", env_dir = pixi_env or "none" }
 		end)
 		return cache[root] or nil
@@ -53,14 +53,14 @@ function M.detect(path)
 			bin_dir = vim.fs.joinpath(venv_dir, "bin"),
 			activate_cmd = "source .venv/bin/activate",
 		}
-		debug.log("detect_venv", function()
+		log.log("detect_venv", function()
 			return { root = root, env_dir = venv_dir }
 		end)
 		return cache[root] or nil
 	end
 
 	cache[root] = false
-	debug.log("detect_none", function()
+	log.log("detect_none", function()
 		return { root = root }
 	end)
 	return nil

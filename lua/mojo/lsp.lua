@@ -1,5 +1,7 @@
 local env = require("mojo.env")
-local debug = require("mojo.debug")
+local log = require("mojo.log")
+
+
 
 local M = {}
 
@@ -29,7 +31,7 @@ function M.opts(user_opts)
 		end,
 	}, user_opts)
 
-	debug.log("lsp_opts", function()
+	log.log("lsp_opts", function()
 		return {
 			root_markers = table.concat(
 				user_opts.root_markers or { "pixi.toml", "pyproject.toml", ".pixi", ".venv" },

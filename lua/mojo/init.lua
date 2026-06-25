@@ -1,11 +1,11 @@
 local config = require("mojo.config")
 local hooks = require("mojo.hooks")
-local debug = require("mojo.debug")
+local log = require("mojo.log")
 
 local M = {}
 
 M.hooks = hooks.defaults
-M.debug = debug
+M.log = log
 
 --- @param user_config Mojo-lang.Config|nil
 --- @return Mojo-lang.Config
@@ -13,8 +13,8 @@ function M.setup(user_config)
 	local opts = config.setup(user_config)
 	M.hooks = hooks.merge(opts.hooks)
 
-	debug.setup({ debug = opts.debug })
-	debug.log("setup", function()
+	log.setup({ debug = opts.debug })
+	log.log("setup", function()
 		return {
 			debug = opts.debug or false,
 			filetype = opts.filetype and opts.filetype.enabled ~= false,
