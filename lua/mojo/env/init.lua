@@ -10,5 +10,6 @@ M.activate_for_dir = activate.activate_for_dir
 M.activate_in_terminal = activate.activate_in_terminal
 M.get_mojo_cmd = bin.get_mojo_cmd
 M.get_lsp_cmd = bin.get_lsp_cmd
+M.get_dap_cmd = bin.get_dap_cmd
 
 return M
