@@ -7,10 +7,6 @@ local M = {}
 --- @type boolean
 local lsp_has_crashed = false
 
---- Track LSP crash events.
---- Called from lsp.lua on_exit.
---- @param code integer
---- @param signal integer
 function M._track_lsp_exit(code, signal)
 	if code ~= 0 or (signal and signal ~= 0) then
 		lsp_has_crashed = true
@@ -20,7 +16,6 @@ function M._track_lsp_exit(code, signal)
 	end
 end
 
---- Reset crash flag (e.g., after restart).
 function M._reset_lsp_crash()
 	lsp_has_crashed = false
 end
@@ -57,8 +52,9 @@ function M.fmt_status()
 	return env.get_mojo_cmd() and "available" or "unavailable"
 end
 
+--- @param state string
 --- @return string
-local function _icon_for(state)
+function M.status_icon(state)
 	if state == "running" or state == "active" or state == "available" then
 		return "󰄬"
 	elseif state == "stopped" or state == "inactive" then
@@ -67,13 +63,24 @@ local function _icon_for(state)
 	return "󰅖"
 end
 
---- @return string
-local function _diag_text()
+--- @param state string
+--- @return string|nil
+function M.status_color(state)
+	if state == "running" or state == "active" or state == "available" then
+		return "#a6da95"
+	elseif state == "stopped" or state == "inactive" then
+		return "#ff9e64"
+	end
+	return "#ed8796"
+end
+
+--- @return string|nil
+function M.diag_text()
 	local counts = vim.diagnostic.get(vim.fn.bufnr())
 	local errors = counts[1] or 0
 	local warnings = counts[2] or 0
 	if errors == 0 and warnings == 0 then
-		return ""
+		return nil
 	end
 	local parts = {}
 	if errors > 0 then
@@ -85,7 +92,17 @@ local function _diag_text()
 	return table.concat(parts, " ")
 end
 
---- Main status string for the statusline.
+--- @return string|nil
+function M.diag_color()
+	local counts = vim.diagnostic.get(vim.fn.bufnr())
+	local errors = counts[1] or 0
+	if errors > 0 then
+		return "#ed8796"
+	end
+	return "#ff9e64"
+end
+
+--- Single-string display for non-lualine statuslines.
 --- @return string
 function M.display()
 	if vim.bo.filetype ~= "mojo" then
@@ -121,20 +138,20 @@ function M.display()
 	local status_parts = {}
 
 	if opts.show_lsp ~= false then
-		table.insert(status_parts, _icon_for(M.lsp_status()) .. " lsp")
+		table.insert(status_parts, M.status_icon(M.lsp_status()) .. " lsp")
 	end
 
 	if opts.show_dbg ~= false then
-		table.insert(status_parts, _icon_for(M.dbg_status()) .. " dbg")
+		table.insert(status_parts, M.status_icon(M.dbg_status()) .. " dbg")
 	end
 
 	if opts.show_fmt ~= false then
-		table.insert(status_parts, _icon_for(M.fmt_status()) .. " fmt")
+		table.insert(status_parts, M.status_icon(M.fmt_status()) .. " fmt")
 	end
 
 	if opts.show_diag ~= false then
-		local diag = _diag_text()
-		if diag ~= "" then
+		local diag = M.diag_text()
+		if diag then
 			table.insert(status_parts, diag)
 		end
 	end
@@ -146,8 +163,6 @@ function M.display()
 	return table.concat(parts, " ")
 end
 
---- Actions shown in the click menu.
---- @type table<string, fun()>
 M.actions = {
 	["Restart LSP"] = function()
 		M._reset_lsp_crash()
@@ -177,12 +192,17 @@ M.actions = {
 
 --- Show action menu on click.
 function M.show_menu()
-	vim.ui.select(vim.tbl_keys(M.actions), {
+	local items = vim.tbl_keys(M.actions)
+	table.sort(items)
+	vim.ui.select(items, {
 		prompt = "Mojo actions:",
 	}, function(choice)
 		if choice then
 			M.actions[choice]()
 		end
+	end)
+	vim.schedule(function()
+		vim.cmd("startinsert!")
 	end)
 end
 
