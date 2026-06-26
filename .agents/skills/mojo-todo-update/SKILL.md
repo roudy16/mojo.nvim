@@ -15,6 +15,9 @@ Maintain `docs/TODO.md` with accurate feature tracking and task priorities.
 ## When to use
 
 - A new VS Code extension release was published (check CHANGELOG)
+- A new Mojo language release or language change was announced
+- A new Mojo tool (LSP, debugger, formatter, CLI) was released or updated
+- A Neovim plugin API change affects any adapter (nvim-dap, nvim-lspconfig, nvim-treesitter, conform, blink.cmp, etc.)
 - A task from the TODO was completed (re-number items, update status)
 - A new feature gap was discovered
 - Prioritization needs review
