@@ -1,5 +1,5 @@
 --- @class Mojo-lang.DetectedEnv
---- @field type "pixi"|"venv"
+--- @field type "pixi"|"venv"|"manual"
 --- @field root string
 --- @field env_name string|nil
 --- @field env_dir string|nil
@@ -63,6 +63,7 @@
 --- @field completion Mojo-lang.CompletionConfig|nil
 --- @field statusline Mojo-lang.StatuslineConfig|nil
 --- @field dap Mojo-lang.DapConfig|nil
+--- @field sdk_path string|nil
 --- @field debug boolean|nil
 --- @field hooks Mojo-lang.Hooks|nil
 
@@ -107,6 +108,7 @@ M.defaults = {
 	dap = {
 		enabled = false,
 	},
+	sdk_path = nil,
 	debug = false,
 	hooks = {},
 }

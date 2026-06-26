@@ -10,7 +10,7 @@ activation — designed so each piece can be swapped when
 
 - `.mojo` and `🔥` filetype detection
 - Treesitter parser registration for Mojo
-- Environment helpers for Pixi and virtualenv projects
+- Environment helpers for Pixi, virtualenv, and manual SDK paths
 - LSP and formatter integration (via `nvim-lspconfig` / `conform.nvim`)
 - Terminal environment auto-activation
 - Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
@@ -31,6 +31,14 @@ activation — designed so each piece can be swapped when
 
 Detects Pixi (`pixi.toml` / `.pixi/`) and virtualenv (`.venv/`) projects and
 activates them for LSP, formatting, and terminal buffers transparently.
+
+Override automatic detection with `sdk_path` config or `$MOJO_SDK_PATH`:
+
+```lua
+require("mojo").setup({
+  sdk_path = "/opt/modular/mojo",
+})
+```
 
 ### Treesitter
 
@@ -179,6 +187,7 @@ Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
   completion = {
     enabled = true,
   },
+  sdk_path = nil, -- or "/path/to/mojo/sdk"
   statusline = {
     enabled = true,
     icon = "󰈸",

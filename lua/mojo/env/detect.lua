@@ -6,9 +6,71 @@ local M = {}
 --- @type table<string, Mojo-lang.DetectedEnv|false>
 local cache = {}
 
+--- @type string
+local MANUAL_KEY = "__manual__"
+
+--- Resolve the SDK path from config or env var.
+--- Priority: config.sdk_path > MOJO_SDK_PATH env var
+--- @return string|nil
+local function resolve_sdk_path()
+	local config = require("mojo.config")
+	if config.options and config.options.sdk_path then
+		return config.options.sdk_path
+	end
+	local env_path = vim.env.MOJO_SDK_PATH
+	if env_path and env_path ~= "" then
+		return env_path
+	end
+	return nil
+end
+
+--- Validate a manual SDK path.
+--- @param sdk_path string
+--- @return boolean
+local function valid_sdk_path(sdk_path)
+	if not util.has_dir(sdk_path) then
+		return false
+	end
+	return util.has_file(vim.fs.joinpath(sdk_path, "bin", "mojo"))
+		or util.has_file(vim.fs.joinpath(sdk_path, "bin", "mojo-lsp-server"))
+end
+
 --- @param path string|nil
 --- @return Mojo-lang.DetectedEnv|nil
 function M.detect(path)
+	-- Manual SDK path override
+	local sdk_path = resolve_sdk_path()
+	if sdk_path then
+		if cache[MANUAL_KEY] ~= nil then
+			return cache[MANUAL_KEY] or nil
+		end
+
+		if not valid_sdk_path(sdk_path) then
+			log.log("sdk_path_invalid", function()
+				return { sdk_path = sdk_path }
+			end)
+			vim.notify(
+				string.format("mojo.nvim: sdk_path %q not found or missing mojo binaries", sdk_path),
+				vim.log.levels.WARN
+			)
+			cache[MANUAL_KEY] = false
+			return nil
+		end
+
+		local bin_dir = vim.fs.joinpath(sdk_path, "bin")
+		cache[MANUAL_KEY] = {
+			type = "manual",
+			root = sdk_path,
+			bin_dir = bin_dir,
+			env_dir = sdk_path,
+		}
+		log.log("detect_manual", function()
+			return { sdk_path = sdk_path, bin_dir = bin_dir }
+		end)
+		return cache[MANUAL_KEY]
+	end
+
+	-- Auto-detection (original logic)
 	local root = util.root_for(path)
 	if not root then
 		log.log("detect_miss", function()
