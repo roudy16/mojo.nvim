@@ -10,7 +10,7 @@
 | VS Code Feature                             | Status | Notes                                                       |
 | ------------------------------------------- | ------ | ----------------------------------------------------------- |
 | SDK auto-detection (pixi + venv + PATH)     | ✅     | `env/detect.lua` — pixi `.pixi` + `.venv`, filesystem-first |
-| Status bar: SDK version / clickable warning | 🟡     | lualine adapter shows env type/name but NOT SDK version     |
+| Status bar: SDK version / clickable warning | ✅     | lualine adapter shows env + SDK version; `status.MojoVersion()` |
 | LSP status bar (running/stopped/crashed)    | ❌     | No status bar indicator for LSP health                      |
 | Crashed-state distinction (26.6.0)          | ❌     | No LSP crash detection at all                               |
 | Click-to-restart LSP from status bar        | ❌     |                                                             |
@@ -19,7 +19,7 @@
 | `mojo.preferWorkspaceEnv` setting           | ❌     | Always prefers workspace; no user-configurable priority     |
 | `.derived/` monorepo SDK detection          | ❌     | Not scanned                                                 |
 | Python extension integration                | ❌     | Doesn't use Python extension at all (good for autonomy)     |
-| SDK version display                         | ❌     | No version parsing from `modular.cfg` or `mojo --version`   |
+| SDK version display                         | ✅     | `env/version.lua` — `mojo --version` parsing with caching   |
 
 ### LSP Features
 
@@ -84,17 +84,17 @@
 
 ## P0 — Sovereignty Gaps
 
-### 14. SDK version detection in status bar
+### 14. SDK version detection in status bar — [done]
 
 **Sovereignty:** Rule 6 (Environmental Autonomy) — users must see which SDK is active.
 **Why:** VS Code shows SDK version + clickable warning. Users need to know which Mojo they're on.
 
-**Scope:**
+**Implementation:**
 
-- Parse version from `modular.cfg` and/or `mojo --version`
-- Expose via env module
-- Update lualine adapter to show version
-- Add `MojoVersion` component for non-lualine statuslines
+- `mojo --version` parsing → `env/version.lua` with caching
+- Exposed via `env.get_version()`
+- `adapters/lualine.lua` — `show_sdk_version` option (default: true)
+- `status.MojoVersion()` component for non-lualine statuslines
 
 ### 15. SDK path override setting
 
@@ -254,7 +254,7 @@
 | telescope.nvim | No             | No            | Works automatically                                                     |
 | which-key.nvim | No             | No            | Works automatically                                                     |
 | trouble.nvim   | No             | No            | Works automatically                                                     |
-| lualine.nvim   | No             | Yes (minimal) | Could document Mojo filetype icon; SDK version display                  |
+| lualine.nvim   | No             | Yes           | SDK version display + env name in statusline                            |
 | nvim-dap       | ❌ Missing     | ❌ Missing    | `mojo-lldb-dap` existe — adapter nvim-dap pendiente                     |
 | neotest        | ⏳ Blocked     | ⏳ Blocked    | `mojo test` not stable yet                                              |
 | nvim-lint      | ⏳ Blocked     | ⏳ Blocked    | No Mojo linter binary exists                                            |
@@ -263,4 +263,4 @@
 | kickstart.nvim | No             | Yes           | Docs section showing minimal config                                     |
 | ftplugin/mojo  | Yes            | Done          | 4-space indentation                                                     |
 
-**Remaining work:** lualine icon + SDK version docs, AstroNvim/NvChad/kickstart config sections.
+**Remaining work:** lualine icon docs, AstroNvim/NvChad/kickstart config sections.

@@ -14,7 +14,8 @@ activation — designed so each piece can be swapped when
 - LSP and formatter integration (via `nvim-lspconfig` / `conform.nvim`)
 - Terminal environment auto-activation
 - Completion support (nvim-cmp / blink.cmp) with keywords, builtins, types, and snippets
-- lualine.nvim statusline integration
+- lualine.nvim statusline integration with SDK version display
+- `MojoVersion` component for non-lualine statuslines
 - Debugging support via nvim-dap + mojo-lldb-dap
 - 4-space indentation for Mojo files
 - LazyVim, AstroNvim, NvChad, and kickstart.nvim adapter helpers
@@ -292,17 +293,20 @@ local mojo = require("mojo.adapters.lazyvim")
 <details>
 <summary>📊 Statusline (lualine.nvim)</summary>
 
-Enabled by default. Shows the Mojo icon and active environment (pixi/venv)
-in your statusline when editing `.mojo` files.
+Enabled by default. Shows the Mojo icon, active environment (pixi/venv),
+and SDK version in your statusline when editing `.mojo` files.
+
+Example output: `🔥 pixi default 24.4.0`
 
 Customize the display:
 
 ```lua
 require("mojo").setup({
   statusline = {
-    icon = "🔥",           -- icon shown for Mojo buffers
-    show_env_name = true,  -- show active pixi/venv environment name
-    colored = true,        -- orange text highlight
+    icon = "🔥",               -- icon shown for Mojo buffers
+    show_env_name = true,      -- show active pixi/venv environment name
+    show_sdk_version = true,   -- show Mojo SDK version (from `mojo --version`)
+    colored = true,            -- orange text highlight
   },
 })
 ```
@@ -320,6 +324,14 @@ require("nvim-web-devicons").setup({
   },
 })
 ```
+
+If you use a statusline other than lualine, use the `MojoVersion` component directly:
+
+```lua
+require("mojo.status").MojoVersion()
+```
+
+Returns `"🔥 pixi 24.4.0"` for Mojo buffers, or `""` for other filetypes.
 
 </details>
 
@@ -411,6 +423,7 @@ All options and their defaults:
     enabled = true,
     icon = "🔥",
     show_env_name = true,
+    show_sdk_version = true,
     colored = true,
   },
   debug = false,
