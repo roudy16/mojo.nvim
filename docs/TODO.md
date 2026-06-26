@@ -1,12 +1,14 @@
 # mojo.nvim — TODO
 
-> Priorities are based on AGENTS.md sovereignty rules. P0 = blocks sovereignty.
-
-## Workflow Rules
-
-1. **One branch per task** — each item below is done in a separate branch from `main`. No mixing concerns.
-2. **No commits without request** — never commit unless I explicitly ask.
-3. **Merge then next** — once tested and committed, merge to `main`, then start the next task on a fresh branch.
+> **North Star:** Achieve full Mojo editor sovereignty in Neovim. Every VS Code
+> feature should have a Neovim equivalent wired through mojo.nvim. No Mojo-specific
+> third-party plugin should be required. When Modular ships an official tool, only
+> one module changes.
+>
+> Priorities are defined by AGENTS.md sovereignty rules:
+> - **P0** — blocks a sovereignty rule (Rules 1-7)
+> - **P1** — matches VS Code parity, high user impact (Rule 1: centralization)
+> - **P2** — quality, docs, polish (Rule 4: adapters, Rule 7: replacement path)
 
 ---
 
@@ -96,6 +98,7 @@
 
 ### 14. SDK version detection in status bar
 
+**Sovereignty:** Rule 6 (Environmental Autonomy) — users must see which SDK is active.
 **Why:** VS Code shows SDK version + clickable warning. Users need to know which Mojo they're on.
 
 **Scope:**
@@ -107,6 +110,7 @@
 
 ### 15. SDK path override setting
 
+**Sovereignty:** Rule 6 (Environmental Autonomy) — users need manual SDK override for CI/remote.
 **Why:** VS Code has `mojo.sdk.path` for CI/remote environments.
 
 **Scope:**
@@ -118,6 +122,7 @@
 
 ### 16. SDK refresh command
 
+**Sovereignty:** Rule 6 (Environmental Autonomy) — recovery mechanism when env changes.
 **Why:** `Mojo: Refresh SDK Detection` clears cache and re-detects.
 
 **Scope:**
@@ -128,12 +133,14 @@
 
 ### 17. `.derived/` monorepo SDK detection
 
+**Sovereignty:** Rule 6 (Environmental Autonomy) — missing SDK source = incomplete detection.
 **Why:** VS Code scans `.derived/` as an SDK source.
 
 **Scope:** Add `.derived/` dir check before pixi/venv in `detect.lua`.
 
-### 18. nvim-dap integration (mojo-lldb-dap adapter)
+### 18. nvim-dap integration (mojo-lldb-dap adapter) — [done]
 
+**Sovereignty:** Rule 1 (Centralization) + Rule 5 (Zero-Bundle) — debugging must use official binary.
 **Why:** Tenemos `mojo-lldb-dap` (DAP server LLDB-based) en el SDK. `_mojo-lldb-dap` es un binario arm64 que implementa DAP completo con soporte para `mojoFile` (compila `.mojo` sobre la marcha), `buildArgs`, attach, y más. El wrapper `mojo-lldb-dap` importa visualizers Mojo via `CONDA_PREFIX`.
 
 **Arquitectura:**
@@ -161,6 +168,7 @@
 
 ### 19. LSP status bar indicator
 
+**Sovereignty:** Rule 1 (Centralization) — central LSP management needs health visibility.
 **Why:** VS Code shows LSP server state (running/stopped/crashed) with click-to-restart.
 
 **Scope:**
@@ -172,6 +180,7 @@
 
 ### 20. LSP crash detection & recovery
 
+**Sovereignty:** Rule 1 (Centralization) — plugin must handle LSP lifecycle, not just delegate.
 **Why:** 26.6.0 distinguishes capped-out (repeated crashes) from normal stopped.
 
 **Scope:**
@@ -182,6 +191,7 @@
 
 ### 21. Signature help keybinding & docs
 
+**Sovereignty:** Rule 1 (Centralization) — all LSP affordances must be documented centrally.
 **Why:** VS Code documents `ctrl+shift+space` for overloaded function scrolling.
 
 **Scope:**
@@ -191,12 +201,14 @@
 
 ### 22. Code actions / quick fixes
 
+**Sovereignty:** Rule 1 (Centralization) — must document all LSP capabilities.
 **Why:** LSP provides textDocument/codeAction but no mojo.nvim adapter exposes it.
 
 **Scope:** Document `vim.lsp.buf.code_action()` mapping, or provide a wrapper.
 
 ### 23. Doc string diagnostics filter
 
+**Sovereignty:** Rule 2 (Official Replacement Path) — LSP config must expose all server options.
 **Why:** 26.1.0 added option to filter diagnostics in docstrings.
 
 **Scope:**
@@ -206,6 +218,7 @@
 
 ### 24. `mojo.lsp.includeDirs` setting
 
+**Sovereignty:** Rule 2 (Official Replacement Path) — LSP config must expose all server options.
 **Why:** Lets users add extra include paths for LSP.
 
 **Scope:**
@@ -215,6 +228,7 @@
 
 ### 25. Restart & stop LSP commands
 
+**Sovereignty:** Rule 1 (Centralization) — central LSP lifecycle management.
 **Why:** `Mojo: Restart the extension` is a documented VS Code troubleshooting tool.
 
 **Scope:**
@@ -225,6 +239,7 @@
 
 ### 26. Run Mojo file commands
 
+**Sovereignty:** Rule 1 (Centralization) — run/debug belongs in the plugin, not external.
 **Why:** VS Code provides run + dedicated terminal run.
 
 **Scope:**
