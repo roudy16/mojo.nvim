@@ -21,7 +21,7 @@ local function _define_highlights()
 	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic })
 	vim.api.nvim_set_hl(0, "MojoText", { fg = c })
 	vim.api.nvim_set_hl(0, "MojoSep", { fg = c })
-	vim.api.nvim_set_hl(0, "MojoOk", { fg = green })
+	vim.api.nvim_set_hl(0, "MojoGood", { fg = green })
 	vim.api.nvim_set_hl(0, "MojoWarn", { fg = yellow })
 	vim.api.nvim_set_hl(0, "MojoErr", { fg = red })
 end
@@ -63,7 +63,7 @@ local function _display(opts)
 
 	local function add_indicator(state, label)
 		local icon = status.status_icon(state)
-		local hl = "MojoOk"
+		local hl = "MojoGood"
 		if state == "crashed" or state == "unavailable" then
 			hl = "MojoErr"
 		elseif state == "stopped" or state == "inactive" then
