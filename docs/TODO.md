@@ -15,8 +15,8 @@
 | Crashed-state distinction (26.6.0)          | 🟡     | Basic crash flag via on_exit; no capped-out/count yet       |
 | Click-to-restart LSP from status bar        | ✅     | Clickable status component with action menu                 |
 | `Mojo: Refresh SDK Detection` command       | ❌     | No user-facing command to re-detect                         |
-| `mojo.sdk.path` override setting            | ❌     | mojo.nvim has auto-detect only, no manual override          |
-| `mojo.preferWorkspaceEnv` setting           | ❌     | Always prefers workspace; no user-configurable priority     |
+| `mojo.sdk.path` override setting            | ✅     | `config.sdk_path` + `$MOJO_SDK_PATH` env var               |
+| `mojo.preferWorkspaceEnv` setting           | 🟡     | sdk_path override bypasses auto-detect; no soft priority    |
 | `.derived/` monorepo SDK detection          | ❌     | Not scanned                                                 |
 | Python extension integration                | ❌     | Doesn't use Python extension at all (good for autonomy)     |
 | SDK version display                         | ✅     | `env/version.lua` — `mojo --version` parsing with caching   |
@@ -96,17 +96,18 @@
 - `adapters/lualine.lua` — `show_sdk_version` option (default: true)
 - `status.MojoVersion()` component for non-lualine statuslines
 
-### 15. SDK path override setting
+### 15. SDK path override setting — [done]
 
 **Sovereignty:** Rule 6 (Environmental Autonomy) — users need manual SDK override for CI/remote.
 **Why:** VS Code has `mojo.sdk.path` for CI/remote environments.
 
-**Scope:**
+**Implementation:**
 
-- Add `mojo.sdk.path` config field
-- Add `MOJO_SDK_PATH` env var fallback
-- Bypass auto-detection when set
-- Validate path and surface errors
+- `config.sdk_path` field + `$MOJO_SDK_PATH` env var fallback
+- `detect.lua` checks override before auto-detection
+- Validates path exists and contains `bin/mojo` or `bin/mojo-lsp-server`
+- Surfaces error via `vim.notify` on invalid path
+- Cached separately from auto-detected envs
 
 ### 16. SDK refresh command
 
