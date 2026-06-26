@@ -7,6 +7,8 @@ local M = {}
 --- @field show_env_name boolean|nil
 --- @field show_sdk_version boolean|nil
 --- @field colored boolean|nil
+--- @field color string|nil
+--- @field icon_color string|nil
 
 --- @type Mojo-lang.LualineOpts
 M.defaults = {
@@ -16,18 +18,15 @@ M.defaults = {
 	colored = true,
 }
 
---- Return the display string for the current buffer.
---- Returns "" (hidden) if the buffer is not a Mojo file.
---- @param opts Mojo-lang.LualineOpts|nil
+--- Return the text portion (env + version) for the current buffer.
+--- @param opts Mojo-lang.LualineOpts
 --- @return string
-local function _display(opts)
+local function _text(opts)
 	if vim.bo.filetype ~= "mojo" then
 		return ""
 	end
 
-	opts = vim.tbl_deep_extend("force", M.defaults, opts or {})
-
-	local parts = { opts.icon or "Mojo" }
+	local parts = {}
 
 	if opts.show_env_name then
 		local detected = env.detect()
@@ -50,40 +49,55 @@ local function _display(opts)
 	return table.concat(parts, " ")
 end
 
---- Return a color function for lualine.
+--- Build two lualine component tables: one for the icon, one for the text.
+--- Each has its own color function.
 --- @param opts Mojo-lang.LualineOpts
---- @return fun(): table|nil
-local function _color(opts)
-	return function()
-		if opts.colored == false then
-			return nil
-		end
-		return { fg = "#ff6f00" }
-	end
-end
-
---- Build a lualine component table.
---- @param opts Mojo-lang.LualineOpts
---- @return table
-local function _component(opts)
-	return {
+--- @return table[]
+local function _components(opts)
+	local icon_comp = {
 		function()
-			return _display(opts)
+			if vim.bo.filetype ~= "mojo" then
+				return ""
+			end
+			return opts.icon or "Mojo"
 		end,
-		color = _color(opts),
+		color = function()
+			if opts.colored == false then
+				return nil
+			end
+			return { fg = opts.icon_color }
+		end,
 	}
+
+	local text_comp = {
+		function()
+			return _text(opts)
+		end,
+		color = function()
+			if opts.colored == false then
+				return nil
+			end
+			return { fg = opts.color }
+		end,
+	}
+
+	return { icon_comp, text_comp }
 end
 
---- Register the Mojo component into lualine's config.
+--- Register the Mojo components into lualine's config.
 --- @param opts Mojo-lang.LualineOpts|nil
 --- @return boolean
 function M.setup(opts)
 	opts = vim.tbl_deep_extend("force", M.defaults, opts or {})
+	opts.color = opts.color or "#d97706"
+	opts.icon_color = opts.icon_color or "#ff6f00"
 
 	local function inject_sections(sections)
 		local target = sections.lualine_x or sections.lualine_y
 		if target then
-			table.insert(target, _component(opts))
+			for _, comp in ipairs(_components(opts)) do
+				table.insert(target, comp)
+			end
 		end
 	end
 
