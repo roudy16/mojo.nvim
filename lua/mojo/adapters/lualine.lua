@@ -79,12 +79,12 @@ local function _display(opts)
 		add_indicator(status.lsp_status(), "lsp")
 	end
 
-	if opts.show_dbg ~= false then
-		add_indicator(status.dbg_status(), "dbg")
-	end
-
 	if opts.show_fmt ~= false then
 		add_indicator(status.fmt_status(), "fmt")
+	end
+
+	if opts.show_dbg ~= false then
+		add_indicator(status.dbg_status(), "dbg")
 	end
 
 	if opts.show_diag ~= false then

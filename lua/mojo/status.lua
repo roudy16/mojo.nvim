@@ -141,12 +141,12 @@ function M.display()
 		table.insert(status_parts, M.status_icon(M.lsp_status()) .. " lsp")
 	end
 
-	if opts.show_dbg ~= false then
-		table.insert(status_parts, M.status_icon(M.dbg_status()) .. " dbg")
-	end
-
 	if opts.show_fmt ~= false then
 		table.insert(status_parts, M.status_icon(M.fmt_status()) .. " fmt")
+	end
+
+	if opts.show_dbg ~= false then
+		table.insert(status_parts, M.status_icon(M.dbg_status()) .. " dbg")
 	end
 
 	if opts.show_diag ~= false then
