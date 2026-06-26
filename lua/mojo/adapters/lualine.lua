@@ -2,78 +2,57 @@ local env = require("mojo.env")
 
 local M = {}
 
---- Build a lualine component for a single binary status indicator.
---- @param name string
---- @param check_fn fun(): boolean
+--- Build the display string for the whole Mojo status block.
+--- Returns something like "󰈸 pixi default 24.4.0 · 󰄬 lsp · 󰄬 dbg".
+--- Returns "" if the buffer is not a Mojo file.
 --- @param opts Mojo-lang.StatuslineConfig
---- @return table
-local function _binary_component(name, check_fn, opts)
-	return {
-		function()
-			if vim.bo.filetype ~= "mojo" then
-				return ""
+--- @return string
+local function _display(opts)
+	if vim.bo.filetype ~= "mojo" then
+		return ""
+	end
+
+	local parts = { opts.icon or "󰈸" }
+
+	if opts.show_env_name then
+		local detected = env.detect()
+		if detected then
+			local env_label = detected.type
+			if detected.env_name and detected.env_name ~= "default" then
+				env_label = string.format("%s %s", detected.type, detected.env_name)
 			end
-			if opts.show_binaries == false then
-				return ""
-			end
-			local ok = check_fn()
-			return (ok and "󰄬" or "󰅖") .. " " .. name
-		end,
-		color = function()
-			if opts.colored == false then
-				return nil
-			end
-			local ok = check_fn()
-			return { fg = ok and "#a6da95" or "#ed8796" }
-		end,
-	}
+			table.insert(parts, env_label)
+		end
+	end
+
+	if opts.show_sdk_version then
+		local version = env.get_version()
+		if version then
+			table.insert(parts, version)
+		end
+	end
+
+	if opts.show_binaries ~= false then
+		local lsp_ok = env.get_lsp_cmd() ~= nil
+		local dbg_ok = env.get_dap_cmd() ~= nil
+
+		local bin_parts = {}
+		table.insert(bin_parts, (lsp_ok and "󰄬" or "󰅖") .. " lsp")
+		table.insert(bin_parts, (dbg_ok and "󰄬" or "󰅖") .. " dbg")
+
+		table.insert(parts, "· " .. table.concat(bin_parts, " · "))
+	end
+
+	return table.concat(parts, " ")
 end
 
---- Build lualine component tables for icon, env text, and binary status.
+--- Build a single lualine component table for the Mojo status.
 --- @param opts Mojo-lang.StatuslineConfig
---- @return table[]
-local function _components(opts)
-	local comps = {}
-
-	local icon_comp = {
+--- @return table
+local function _component(opts)
+	return {
 		function()
-			if vim.bo.filetype ~= "mojo" then
-				return ""
-			end
-			return opts.icon or "󰈸"
-		end,
-		color = function()
-			if opts.colored == false then
-				return nil
-			end
-			return { fg = opts.icon_color or "#ff6f00" }
-		end,
-	}
-	table.insert(comps, icon_comp)
-
-	local text_comp = {
-		function()
-			if vim.bo.filetype ~= "mojo" then
-				return ""
-			end
-			local parts = {}
-			if opts.show_env_name then
-				local detected = env.detect()
-				if detected then
-					local env_label = detected.type
-					if detected.env_name and detected.env_name ~= "default" then
-						env_label = string.format("%s %s", detected.type, detected.env_name)
-					end
-					table.insert(parts, env_label)
-				end
-			end
-			if opts.show_sdk_version then
-				local version = env.get_version()
-				if version then
-					table.insert(parts, version)
-				end
-			end
-			return table.concat(parts, " ")
+			return _display(opts)
 		end,
 		color = function()
 			if opts.colored == false then
@@ -82,21 +61,9 @@ local function _components(opts)
 			return { fg = opts.color or "#ff9e64" }
 		end,
 	}
-	table.insert(comps, text_comp)
-
-	if opts.show_binaries ~= false then
-		local lsp_comp = _binary_component("lsp",
-			function() return env.get_lsp_cmd() ~= nil end, opts)
-		local dbg_comp = _binary_component("dbg",
-			function() return env.get_dap_cmd() ~= nil end, opts)
-		table.insert(comps, lsp_comp)
-		table.insert(comps, dbg_comp)
-	end
-
-	return comps
 end
 
---- Register the Mojo components into lualine's config.
+--- Register the Mojo component into lualine's config.
 --- @param opts Mojo-lang.StatuslineConfig
 --- @return boolean
 function M.setup(opts)
@@ -105,9 +72,7 @@ function M.setup(opts)
 	local function inject_sections(sections)
 		local target = sections.lualine_x or sections.lualine_y
 		if target then
-			for _, comp in ipairs(_components(opts)) do
-				table.insert(target, comp)
-			end
+			table.insert(target, _component(opts))
 		end
 	end
 
