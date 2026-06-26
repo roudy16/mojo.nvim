@@ -15,14 +15,12 @@ local function _define_highlights()
 	local c = opts.color or "#ff9e64"
 	local ic = opts.icon_color or "#ff6f00"
 	local green = "#a6da95"
-	local yellow = "#d4b44e"
 	local red = "#ed8796"
 
 	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic })
 	vim.api.nvim_set_hl(0, "MojoText", { fg = c })
 	vim.api.nvim_set_hl(0, "MojoSep", { fg = c })
 	vim.api.nvim_set_hl(0, "MojoGood", { fg = green })
-	vim.api.nvim_set_hl(0, "MojoWarn", { fg = yellow })
 	vim.api.nvim_set_hl(0, "MojoErr", { fg = red })
 end
 
@@ -63,14 +61,18 @@ local function _display(opts)
 
 	local function add_indicator(state, label)
 		local icon = status.status_icon(state)
-		local hl = "MojoGood"
-		if state == "crashed" or state == "unavailable" then
+		local hl
+		if state == "running" or state == "active" or state == "available" then
+			hl = "MojoGood"
+		elseif state == "crashed" or state == "unavailable" then
 			hl = "MojoErr"
-		elseif state == "stopped" or state == "inactive" then
-			hl = "MojoWarn"
 		end
 		table.insert(parts, "%#MojoSep#·%*")
-		table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. " " .. label)
+		if hl then
+			table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. " " .. label)
+		else
+			table.insert(parts, icon .. " " .. label)
+		end
 	end
 
 	if opts.show_lsp ~= false then
@@ -88,13 +90,14 @@ local function _display(opts)
 	if opts.show_diag ~= false then
 		local dt = status.diag_text()
 		if dt then
-			local hl = "MojoErr"
 			local counts = vim.diagnostic.get(vim.fn.bufnr())
-			if (counts[1] or 0) == 0 then
-				hl = "MojoWarn"
-			end
+			local has_errors = (counts[1] or 0) > 0
 			table.insert(parts, "%#MojoSep#·%*")
-			table.insert(parts, "%#" .. hl .. "#" .. dt .. "%*")
+			if has_errors then
+				table.insert(parts, "%#MojoErr#" .. dt .. "%*")
+			else
+				table.insert(parts, dt)
+			end
 		end
 	end
 

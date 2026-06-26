@@ -19,8 +19,8 @@ local icon_tests = {
 	{ state = "running", expected = "󰄬" },
 	{ state = "active", expected = "󰄬" },
 	{ state = "available", expected = "󰄬" },
-	{ state = "stopped", expected = "󰂎" },
-	{ state = "inactive", expected = "󰂎" },
+	{ state = "stopped", expected = "○" },
+	{ state = "inactive", expected = "○" },
 	{ state = "crashed", expected = "󰅖" },
 	{ state = "unavailable", expected = "󰅖" },
 	{ state = "unknown", expected = "󰅖" },
@@ -41,22 +41,22 @@ local color_tests = {
 	{ state = "running", expected = "#a6da95" },
 	{ state = "active", expected = "#a6da95" },
 	{ state = "available", expected = "#a6da95" },
-	{ state = "stopped", expected = "#ff9e64" },
-	{ state = "inactive", expected = "#ff9e64" },
+	{ state = "stopped", expected = nil },
+	{ state = "inactive", expected = nil },
 	{ state = "crashed", expected = "#ed8796" },
 	{ state = "unavailable", expected = "#ed8796" },
 	{ state = "unknown", expected = "#ed8796" },
 }
 
 print("--- status_color ---")
-for _, tc in ipairs(color_tests) do
-	local result = status.status_color(tc.state)
-	if result == tc.expected then
-		pass(string.format("status_color(%q) = %s", tc.state, result))
-	else
-		fail(string.format("status_color(%q) expected %s, got %s", tc.state, tc.expected, result))
+	for _, tc in ipairs(color_tests) do
+		local result = status.status_color(tc.state)
+		if result == tc.expected then
+			pass(string.format("status_color(%q) = %s", tc.state, result or "nil"))
+		else
+			fail(string.format("status_color(%q) expected %s, got %s", tc.state, tc.expected or "nil", result or "nil"))
+		end
 	end
-end
 
 -- display returns "" for non-mojo buffers
 print("--- display ---")

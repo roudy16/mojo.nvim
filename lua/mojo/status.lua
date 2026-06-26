@@ -58,7 +58,7 @@ function M.status_icon(state)
 	if state == "running" or state == "active" or state == "available" then
 		return "󰄬"
 	elseif state == "stopped" or state == "inactive" then
-		return "󰂎"
+		return "○"
 	end
 	return "󰅖"
 end
@@ -69,7 +69,7 @@ function M.status_color(state)
 	if state == "running" or state == "active" or state == "available" then
 		return "#a6da95"
 	elseif state == "stopped" or state == "inactive" then
-		return "#ff9e64"
+		return nil
 	end
 	return "#ed8796"
 end
