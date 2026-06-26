@@ -10,13 +10,22 @@ metadata:
 
 # TODO Update
 
-Maintain `docs/TODO.md` with accurate feature tracking and task priorities.
-Every external change must be investigated and traced to a TODO entry — nothing
-is adopted silently.
+This skill defines the **rules and triggers** for maintaining `docs/TODO.md`.
+The TODO is the **output** of this skill — a dynamic list of tasks that drives
+plugin development. Every external change must be investigated and traced to a
+TODO entry. Nothing is adopted silently.
 
-## Investigation rules
+## North Star
 
-Each trigger requires a specific investigation before updating TODO:
+Achieve full Mojo editor sovereignty in Neovim:
+- Every VS Code feature has a Neovim equivalent wired through mojo.nvim
+- No Mojo-specific third-party plugin required
+- When Modular ships an official tool, only one module changes
+
+## Investigation triggers
+
+Each trigger below describes what to investigate and how to translate findings
+into TODO entries.
 
 ### 1. New Mojo language release
 
@@ -34,17 +43,17 @@ Check: `https://github.com/modular/vscode-mojo/blob/main/CHANGELOG.md`
 
 - Read the full CHANGELOG, not just the latest version
 - Categorize each change: SDK detection, LSP, debugger, formatter, run commands, status bar, settings
-- For each new VS Code feature, determine if mojo.nvim already supports it (✅), partially supports it (🟡), or is missing it (❌)
+- For each new VS Code feature, determine if mojo.nvim already supports it (✅), partially (🟡), or missing (❌)
 - If blocked by missing upstream binary, mark as ⏳
-- Update the audit table with the findings
-- Create task entries for each ❌ or 🟡 that is worth implementing
+- Output: update the audit tables in TODO.md
+- Create task entries for each ❌ or 🟡 worth implementing
 
 ### 3. New Mojo tool (LSP, debugger, formatter, CLI)
 
-- Check the pixi/venv `bin/` directory for new binaries (e.g. `mojo-lldb-dap`, `mojo-lsp-server`)
+- Check pixi/venv `bin/` for new binaries (e.g. `mojo-lldb-dap`, `mojo-lsp-server`)
 - Check `lib/` for supporting files (e.g. `lldb-visualizers/`)
 - For each new tool: does mojo.nvim discover it? Does it need an adapter?
-- Add task entries for missing discovery or integration
+- Output: add task entries for missing discovery or integration
 
 ### 4. Neovim plugin API change
 
@@ -53,36 +62,52 @@ Triggers: nvim-dap, nvim-lspconfig, nvim-treesitter, conform.nvim, blink.cmp, nv
 - Check the plugin's CHANGELOG or recent commits
 - Does the API change break any mojo.nvim adapter?
 - Does a new API allow a simpler adapter implementation?
-- Does a new plugin ecosystem option exist (e.g. a new cmp engine)?
-- Update adapters or add task entries as needed
+- Does a new plugin ecosystem option exist?
+- Output: update adapters or add task entries
 
-## Priorities
+### 5. Task completed
 
-| Priority | Meaning |
-|----------|---------|
-| **P0** | Sovereignty gaps — blocks autonomy, env detection, core architecture |
-| **P1** | Feature parity — matches VS Code feature, high user impact |
-| **P2** | Quality & completeness — docs, polish, minor features |
+- Mark the task as `[done]` in TODO.md
+- Re-number all remaining items
+- Update the P2 tools table if the completed task involved a Neovim tool
 
-## Audit table format
+### 6. New feature gap discovered
 
-When adding a new audit (e.g. after a VS Code release):
+- If the gap blocks a sovereignty rule → P0
+- If it matches VS Code parity → P1
+- Otherwise → P2
+
+## Priority definitions
+
+| Priority | Meaning | Sovereignty rules |
+|----------|---------|-------------------|
+| **P0** | Sovereignty gaps — blocks autonomy, env detection, core architecture | Rules 1-7 |
+| **P1** | VS Code feature parity, high user impact | Rule 1 (centralization) |
+| **P2** | Quality, polish, docs, minor features | Rules 4, 7 |
+
+## TODO output format
+
+The TODO.md document has two kinds of content:
+
+### Audit tables
+
+After each VS Code release audit:
 
 ```
-### Feature Area
+### <Feature Area>
 
 | VS Code Feature | Status | Notes |
 | --------------- | ------ | ----- |
-| Feature name    | ✅/🟡/❌/⏳ | Details and module references |
+| Feature name    | ✅/🟡/❌/⏳ | Module reference |
 ```
 
-Status key: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstream
+Status: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstream
 
-## Task entry format
+### Task entries
 
 ```
 ### N. Task name
-
+**Sovereignty:** Rule X (name) — how it relates.
 **Why:** Context and motivation.
 
 **Scope:**
@@ -90,9 +115,10 @@ Status key: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstre
 - Action item 2
 ```
 
-## Rules
+## Maintenance rules
 
 - Re-number all items after adding/removing any entry
-- Existing P2 tools table uses columns: Tool, Needs adapter?, Needs README?, Notes
-- Update the audit tables before adding task entries
-- Never delete a completed task — mark it as `[done]` or note it inline
+- Update audit tables before adding task entries
+- Never delete a completed task — mark `[done]` inline
+- P2 tools table uses columns: Tool, Needs adapter?, Needs README?, Notes
+- Each task references the sovereignty rule it serves

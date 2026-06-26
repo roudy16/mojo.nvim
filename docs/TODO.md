@@ -1,17 +1,5 @@
 # mojo.nvim — TODO
 
-> **North Star:** Achieve full Mojo editor sovereignty in Neovim. Every VS Code
-> feature should have a Neovim equivalent wired through mojo.nvim. No Mojo-specific
-> third-party plugin should be required. When Modular ships an official tool, only
-> one module changes.
->
-> Priorities are defined by AGENTS.md sovereignty rules:
-> - **P0** — blocks a sovereignty rule (Rules 1-7)
-> - **P1** — matches VS Code parity, high user impact (Rule 1: centralization)
-> - **P2** — quality, docs, polish (Rule 4: adapters, Rule 7: replacement path)
-
----
-
 ## VS Code Extension Feature Audit
 
 > Based on `modular-mojotools.vscode-mojo` v26.6.0 (2026-06-24).
@@ -53,8 +41,8 @@
 
 ### Debugging
 
-| VS Code Feature                    | Status | Notes                                   |
-| ---------------------------------- | ------ | --------------------------------------- |
+| VS Code Feature                    | Status | Notes                                                              |
+| ---------------------------------- | ------ | ------------------------------------------------------------------ |
 | LLDB debug adapter                 | ✅     | `mojo-lldb-dap` → DAP server nativo LLDB, `_mojo-lldb-dap` (arm64) |
 | AOT compile + LLDB attach (26.6.0) | ✅     | Soportado vía `mojoFile` — DAP server compila `.mojo` internamente |
 | Debug Mojo File action             | ❌     | Falta adapter/config nvim-dap                                      |
@@ -62,7 +50,7 @@
 | `buildArgs` in debug config        | ❌     | Propiedad `buildArgs` soportada por el DAP server                  |
 | Attach to process                  | ❌     | Propiedad `pid`/`program`/`waitFor` soportada                      |
 | `mojo debug --vscode` support      | 🟡     | No necesario; DAP server es más directo                            |
-| Mojo data formatters (visualizers) | ❌     | `lldbDataFormatters.py` + `mlirDataFormatters.py` en lib/         |
+| Mojo data formatters (visualizers) | ❌     | `lldbDataFormatters.py` + `mlirDataFormatters.py` en lib/          |
 | LLDB init/pre-run/post-run cmds    | ❌     | Comandos LLDB pre/post lanzamiento soportados                      |
 
 ### Run
@@ -144,11 +132,13 @@
 **Why:** Tenemos `mojo-lldb-dap` (DAP server LLDB-based) en el SDK. `_mojo-lldb-dap` es un binario arm64 que implementa DAP completo con soporte para `mojoFile` (compila `.mojo` sobre la marcha), `buildArgs`, attach, y más. El wrapper `mojo-lldb-dap` importa visualizers Mojo via `CONDA_PREFIX`.
 
 **Arquitectura:**
+
 - `mojo-lldb-dap` → shell script wrapper que usa `$CONDA_PREFIX/bin/_mojo-lldb-dap`
 - `_mojo-lldb-dap` → binario arm64, DAP server LLDB-based (Apple's lldb-dap adaptado)
 - Visualizers en `$CONDA_PREFIX/lib/lldb-visualizers/` (lldbDataFormatters.py + mlirDataFormatters.py)
 
 **Scope:**
+
 - Detectar `mojo-lldb-dap` vía env module (misma mecánica que `mojo-lsp-server`)
 - Crear adapter nvim-dap con `type = "executable"` y env correcto (CONDA_PREFIX)
 - Keyboard: `mojoFile` → debug de archivo actual, `program` → debug de binario, `attach` → attach PID
@@ -265,7 +255,7 @@
 | which-key.nvim | No             | No            | Works automatically                                                     |
 | trouble.nvim   | No             | No            | Works automatically                                                     |
 | lualine.nvim   | No             | Yes (minimal) | Could document Mojo filetype icon; SDK version display                  |
-| nvim-dap       | ❌ Missing     | ❌ Missing     | `mojo-lldb-dap` existe — adapter nvim-dap pendiente                      |
+| nvim-dap       | ❌ Missing     | ❌ Missing    | `mojo-lldb-dap` existe — adapter nvim-dap pendiente                     |
 | neotest        | ⏳ Blocked     | ⏳ Blocked    | `mojo test` not stable yet                                              |
 | nvim-lint      | ⏳ Blocked     | ⏳ Blocked    | No Mojo linter binary exists                                            |
 | AstroNvim      | No             | Yes           | Docs section showing config format                                      |
