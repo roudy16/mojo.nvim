@@ -11,9 +11,9 @@
 | ------------------------------------------- | ------ | ----------------------------------------------------------- |
 | SDK auto-detection (pixi + venv + PATH)     | ✅     | `env/detect.lua` — pixi `.pixi` + `.venv`, filesystem-first |
 | Status bar: SDK version / clickable warning | ✅     | lualine adapter shows env + SDK version; `status.MojoVersion()` |
-| LSP status bar (running/stopped/crashed)    | ❌     | No status bar indicator for LSP health                      |
-| Crashed-state distinction (26.6.0)          | ❌     | No LSP crash detection at all                               |
-| Click-to-restart LSP from status bar        | ❌     |                                                             |
+| LSP status bar (running/stopped/crashed)    | ✅     | `status.lua` — lsp_status() runtime tracking in statusline  |
+| Crashed-state distinction (26.6.0)          | 🟡     | Basic crash flag via on_exit; no capped-out/count yet       |
+| Click-to-restart LSP from status bar        | ✅     | Clickable status component with action menu                 |
 | `Mojo: Refresh SDK Detection` command       | ❌     | No user-facing command to re-detect                         |
 | `mojo.sdk.path` override setting            | ❌     | mojo.nvim has auto-detect only, no manual override          |
 | `mojo.preferWorkspaceEnv` setting           | ❌     | Always prefers workspace; no user-configurable priority     |
