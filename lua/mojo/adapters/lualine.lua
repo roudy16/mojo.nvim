@@ -15,12 +15,14 @@ local function _define_highlights()
 	local c = opts.color or "#ff9e64"
 	local ic = opts.icon_color or "#ff6f00"
 	local green = "#a6da95"
+	local yellow = "#d4b44e"
 	local red = "#ed8796"
 
 	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic })
 	vim.api.nvim_set_hl(0, "MojoText", { fg = c })
 	vim.api.nvim_set_hl(0, "MojoSep", { fg = c })
 	vim.api.nvim_set_hl(0, "MojoGood", { fg = green })
+	vim.api.nvim_set_hl(0, "MojoWarn", { fg = yellow })
 	vim.api.nvim_set_hl(0, "MojoErr", { fg = red })
 end
 
@@ -91,13 +93,9 @@ local function _display(opts)
 		local dt = status.diag_text()
 		if dt then
 			local counts = vim.diagnostic.get(vim.fn.bufnr())
-			local has_errors = (counts[1] or 0) > 0
+			local hl = (counts[1] or 0) > 0 and "MojoErr" or "MojoWarn"
 			table.insert(parts, "%#MojoSep#·%*")
-			if has_errors then
-				table.insert(parts, "%#MojoErr#" .. dt .. "%*")
-			else
-				table.insert(parts, dt)
-			end
+			table.insert(parts, "%#" .. hl .. "#" .. dt .. "%*")
 		end
 	end
 
