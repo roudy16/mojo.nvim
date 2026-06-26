@@ -22,7 +22,7 @@ end
 
 --- @return "running"|"stopped"|"crashed"|"unavailable"
 function M.lsp_status()
-	local clients = vim.lsp.get_active_clients({ bufnr = vim.fn.bufnr() })
+	local clients = vim.lsp.get_clients({ bufnr = vim.fn.bufnr() })
 	for _, client in ipairs(clients) do
 		if client.name == "mojo" then
 			return "running"
@@ -178,18 +178,27 @@ end
 M.actions = {
 	["Restart LSP"] = function()
 		M._reset_lsp_crash()
-		local clients = vim.lsp.get_active_clients({ name = "mojo" })
+		local clients = vim.lsp.get_clients({ name = "mojo" })
+		if #clients == 0 then
+			vim.schedule(function()
+				vim.cmd("edit")
+			end)
+			return
+		end
 		for _, client in ipairs(clients) do
-			client.stop()
+			client:stop()
 		end
 		vim.schedule(function()
+			vim.wait(1000, function()
+				return #vim.lsp.get_clients({ name = "mojo" }) == 0
+			end, 50)
 			vim.cmd("edit")
 		end)
 	end,
 	["Stop LSP"] = function()
-		local clients = vim.lsp.get_active_clients({ name = "mojo" })
+		local clients = vim.lsp.get_clients({ name = "mojo" })
 		for _, client in ipairs(clients) do
-			client.stop()
+			client:stop()
 		end
 	end,
 	["Refresh SDK"] = function()
@@ -202,20 +211,81 @@ M.actions = {
 	end,
 }
 
---- Show action menu on click.
+--- Show floating window with numbered actions.
 function M.show_menu()
 	local items = vim.tbl_keys(M.actions)
 	table.sort(items)
-	vim.ui.select(items, {
-		prompt = "Mojo actions:",
-	}, function(choice)
-		if choice then
-			M.actions[choice]()
-		end
-	end)
-	vim.schedule(function()
-		vim.cmd("startinsert!")
-	end)
+
+	local lines = {}
+	for i, item in ipairs(items) do
+		table.insert(lines, string.format("   [%d] %s", i, item))
+	end
+
+	local width = 20
+	local height = #lines
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	vim.bo[buf].filetype = "mojo-prompt"
+	vim.bo[buf].modifiable = false
+
+	vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = width,
+		height = height,
+		col = math.floor((vim.o.columns - width) / 2),
+		row = math.floor((vim.o.lines - height) / 2),
+		style = "minimal",
+		border = "rounded",
+		title = " Press [ 1 | 2 | 3]",
+		title_pos = "center",
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, "n", "1", "", {
+		callback = function()
+			M._close_and_run(items[1])
+		end,
+		noremap = true,
+		silent = true,
+	})
+	vim.api.nvim_buf_set_keymap(buf, "n", "2", "", {
+		callback = function()
+			M._close_and_run(items[2])
+		end,
+		noremap = true,
+		silent = true,
+	})
+	vim.api.nvim_buf_set_keymap(buf, "n", "3", "", {
+		callback = function()
+			M._close_and_run(items[3])
+		end,
+		noremap = true,
+		silent = true,
+	})
+	vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
+		callback = function()
+			M._close_and_run()
+		end,
+		noremap = true,
+		silent = true,
+	})
+	vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "", {
+		callback = function()
+			M._close_and_run()
+		end,
+		noremap = true,
+		silent = true,
+	})
+end
+
+function M._close_and_run(action)
+	if vim.api.nvim_win_is_valid(vim.api.nvim_get_current_win()) then
+		vim.api.nvim_win_close(0, true)
+	end
+	if action then
+		vim.schedule(function()
+			M.actions[action]()
+		end)
+	end
 end
 
 return M

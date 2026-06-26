@@ -47,7 +47,7 @@ for _, filepath in ipairs(mojo_files) do
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].filetype = "mojo"
-  vim.api.nvim_buf_set_option(buf, "modified", false)
+  vim.bo[buf].modified = false
 
   local parser = vim.treesitter.get_parser(buf, "mojo", {error = true})
   local ok, tree
