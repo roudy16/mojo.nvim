@@ -1,58 +1,16 @@
-local env = require("mojo.env")
+local status = require("mojo.status")
 
 local M = {}
 
---- Build the display string for the whole Mojo status block.
---- Returns something like "󰈸 pixi default 24.4.0 · 󰄬 lsp · 󰄬 dbg".
---- Returns "" if the buffer is not a Mojo file.
+--- Register the Mojo component into lualine's config.
 --- @param opts Mojo-lang.StatuslineConfig
---- @return string
-local function _display(opts)
-	if vim.bo.filetype ~= "mojo" then
-		return ""
-	end
+--- @return boolean
+function M.setup(opts)
+	opts = opts or {}
 
-	local parts = { opts.icon or "󰈸" }
-
-	if opts.show_env_name then
-		local detected = env.detect()
-		if detected then
-			local env_label = detected.type
-			if detected.env_name and detected.env_name ~= "default" then
-				env_label = string.format("%s %s", detected.type, detected.env_name)
-			end
-			table.insert(parts, env_label)
-		end
-	end
-
-	if opts.show_sdk_version then
-		local version = env.get_version()
-		if version then
-			table.insert(parts, version)
-		end
-	end
-
-	if opts.show_binaries ~= false then
-		local lsp_ok = env.get_lsp_cmd() ~= nil
-		local dbg_ok = env.get_dap_cmd() ~= nil
-
-		local bin_parts = {}
-		table.insert(bin_parts, (lsp_ok and "󰄬" or "󰅖") .. " lsp")
-		table.insert(bin_parts, (dbg_ok and "󰄬" or "󰅖") .. " dbg")
-
-		table.insert(parts, "· " .. table.concat(bin_parts, " · "))
-	end
-
-	return table.concat(parts, " ")
-end
-
---- Build a single lualine component table for the Mojo status.
---- @param opts Mojo-lang.StatuslineConfig
---- @return table
-local function _component(opts)
-	return {
+	local component = {
 		function()
-			return _display(opts)
+			return status.display()
 		end,
 		color = function()
 			if opts.colored == false then
@@ -61,18 +19,17 @@ local function _component(opts)
 			return { fg = opts.color or "#ff9e64" }
 		end,
 	}
-end
 
---- Register the Mojo component into lualine's config.
---- @param opts Mojo-lang.StatuslineConfig
---- @return boolean
-function M.setup(opts)
-	opts = opts or {}
+	if opts.clickable ~= false then
+		component.on_click = function()
+			status.show_menu()
+		end
+	end
 
 	local function inject_sections(sections)
 		local target = sections.lualine_x or sections.lualine_y
 		if target then
-			table.insert(target, _component(opts))
+			table.insert(target, component)
 		end
 	end
 

@@ -148,7 +148,7 @@ Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
 - **Treesitter (nvim-treesitter)** — Self-hosted Mojo parser grammar, auto-rebuilds on change.
 - **Completion (nvim-cmp / blink.cmp)** — Auto-detects engine. Provides 56 keywords, 42 builtins, 34 types, 13 snippets. Use `completion.adapter` to force a specific engine.
 - **Debugging (nvim-dap)** — Opt-in (`dap.enabled = true`). Launches `mojo-lldb-dap` with four configs: debug current file, debug with args, debug binary, attach to process.
-- **Statusline (lualine.nvim)** — Shows `󰈸 env version` with separate colors for icon and text, plus binary availability indicators (`󰄬 lsp 󰄬 dbg`). Customize via `statusline` config. For non-lualine statuslines, use `require("mojo.status").MojoVersion()` and `require("mojo.status").MojoBinaries()`.
+- **Statusline (lualine.nvim)** — Shows `󰈸 env version · 󰄬 lsp · 󰄬 dbg · 󰄬 fmt · E3 W2` with runtime status for LSP (running/stopped/crashed), DAP (active/inactive), and formatter availability. Click the block for a menu of Mojo actions. Customize with individual toggles per indicator.
 - **LazyVim** — Use `require("mojo.adapters.lazyvim")` helpers in your plugin specs.
 - **AstroNvim / NvChad / kickstart.nvim** — Just add `{ "Sarctiann/mojo.nvim" }` to your plugins.
 
@@ -184,7 +184,11 @@ Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
     icon = "󰈸",
     show_env_name = true,
     show_sdk_version = true,
-    show_binaries = true,
+    show_lsp = true,
+    show_dbg = true,
+    show_fmt = true,
+    show_diag = true,
+    clickable = true,
     colored = true,
     color = "#ff9e64",
     icon_color = "#ff6f00",

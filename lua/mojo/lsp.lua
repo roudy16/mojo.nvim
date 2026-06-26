@@ -1,8 +1,6 @@
 local env = require("mojo.env")
 local log = require("mojo.log")
 
-
-
 local M = {}
 
 --- @param root_markers string[]|nil
@@ -28,6 +26,9 @@ function M.opts(user_opts)
 			if cmd then
 				new_config.cmd = cmd
 			end
+		end,
+		on_exit = function(code, signal, _)
+			require("mojo.status")._track_lsp_exit(code, signal)
 		end,
 	}, user_opts)
 

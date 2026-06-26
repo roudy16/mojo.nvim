@@ -41,7 +41,11 @@
 --- @field icon string|nil
 --- @field show_env_name boolean|nil
 --- @field show_sdk_version boolean|nil
---- @field show_binaries boolean|nil
+--- @field show_lsp boolean|nil
+--- @field show_dbg boolean|nil
+--- @field show_fmt boolean|nil
+--- @field show_diag boolean|nil
+--- @field clickable boolean|nil
 --- @field colored boolean|nil
 --- @field color string|nil
 --- @field icon_color string|nil
@@ -91,7 +95,11 @@ M.defaults = {
 		icon = "󰈸",
 		show_env_name = true,
 		show_sdk_version = true,
-		show_binaries = true,
+		show_lsp = true,
+		show_dbg = true,
+		show_fmt = true,
+		show_diag = true,
+		clickable = true,
 		colored = true,
 		color = "#ff9e64",
 		icon_color = "#ff6f00",
