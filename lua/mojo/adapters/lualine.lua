@@ -34,6 +34,8 @@ local function _display(opts)
 		return ""
 	end
 
+	_define_highlights()
+
 	local parts = {}
 
 	table.insert(parts, "%#MojoIcon#" .. (opts.icon or "󰈸") .. "%*")
@@ -109,6 +111,10 @@ function M.setup(opts)
 
 	local augroup = vim.api.nvim_create_augroup("MojoLualine", { clear = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = augroup,
+		callback = _define_highlights,
+	})
+	vim.api.nvim_create_autocmd("WinEnter", {
 		group = augroup,
 		callback = _define_highlights,
 	})
