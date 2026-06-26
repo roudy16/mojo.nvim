@@ -3,178 +3,121 @@ local status = require("mojo.status")
 
 local M = {}
 
---- @param opts Mojo-lang.StatuslineConfig
---- @return table[]
-local function _components(opts)
-	local comps = {}
-	local sep = "·"
+--- Define highlight groups for inline coloring via %#...#%* syntax.
+local function _define_highlights(opts)
+	local c = opts.color or "#ff9e64"
+	local ic = opts.icon_color or "#ff6f00"
+	local green = "#a6da95"
+	local amber = c
+	local red = "#ed8796"
 
-	local function click()
-		if opts.clickable ~= false then
+	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic, default = true })
+	vim.api.nvim_set_hl(0, "MojoText", { fg = c, default = true })
+	vim.api.nvim_set_hl(0, "MojoSep", { fg = c, default = true })
+	vim.api.nvim_set_hl(0, "MojoOk", { fg = green, default = true })
+	vim.api.nvim_set_hl(0, "MojoWarn", { fg = amber, default = true })
+	vim.api.nvim_set_hl(0, "MojoErr", { fg = red, default = true })
+end
+
+--- Build the display string with inline highlight groups.
+--- @param opts Mojo-lang.StatuslineConfig
+--- @return string
+local function _display(opts)
+	if vim.bo.filetype ~= "mojo" then
+		return ""
+	end
+
+	local parts = {}
+
+	-- Icon
+	table.insert(parts, "%#MojoIcon#" .. (opts.icon or "󰈸") .. "%*")
+
+	-- Env text
+	local env_parts = {}
+	if opts.show_env_name then
+		local detected = env.detect()
+		if detected then
+			local label = detected.type
+			if detected.env_name and detected.env_name ~= "default" then
+				label = string.format("%s %s", detected.type, detected.env_name)
+			end
+			table.insert(env_parts, label)
+		end
+	end
+	if opts.show_sdk_version then
+		local v = env.get_version()
+		if v then
+			table.insert(env_parts, v)
+		end
+	end
+	if #env_parts > 0 then
+		table.insert(parts, "%#MojoText#" .. table.concat(env_parts, " ") .. "%*")
+	end
+
+	-- Status indicators
+	local function add_indicator(state, label)
+		local icon = status.status_icon(state)
+		local hl = "MojoOk"
+		if state == "crashed" or state == "unavailable" then
+			hl = "MojoErr"
+		elseif state == "stopped" or state == "inactive" then
+			hl = "MojoWarn"
+		end
+		table.insert(parts, "%#MojoSep#·%*")
+		table.insert(parts, "%#" .. hl .. "#" .. icon .. " " .. label .. "%*")
+	end
+
+	if opts.show_lsp ~= false then
+		add_indicator(status.lsp_status(), "lsp")
+	end
+
+	if opts.show_dbg ~= false then
+		add_indicator(status.dbg_status(), "dbg")
+	end
+
+	if opts.show_fmt ~= false then
+		add_indicator(status.fmt_status(), "fmt")
+	end
+
+	if opts.show_diag ~= false then
+		local dt = status.diag_text()
+		if dt then
+			local hl = "MojoErr"
+			local counts = vim.diagnostic.get(vim.fn.bufnr())
+			if (counts[1] or 0) == 0 then
+				hl = "MojoWarn"
+			end
+			table.insert(parts, "%#MojoSep#·%*")
+			table.insert(parts, "%#" .. hl .. "#" .. dt .. "%*")
+		end
+	end
+
+	return table.concat(parts, " ")
+end
+
+--- @param opts Mojo-lang.StatuslineConfig
+--- @return boolean
+function M.setup(opts)
+	opts = opts or {}
+
+	_define_highlights(opts)
+
+	local component = {
+		function()
+			return _display(opts)
+		end,
+	}
+
+	if opts.clickable ~= false then
+		component.on_click = function()
 			status.show_menu()
 		end
 	end
 
-	local function colored()
-		return opts.colored ~= false
-	end
-
-	-- Icon component
-	table.insert(comps, {
-		function()
-			if vim.bo.filetype ~= "mojo" then
-				return ""
-			end
-			return opts.icon or "󰈸"
-		end,
-		color = function()
-			if not colored() then
-				return nil
-			end
-			return { fg = opts.icon_color or "#ff6f00" }
-		end,
-		on_click = click,
-	})
-
-	-- Env + version text component
-	local function env_text()
-		if vim.bo.filetype ~= "mojo" then
-			return ""
-		end
-		local parts = {}
-		if opts.show_env_name then
-			local detected = env.detect()
-			if detected then
-				local label = detected.type
-				if detected.env_name and detected.env_name ~= "default" then
-					label = string.format("%s %s", detected.type, detected.env_name)
-				end
-				table.insert(parts, label)
-			end
-		end
-		if opts.show_sdk_version then
-			local v = env.get_version()
-			if v then
-				table.insert(parts, v)
-			end
-		end
-		return table.concat(parts, " ")
-	end
-
-	table.insert(comps, {
-		env_text,
-		color = function()
-			if not colored() then
-				return nil
-			end
-			return { fg = opts.color or "#ff9e64" }
-		end,
-		on_click = click,
-	})
-
-	-- Separator helper
-	local function sep_comp()
-		return {
-			function()
-				if vim.bo.filetype ~= "mojo" then
-					return ""
-				end
-				return sep
-			end,
-			color = function()
-				if not colored() then
-					return nil
-				end
-				return { fg = opts.color or "#ff9e64" }
-			end,
-			on_click = click,
-		}
-	end
-
-	-- Indicator helper
-	local function indicator_comp(text_fn, color_fn)
-		local comp = {
-			function()
-				if vim.bo.filetype ~= "mojo" then
-					return ""
-				end
-				return text_fn()
-			end,
-			on_click = click,
-		}
-		if color_fn then
-			comp.color = function()
-				if not colored() then
-					return nil
-				end
-				return { fg = color_fn() }
-			end
-		end
-		return comp
-	end
-
-	-- LSP indicator
-	if opts.show_lsp ~= false then
-		table.insert(comps, sep_comp())
-		table.insert(comps, indicator_comp(
-			function() return status.status_icon(status.lsp_status()) .. " lsp" end,
-			function() return status.status_color(status.lsp_status()) end
-		))
-	end
-
-	-- DAP indicator
-	if opts.show_dbg ~= false then
-		table.insert(comps, sep_comp())
-		table.insert(comps, indicator_comp(
-			function() return status.status_icon(status.dbg_status()) .. " dbg" end,
-			function() return status.status_color(status.dbg_status()) end
-		))
-	end
-
-	-- Formatter indicator
-	if opts.show_fmt ~= false then
-		table.insert(comps, sep_comp())
-		table.insert(comps, indicator_comp(
-			function() return status.status_icon(status.fmt_status()) .. " fmt" end,
-			function() return status.status_color(status.fmt_status()) end
-		))
-	end
-
-	-- Diagnostics (separator + count baked into one component so both hide when empty)
-	if opts.show_diag ~= false then
-		table.insert(comps, {
-			function()
-				if vim.bo.filetype ~= "mojo" then
-					return ""
-				end
-				local t = status.diag_text()
-				if not t then
-					return ""
-				end
-				return "· " .. t
-			end,
-			color = function()
-				if not colored() then
-					return nil
-				end
-				return { fg = status.diag_color() or opts.color or "#ff9e64" }
-			end,
-			on_click = click,
-		})
-	end
-
-	return comps
-end
-
-function M.setup(opts)
-	opts = opts or {}
-
 	local function inject_sections(sections)
 		local target = sections.lualine_x or sections.lualine_y
 		if target then
-			for _, comp in ipairs(_components(opts)) do
-				table.insert(target, comp)
-			end
+			table.insert(target, component)
 		end
 	end
 
@@ -200,7 +143,6 @@ function M.setup(opts)
 	end
 
 	local orig_require = _G.require
-	---@diagnostic disable-next-line: duplicate-set-field
 	_G.require = function(modname)
 		if modname == "lualine" then
 			_G.require = orig_require
