@@ -41,6 +41,7 @@
 --- @field icon string|nil
 --- @field show_env_name boolean|nil
 --- @field show_sdk_version boolean|nil
+--- @field show_binaries boolean|nil
 --- @field colored boolean|nil
 --- @field color string|nil
 --- @field icon_color string|nil
@@ -90,9 +91,10 @@ M.defaults = {
 		icon = "󰈸",
 		show_env_name = true,
 		show_sdk_version = true,
+		show_binaries = true,
 		colored = true,
 		color = "#ff9e64",
-		icon_color = "#b15c00",
+		icon_color = "#ff6f00",
 	},
 	dap = {
 		enabled = false,

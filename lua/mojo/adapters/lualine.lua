@@ -2,11 +2,39 @@ local env = require("mojo.env")
 
 local M = {}
 
---- Build two lualine component tables: one for the icon, one for the text.
---- Each has its own color function.
+--- Build a lualine component for a single binary status indicator.
+--- @param name string
+--- @param check_fn fun(): boolean
+--- @param opts Mojo-lang.StatuslineConfig
+--- @return table
+local function _binary_component(name, check_fn, opts)
+	return {
+		function()
+			if vim.bo.filetype ~= "mojo" then
+				return ""
+			end
+			if opts.show_binaries == false then
+				return ""
+			end
+			local ok = check_fn()
+			return (ok and "󰄬" or "󰅖") .. " " .. name
+		end,
+		color = function()
+			if opts.colored == false then
+				return nil
+			end
+			local ok = check_fn()
+			return { fg = ok and "#a6da95" or "#ed8796" }
+		end,
+	}
+end
+
+--- Build lualine component tables for icon, env text, and binary status.
 --- @param opts Mojo-lang.StatuslineConfig
 --- @return table[]
 local function _components(opts)
+	local comps = {}
+
 	local icon_comp = {
 		function()
 			if vim.bo.filetype ~= "mojo" then
@@ -21,6 +49,7 @@ local function _components(opts)
 			return { fg = opts.icon_color or "#ff6f00" }
 		end,
 	}
+	table.insert(comps, icon_comp)
 
 	local text_comp = {
 		function()
@@ -50,11 +79,21 @@ local function _components(opts)
 			if opts.colored == false then
 				return nil
 			end
-			return { fg = opts.color or "#d97706" }
+			return { fg = opts.color or "#ff9e64" }
 		end,
 	}
+	table.insert(comps, text_comp)
 
-	return { icon_comp, text_comp }
+	if opts.show_binaries ~= false then
+		local lsp_comp = _binary_component("lsp",
+			function() return env.get_lsp_cmd() ~= nil end, opts)
+		local dbg_comp = _binary_component("dbg",
+			function() return env.get_dap_cmd() ~= nil end, opts)
+		table.insert(comps, lsp_comp)
+		table.insert(comps, dbg_comp)
+	end
+
+	return comps
 end
 
 --- Register the Mojo components into lualine's config.

@@ -4,7 +4,7 @@ local config = require("mojo.config")
 local M = {}
 
 --- Component for non-lualine statuslines.
---- Returns a string like "🔥 pixi 24.4.0" or empty if not a Mojo file.
+--- Returns a string like "󰈸 pixi 24.4.0" or empty if not a Mojo file.
 --- @return string
 function M.MojoVersion()
 	if vim.bo.filetype ~= "mojo" then
@@ -31,6 +31,29 @@ function M.MojoVersion()
 			table.insert(parts, version)
 		end
 	end
+
+	return table.concat(parts, " ")
+end
+
+--- Binary availability indicators for non-lualine statuslines.
+--- Returns something like "󰄬 lsp 󰅖 dbg" or empty if not a Mojo file.
+--- @return string
+function M.MojoBinaries()
+	if vim.bo.filetype ~= "mojo" then
+		return ""
+	end
+
+	local opts = config.options.statusline or {}
+	if opts.show_binaries == false then
+		return ""
+	end
+
+	local lsp_ok = env.get_lsp_cmd() ~= nil
+	local dbg_ok = env.get_dap_cmd() ~= nil
+
+	local parts = {}
+	table.insert(parts, (lsp_ok and "󰄬" or "󰅖") .. " lsp")
+	table.insert(parts, (dbg_ok and "󰄬" or "󰅖") .. " dbg")
 
 	return table.concat(parts, " ")
 end
