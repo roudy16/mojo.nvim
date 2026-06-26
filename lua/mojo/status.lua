@@ -74,11 +74,24 @@ function M.status_color(state)
 	return "#ed8796"
 end
 
+--- @return integer, integer
+local function diag_counts()
+	local items = vim.diagnostic.get(vim.fn.bufnr())
+	local errors = 0
+	local warnings = 0
+	for _, item in ipairs(items) do
+		if item.severity == 1 then
+			errors = errors + 1
+		elseif item.severity == 2 then
+			warnings = warnings + 1
+		end
+	end
+	return errors, warnings
+end
+
 --- @return string|nil
 function M.diag_text()
-	local counts = vim.diagnostic.get(vim.fn.bufnr())
-	local errors = counts[1] or 0
-	local warnings = counts[2] or 0
+	local errors, warnings = diag_counts()
 	if errors == 0 and warnings == 0 then
 		return nil
 	end
@@ -87,15 +100,14 @@ function M.diag_text()
 		table.insert(parts, "󰅙" .. errors)
 	end
 	if warnings > 0 then
-		table.insert(parts, "󰅪" .. warnings)
+		table.insert(parts, "⚠" .. warnings)
 	end
 	return table.concat(parts, " ")
 end
 
 --- @return string|nil
 function M.diag_color()
-	local counts = vim.diagnostic.get(vim.fn.bufnr())
-	local errors = counts[1] or 0
+	local errors = diag_counts()
 	if errors > 0 then
 		return "#ed8796"
 	end
@@ -110,7 +122,7 @@ function M.display()
 	end
 
 	local opts = config.options.statusline or {}
-	local parts = { opts.icon or "󰈸" }
+	local parts = { opts.icon or "🔥" }
 
 	local env_text = {}
 	if opts.show_env_name ~= false then

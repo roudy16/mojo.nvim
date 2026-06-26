@@ -4,6 +4,25 @@ Neovim integration for [Mojo](https://www.modular.com/mojo).
 
 Centralizes filetype detection, Treesitter, LSP, formatting, and environment activation—designed so each piece can be swapped when [Modular](https://www.modular.com) ships official tooling.
 
+## Index
+
+- [What it provides](#what-it-provides)
+- [Features](#features)
+  - [Filetype](#filetype)
+  - [Environment](#environment)
+  - [Treesitter](#treesitter)
+  - [LSP](#lsp)
+  - [Format](#format)
+  - [Terminal](#terminal)
+  - [Indentation](#indentation)
+- [Statusline](#statusline)
+- [Installation](#installation)
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Integrations](#integrations)
+- [Notes](#notes)
+  - [Tools that work without config](#tools-that-work-without-mojo-specific-config)
+
 ## What it provides
 
 - `.mojo` and `🔥` filetype detection
@@ -53,14 +72,12 @@ Sets 4-space indentation for Mojo files (matching Python-style conventions) via 
 
 The statusline provides comprehensive Mojo environment and tooling status with easy visibility and control.
 
-**Default display:** `󰈸 pixi 24.4.0 · 󰄬 lsp · 󰄬 fmt · ○ dbg · 󰅙3 󰅪2`
+**Default display:** `🔥 pixi 24.4.0 · lsp · fmt · dbg · e3 w2`
 
-**Icons:**
-- 󰄬 = running/active/available (green)
-- ○ = stopped/inactive (gray)  
-- 󰅖 = crashed/unavailable (red)
+**Icons (Nerd Font required for check/cross symbols):**
 
 **Features:**
+
 - Environment type and name display (Pixi/dev, venv, manual)
 - SDK version from `mojo --version`
 - LSP status tracking (running/stopped/crashed) with auto-restart capability
@@ -69,11 +86,13 @@ The statusline provides comprehensive Mojo environment and tooling status with e
 - Diagnostic counts (errors and warnings)
 
 **Clickability:** The entire statusline block is clickable and opens a menu with Mojo actions:
+
 - Restart LSP server
-- Stop LSP server  
+- Stop LSP server
 - Refresh SDK detection
 
 **Customization:** Each indicator can be individually controlled via the `statusline` configuration options:
+
 - `show_lsp`, `show_dbg`, `show_fmt`, `show_diag` (defaults: true)
 - `show_env_name`, `show_sdk_version` (defaults: true)
 - `clickable` (default: true)
@@ -192,7 +211,7 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
   sdk_path = nil, -- or "/path/to/mojo/sdk"
   statusline = {
     enabled = true,
-    icon = "󰈸",
+    icon = "🔥",
     show_env_name = true,
     show_sdk_version = true,
     show_lsp = true,

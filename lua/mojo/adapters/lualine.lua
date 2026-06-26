@@ -39,7 +39,7 @@ local function _display(opts)
 
 	local parts = {}
 
-	table.insert(parts, "%#MojoIcon#" .. (opts.icon or "󰈸") .. "%*")
+	table.insert(parts, "%#MojoIcon#" .. (opts.icon or "🔥") .. "%*")
 
 	local env_parts = {}
 	if opts.show_env_name then
@@ -89,8 +89,7 @@ local function _display(opts)
 	if opts.show_diag ~= false then
 		local dt = status.diag_text()
 		if dt then
-			local counts = vim.diagnostic.get(vim.fn.bufnr())
-			local hl = (counts[1] or 0) > 0 and "MojoErr" or "MojoWarn"
+			local hl = status.diag_color() == "#ed8796" and "MojoErr" or "MojoWarn"
 			table.insert(parts, "%#MojoSep#·%*")
 			table.insert(parts, "%#" .. hl .. "#" .. dt .. "%*")
 		end
