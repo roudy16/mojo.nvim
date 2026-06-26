@@ -3,20 +3,27 @@ local status = require("mojo.status")
 
 local M = {}
 
+--- @type Mojo-lang.StatuslineConfig|nil
+local setup_opts = nil
+
 --- Define highlight groups for inline coloring via %#...#%* syntax.
-local function _define_highlights(opts)
+local function _define_highlights()
+	if not setup_opts then
+		return
+	end
+	local opts = setup_opts
 	local c = opts.color or "#ff9e64"
 	local ic = opts.icon_color or "#ff6f00"
 	local green = "#a6da95"
-	local amber = c
+	local yellow = "#d4b44e"
 	local red = "#ed8796"
 
-	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic, default = true })
-	vim.api.nvim_set_hl(0, "MojoText", { fg = c, default = true })
-	vim.api.nvim_set_hl(0, "MojoSep", { fg = c, default = true })
-	vim.api.nvim_set_hl(0, "MojoOk", { fg = green, default = true })
-	vim.api.nvim_set_hl(0, "MojoWarn", { fg = amber, default = true })
-	vim.api.nvim_set_hl(0, "MojoErr", { fg = red, default = true })
+	vim.api.nvim_set_hl(0, "MojoIcon", { fg = ic })
+	vim.api.nvim_set_hl(0, "MojoText", { fg = c })
+	vim.api.nvim_set_hl(0, "MojoSep", { fg = c })
+	vim.api.nvim_set_hl(0, "MojoOk", { fg = green })
+	vim.api.nvim_set_hl(0, "MojoWarn", { fg = yellow })
+	vim.api.nvim_set_hl(0, "MojoErr", { fg = red })
 end
 
 --- Build the display string with inline highlight groups.
@@ -29,10 +36,8 @@ local function _display(opts)
 
 	local parts = {}
 
-	-- Icon
 	table.insert(parts, "%#MojoIcon#" .. (opts.icon or "󰈸") .. "%*")
 
-	-- Env text
 	local env_parts = {}
 	if opts.show_env_name then
 		local detected = env.detect()
@@ -54,7 +59,6 @@ local function _display(opts)
 		table.insert(parts, "%#MojoText#" .. table.concat(env_parts, " ") .. "%*")
 	end
 
-	-- Status indicators
 	local function add_indicator(state, label)
 		local icon = status.status_icon(state)
 		local hl = "MojoOk"
@@ -64,7 +68,7 @@ local function _display(opts)
 			hl = "MojoWarn"
 		end
 		table.insert(parts, "%#MojoSep#·%*")
-		table.insert(parts, "%#" .. hl .. "#" .. icon .. " " .. label .. "%*")
+		table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. " " .. label)
 	end
 
 	if opts.show_lsp ~= false then
@@ -99,8 +103,15 @@ end
 --- @return boolean
 function M.setup(opts)
 	opts = opts or {}
+	setup_opts = opts
 
-	_define_highlights(opts)
+	_define_highlights()
+
+	local augroup = vim.api.nvim_create_augroup("MojoLualine", { clear = true })
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = augroup,
+		callback = _define_highlights,
+	})
 
 	local component = {
 		function()
