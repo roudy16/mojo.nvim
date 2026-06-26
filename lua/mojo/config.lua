@@ -87,12 +87,12 @@ M.defaults = {
 	},
 	statusline = {
 		enabled = true,
-		icon = "🔥",
+		icon = "󰈸",
 		show_env_name = true,
 		show_sdk_version = true,
 		colored = true,
-		color = "#d97706",
-		icon_color = "#ff6f00",
+		color = "#ff9e64",
+		icon_color = "#b15c00",
 	},
 	dap = {
 		enabled = false,

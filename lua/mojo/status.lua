@@ -12,7 +12,7 @@ function M.MojoVersion()
 	end
 
 	local opts = config.options.statusline or {}
-	local parts = { opts.icon or "🔥" }
+	local parts = { opts.icon or "󰈸" }
 
 	if opts.show_env_name ~= false then
 		local detected = env.detect()
