@@ -5,12 +5,14 @@ local M = {}
 --- @class Mojo-lang.LualineOpts
 --- @field icon string|nil
 --- @field show_env_name boolean|nil
+--- @field show_sdk_version boolean|nil
 --- @field colored boolean|nil
 
 --- @type Mojo-lang.LualineOpts
 M.defaults = {
 	icon = "🔥",
 	show_env_name = true,
+	show_sdk_version = true,
 	colored = true,
 }
 
@@ -25,7 +27,7 @@ local function _display(opts)
 
 	opts = vim.tbl_deep_extend("force", M.defaults, opts or {})
 
-	local label = opts.icon or "Mojo"
+	local parts = { opts.icon or "Mojo" }
 
 	if opts.show_env_name then
 		local detected = env.detect()
@@ -34,11 +36,18 @@ local function _display(opts)
 			if detected.env_name and detected.env_name ~= "default" then
 				env_label = string.format("%s %s", detected.type, detected.env_name)
 			end
-			label = string.format("%s %s", label, env_label)
+			table.insert(parts, env_label)
 		end
 	end
 
-	return label
+	if opts.show_sdk_version then
+		local version = env.get_version()
+		if version then
+			table.insert(parts, version)
+		end
+	end
+
+	return table.concat(parts, " ")
 end
 
 --- Return a color function for lualine.

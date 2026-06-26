@@ -40,6 +40,7 @@
 --- @field enabled boolean|nil
 --- @field icon string|nil
 --- @field show_env_name boolean|nil
+--- @field show_sdk_version boolean|nil
 --- @field colored boolean|nil
 --- @field adapter (fun(opts: Mojo-lang.StatuslineConfig): boolean)|nil
 
@@ -86,6 +87,7 @@ M.defaults = {
 		enabled = true,
 		icon = "🔥",
 		show_env_name = true,
+		show_sdk_version = true,
 		colored = true,
 	},
 	dap = {
