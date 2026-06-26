@@ -72,11 +72,18 @@ to reflect the new recommended path.
 - `README.md` is for users: installation, setup, features. No internal rules.
 - `AGENTS.md` is for contributors and AI agents: sovereignty rules, conventions.
 - `docs/superpowers/specs/` — design documents and specs.
+- `docs/superpowers/plans/` — implementation plans.
 - Commit messages use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`).
 
-### Workflow
-1. **One branch per task** — each item in `docs/TODO.md` is done in a separate
-   branch from `main`. No mixing concerns.
-2. **No commits without request** — never commit unless I explicitly ask.
-3. **Merge then next** — once tested and committed, merge to `main`, then
-   start the next task on a fresh branch.
+## Skills
+
+Workflow automation lives in `.agents/skills/`. Load the relevant skill before
+starting a task:
+
+| Skill | When to load |
+|-------|-------------|
+| `mojo-task-workflow` | When executing any task from `docs/TODO.md` |
+| `mojo-todo-update` | When updating `docs/TODO.md` after an audit or completed task |
+| `mojo-community-post` | When drafting a community update post |
+
+Each skill contains the full workflow and conventions for that concern.
