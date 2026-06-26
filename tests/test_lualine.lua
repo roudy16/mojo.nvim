@@ -43,7 +43,7 @@ end
 
 -- Highlight groups are defined after setup
 print("--- highlight groups ---")
-local hl_groups = { "MojoIcon", "MojoText", "MojoSep", "MojoGood", "MojoWarn", "MojoErr" }
+local hl_groups = { "MojoIcon", "MojoText", "MojoSep", "MojoGood", "MojoNeutral", "MojoWarn", "MojoErr" }
 for _, name in ipairs(hl_groups) do
 	local id = vim.api.nvim_get_hl_id_by_name(name)
 	if id and id ~= 0 then
