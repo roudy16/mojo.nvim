@@ -2,9 +2,7 @@
 
 Neovim integration for [Mojo](https://www.modular.com/mojo).
 
-Centralizes filetype detection, Treesitter, LSP, formatting, and environment
-activation — designed so each piece can be swapped when
-[Modular](https://www.modular.com) ships official tooling.
+Centralizes filetype detection, Treesitter, LSP, formatting, and environment activation—designed so each piece can be swapped when [Modular](https://www.modular.com) ships official tooling.
 
 ## What it provides
 
@@ -25,46 +23,63 @@ activation — designed so each piece can be swapped when
 
 ### Filetype
 
-`.mojo` and `🔥` files are automatically recognized as `mojo` filetype.
+`.mojo` and `🔥` files are automatically recognized as `mojo` filetype. The plugin adds these to Neovim's filetype detection and triggers environment activation for each Mojo buffer.
 
 ### Environment
 
-Detects Pixi (`pixi.toml` / `.pixi/`) and virtualenv (`.venv/`) projects and
-activates them for LSP, formatting, and terminal buffers transparently.
-
-Override automatic detection with `sdk_path` config or `$MOJO_SDK_PATH`:
-
-```lua
-require("mojo").setup({
-  sdk_path = "/opt/modular/mojo",
-})
-```
+Detects Pixi (`pixi.toml` / `.pixi/`) and virtualenv (`.venv/`) projects and activates them for LSP, formatting, and terminal buffers transparently. Also supports manual SDK path override via `config.sdk_path` or the `$MOJO_SDK_PATH` environment variable.
 
 ### Treesitter
 
-Registers the self-hosted Mojo parser grammar with `nvim-treesitter`.
-The grammar files live in `tree-sitter/mojo/` — no external parser repo required.
-
-When a `.mojo` file is opened, the plugin checks if the grammar source (`grammar.js`)
-is newer than the compiled parser (`mojo.so`). If so, it automatically recompiles
-and reloads. Use `:MojoRebuildParser` to rebuild manually.
+Registers the self-hosted Mojo parser grammar with `nvim-treesitter`. The grammar files live in `tree-sitter/mojo/` — no external parser repo required. Automatically checks for grammar updates and recompiles when needed, with a `:MojoRebuildParser` command for manual rebuilds.
 
 ### LSP
 
-Configures `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary
-resolution (finds the binary in the active Pixi/venv environment).
+Configures `mojo-lsp-server` via `nvim-lspconfig` with environment-aware binary resolution (finds the binary in the active Pixi/venv environment). Supports custom root markers for project detection.
 
 ### Format
 
-Configures `mojo format` via `conform.nvim` with environment-aware binary resolution.
+Configures `mojo format` via `conform.nvim` with environment-aware binary resolution. Provides consistent formatting across the editor.
 
 ### Terminal
 
-Auto-activates the project environment in new shell terminal buffers.
+Auto-activates the project environment in new shell terminal buffers. Detects shell terminals and applies the correct activation command before they start.
 
 ### Indentation
 
-Sets 4-space indentation for Mojo files (matching Python-style conventions).
+Sets 4-space indentation for Mojo files (matching Python-style conventions) via `ftplugin/mojo.lua`.
+
+## Statusline
+
+The statusline provides comprehensive Mojo environment and tooling status with easy visibility and control.
+
+**Default display:** `󰈸 pixi 24.4.0 · 󰄬 lsp · 󰄬 fmt · ○ dbg · 󰅙3 󰅪2`
+
+**Icons:**
+- 󰄬 = running/active/available (green)
+- ○ = stopped/inactive (gray)  
+- 󰅖 = crashed/unavailable (red)
+
+**Features:**
+- Environment type and name display (Pixi/dev, venv, manual)
+- SDK version from `mojo --version`
+- LSP status tracking (running/stopped/crashed) with auto-restart capability
+- Debugger status (active/inactive/unavailable)
+- Formatter availability status
+- Diagnostic counts (errors and warnings)
+
+**Clickability:** The entire statusline block is clickable and opens a menu with Mojo actions:
+- Restart LSP server
+- Stop LSP server  
+- Refresh SDK detection
+
+**Customization:** Each indicator can be individually controlled via the `statusline` configuration options:
+- `show_lsp`, `show_dbg`, `show_fmt`, `show_diag` (defaults: true)
+- `show_env_name`, `show_sdk_version` (defaults: true)
+- `clickable` (default: true)
+- Colors and icon colors customizable via `color` and `icon_color` options
+
+For non-lualine statuslines, use `require("mojo.status").display()`.
 
 ## Installation
 
@@ -147,19 +162,6 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
 
 **Note:** `opts` (lazy.nvim) and `setup()` accept the same config table.
 
-## Integrations
-
-Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
-
-- **LSP (nvim-lspconfig)** — `mojo-lsp-server` with env-aware binary resolution.
-- **Formatting (conform.nvim)** — `mojo format` with env-aware binary resolution.
-- **Treesitter (nvim-treesitter)** — Self-hosted Mojo parser grammar, auto-rebuilds on change.
-- **Completion (nvim-cmp / blink.cmp)** — Auto-detects engine. Provides 56 keywords, 42 builtins, 34 types, 13 snippets. Use `completion.adapter` to force a specific engine.
-- **Debugging (nvim-dap)** — Opt-in (`dap.enabled = true`). Launches `mojo-lldb-dap` with four configs: debug current file, debug with args, debug binary, attach to process.
-- **Statusline (lualine.nvim)** — Shows `󰈸 env version · 󰄬 lsp · 󰄬 dbg · 󰄬 fmt · E3 W2` with runtime status for LSP (running/stopped/crashed), DAP (active/inactive), and formatter availability. Click the block for a menu of Mojo actions. Customize with individual toggles per indicator.
-- **LazyVim** — Use `require("mojo.adapters.lazyvim")` helpers in your plugin specs.
-- **AstroNvim / NvChad / kickstart.nvim** — Just add `{ "Sarctiann/mojo.nvim" }` to your plugins.
-
 ## Configuration
 
 <details>
@@ -202,6 +204,9 @@ Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
     color = "#ff9e64",
     icon_color = "#ff6f00",
   },
+  dap = {
+    enabled = false,
+  },
   debug = false,
   hooks = {},
 }
@@ -209,23 +214,31 @@ Enabled by default unless noted. Disable any feature with `{ enabled = false }`.
 
 </details>
 
+## Integrations
+
+- LSP (nvim-lspconfig)
+- Formatting (conform.nvim)
+- Treesitter (nvim-treesitter)
+- Completion (nvim-cmp / blink.cmp)
+- Debugging (nvim-dap)
+- Statusline (lualine.nvim)
+- LazyVim
+- AstroNvim / NvChad / kickstart.nvim
+
 ## Notes
 
-- The plugin does not ship the Mojo LSP binary or official toolchain.
-- The plugin does not ship nvim-dap; debugging is opt-in via `dap.enabled = true`.
-- When `debug = true`, logs are written to `mojo-debug.log` in the current working directory.
-- The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers.
-- Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds.
-- Mojo files use 4-space indentation (configured via `ftplugin/mojo.lua`).
+- The plugin does not ship the Mojo LSP binary or official toolchain
+- Debugging is opt-in
+- When `debug = true`, logs are written to `mojo-debug.log` in the current working directory
+- The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers
+- Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds
+- Mojo files use 4-space indentation (configured via `ftplugin/mojo.lua`)
 
 ### Tools that work without Mojo-specific config
 
-These tools work with Mojo files through standard Neovim protocols — no adapter or
-Mojo-specific configuration is required:
-
-- **telescope.nvim** — picks up `.mojo`/`.🔥` files in standard pickers
-- **trouble.nvim** — displays diagnostics from `mojo-lsp-server` automatically
-- **nvim-cmp / blink.cmp** — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source
-- **which-key.nvim** — discovers any Mojo-related keymaps you define
+- telescope.nvim — picks up `.mojo`/`.🔥` files in standard pickers
+- trouble.nvim — displays diagnostics from `mojo-lsp-server` automatically
+- nvim-cmp / blink.cmp — receives LSP completions from `mojo-lsp-server` via the `nvim_lsp` source
+- which-key.nvim — discovers any Mojo-related keymaps you define
 
 Adapter-based integration for other tools is tracked in `docs/TODO.md`.
