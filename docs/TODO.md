@@ -243,7 +243,7 @@
 
 ## P2 — Quality & Completeness
 
-### 27. Support popular Neovim tools with README documentation
+### 27. Support popular Neovim tools with README documentation — [done]
 
 **Scope:** Ongoing — new tools are added here as they're identified.
 
@@ -256,7 +256,7 @@
 | which-key.nvim | No             | No            | Works automatically                                                     |
 | trouble.nvim   | No             | No            | Works automatically                                                     |
 | lualine.nvim   | No             | Yes           | SDK version display + env name in statusline                            |
-| nvim-dap       | ❌ Missing     | ❌ Missing    | `mojo-lldb-dap` existe — adapter nvim-dap pendiente                     |
+| nvim-dap       | Done           | Done          | `adapters/dap.lua` — launches `mojo-lldb-dap` with 4 configs            |
 | neotest        | ⏳ Blocked     | ⏳ Blocked    | `mojo test` not stable yet                                              |
 | nvim-lint      | ⏳ Blocked     | ⏳ Blocked    | No Mojo linter binary exists                                            |
 | AstroNvim      | No             | Yes           | Docs section showing config format                                      |
@@ -264,4 +264,4 @@
 | kickstart.nvim | No             | Yes           | Docs section showing minimal config                                     |
 | ftplugin/mojo  | Yes            | Done          | 4-space indentation                                                     |
 
-**Remaining work:** lualine icon docs, AstroNvim/NvChad/kickstart config sections.
+**Remaining work:** lualine icon docs.

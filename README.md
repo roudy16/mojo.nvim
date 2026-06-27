@@ -216,7 +216,7 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
 - Debugging (nvim-dap)
 - Statusline (lualine.nvim)
 - LazyVim
-- AstroNvim / NvChad / kickstart.nvim
+- AstroNvim, NvChad, kickstart.nvim — just add `{ "Sarctiann/mojo.nvim" }` to your plugins
 
 ## Notes
 
