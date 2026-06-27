@@ -67,9 +67,9 @@ function M.setup(user_config)
 		end
 	end
 
-	if opts.statusline and opts.statusline.enabled ~= false then
-		local sl_opts = opts.statusline
-		if sl_opts and sl_opts.adapter then
+	local sl_opts = opts.statusline
+	if sl_opts and sl_opts.enabled ~= false then
+		if sl_opts.adapter then
 			sl_opts.adapter(sl_opts)
 		else
 			require("mojo.adapters.lualine").setup(sl_opts)
@@ -94,10 +94,8 @@ function M.setup(user_config)
 		group = mojo_augroup,
 		pattern = "mojo",
 		callback = function()
-			vim.keymap.set("n", "<C-S-space>", vim.lsp.buf.signature_help,
-				{ buffer = true, desc = "Signature help" })
-			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
-				{ buffer = true, desc = "Code action" })
+			vim.keymap.set("n", "<C-S-space>", vim.lsp.buf.signature_help, { buffer = true, desc = "Signature help" })
+			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { buffer = true, desc = "Code action" })
 		end,
 	})
 
@@ -124,6 +122,21 @@ function M.setup(user_config)
 		require("mojo.status").actions["Stop LSP"]()
 	end, { desc = "Stop Mojo LSP server" })
 
+	local function setup_run_terminal()
+		local buf = vim.api.nvim_get_current_buf()
+		local win = vim.api.nvim_get_current_win()
+		vim.bo[buf].buflisted = false
+		vim.api.nvim_set_hl(0, "MojoRunWinBar", { bg = "#f0903a", fg = "#ffffff" })
+		vim.wo[win].winbar = "%#MojoRunWinBar#  Press [q] [Esc] or [Enter] to close this pane  "
+		vim.wo[win].winhl = "Normal:NormalFloat"
+		vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { noremap = true, silent = true })
+		vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", ":close<CR>", { noremap = true, silent = true })
+		vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", ":close<CR>", { noremap = true, silent = true })
+		vim.api.nvim_buf_set_keymap(buf, "t", "q", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
+		vim.api.nvim_buf_set_keymap(buf, "t", "<Esc>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
+		vim.api.nvim_buf_set_keymap(buf, "t", "<CR>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
+	end
+
 	vim.api.nvim_create_user_command("MojoRun", function()
 		local file = vim.fn.expand("%:p")
 		if vim.bo.filetype ~= "mojo" then
@@ -135,7 +148,8 @@ function M.setup(user_config)
 			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
 			return
 		end
-		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+		vim.cmd("belowright terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+		setup_run_terminal()
 	end, { desc = "Run current Mojo file in terminal split" })
 
 	vim.api.nvim_create_user_command("MojoRunDedicated", function()
@@ -144,13 +158,27 @@ function M.setup(user_config)
 			vim.notify("mojo.nvim: not a Mojo file", vim.log.levels.ERROR)
 			return
 		end
-		local mojo = require("mojo.env").get_mojo_cmd()
-		if not mojo then
+		local mojo_cmd = require("mojo.env").get_mojo_cmd()
+		if not mojo_cmd then
 			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
 			return
 		end
-		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
-	end, { desc = "Run current Mojo file in terminal split" })
+		local bufname = "mojo-run://" .. file
+		local buf = vim.fn.bufnr(bufname)
+		if buf > 0 then
+			local win = vim.fn.bufwinid(buf)
+			if win > 0 then
+				vim.api.nvim_set_current_win(win)
+			else
+				vim.cmd("belowright sbuffer " .. buf)
+				setup_run_terminal()
+			end
+			return
+		end
+		vim.cmd("belowright terminal " .. mojo_cmd .. " run " .. vim.fn.shellescape(file))
+		vim.api.nvim_buf_set_name(vim.api.nvim_get_current_buf(), bufname)
+		setup_run_terminal()
+	end, { desc = "Run current Mojo file in dedicated terminal buffer" })
 
 	return opts
 end
