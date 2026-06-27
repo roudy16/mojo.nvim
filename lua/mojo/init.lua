@@ -135,7 +135,7 @@ function M.setup(user_config)
 			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
 			return
 		end
-		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+		vim.cmd("belowright terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
 	end, { desc = "Run current Mojo file in terminal split" })
 
 	vim.api.nvim_create_user_command("MojoRunDedicated", function()
@@ -149,7 +149,7 @@ function M.setup(user_config)
 			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
 			return
 		end
-		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+		vim.cmd("belowright terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
 	end, { desc = "Run current Mojo file in terminal split" })
 
 	return opts
