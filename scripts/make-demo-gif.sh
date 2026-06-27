@@ -58,7 +58,7 @@ VIDEO_DUR=${VIDEO_DUR%.*}
 echo "Video duration: ${VIDEO_DUR}s"
 
 TEXT_COLOR="white"
-TEXT_BG="rgba(0,0,0,0.55)"
+TEXT_BG="rgba(0,0,0,0.75)"
 FONT="/System/Library/Fonts/Helvetica.ttc"
 
 ALL_FRAMES=()

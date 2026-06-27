@@ -4,6 +4,8 @@ Neovim integration for [Mojo](https://www.modular.com/mojo).
 
 Centralizes filetype detection, Treesitter, LSP, formatting, and environment activation—designed so each piece can be swapped when [Modular](https://www.modular.com) ships official tooling.
 
+![mojo.nvim demo](docs/demo.gif)
+
 ## Index
 
 - [What it provides](#what-it-provides)
