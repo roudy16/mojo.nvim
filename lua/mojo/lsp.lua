@@ -26,11 +26,16 @@ function M.opts(user_opts)
 			if cmd then
 				new_config.cmd = cmd
 			end
+			local mojo_settings = {}
 			if user_opts.include_dirs then
+				mojo_settings.includeDirs = user_opts.include_dirs
+			end
+			if user_opts.filter_docstring_diagnostics ~= nil then
+				mojo_settings.filterDocstringDiagnostics = user_opts.filter_docstring_diagnostics
+			end
+			if next(mojo_settings) then
 				new_config.settings = vim.tbl_deep_extend("force",
-					new_config.settings or {}, {
-						mojo = { includeDirs = user_opts.include_dirs },
-					})
+					new_config.settings or {}, { mojo = mojo_settings })
 			end
 		end,
 		on_exit = function(code, signal, _)

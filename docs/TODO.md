@@ -197,15 +197,15 @@
 
 - `<leader>ca` mapped to `vim.lsp.buf.code_action` for mojo filetype (n + v modes)
 
-### 23. Doc string diagnostics filter
+### 23. Doc string diagnostics filter — [done]
 
 **Sovereignty:** Rule 2 (Official Replacement Path) — LSP config must expose all server options.
 **Why:** 26.1.0 added option to filter diagnostics in docstrings.
 
-**Scope:**
+**Implementation:**
 
-- Add `lsp.filter_docstring_diagnostics` config option
-- Implement filter in LSP handler
+- `config.lua`: `lsp.filter_docstring_diagnostics` field
+- `lsp.lua`: passed via `settings.mojo.filterDocstringDiagnostics` on new_config
 
 ### 24. `mojo.lsp.includeDirs` setting — [done]
 

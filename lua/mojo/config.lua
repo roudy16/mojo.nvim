@@ -22,6 +22,7 @@
 --- @field enabled boolean|nil
 --- @field root_markers string[]|nil
 --- @field include_dirs string[]|nil
+--- @field filter_docstring_diagnostics boolean|nil
 --- @field adapter (fun(opts: Mojo-lang.LspConfig): boolean)|nil
 
 --- @class Mojo-lang.FormatConfig
