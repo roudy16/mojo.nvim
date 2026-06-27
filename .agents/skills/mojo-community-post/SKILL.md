@@ -47,4 +47,4 @@ https://github.com/Sarctiann/mojo.nvim
 
 ## Reference
 
-See `docs/posts/TEMPLATE.md` for the annotated template with examples.
+See `TEMPLATE.md` in this directory for the annotated template with examples.
