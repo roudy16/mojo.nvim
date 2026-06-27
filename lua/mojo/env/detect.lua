@@ -71,7 +71,7 @@ function M.detect(path)
 	end
 
 	-- Auto-detection (original logic)
-	local root = util.root_for(path)
+	local root = util.root_for(path, { "pixi.toml", "pyproject.toml", ".pixi", ".venv", ".derived" })
 	if not root then
 		log.log("detect_miss", function()
 			return { path = path or vim.fn.getcwd() }
@@ -86,9 +86,21 @@ function M.detect(path)
 		return cache[root] or nil
 	end
 
-	local pixi_toml = vim.fs.joinpath(root, "pixi.toml")
-	local pixi_dir = vim.fs.joinpath(root, ".pixi")
-	if util.has_file(pixi_toml) or util.has_dir(pixi_dir) then
+	local derived_bin = vim.fs.joinpath(root, ".derived", "bin")
+	if util.has_dir(derived_bin) then
+		cache[root] = {
+			type = "derived",
+			root = root,
+			bin_dir = derived_bin,
+			env_dir = vim.fs.joinpath(root, ".derived"),
+		}
+		log.log("detect_derived", function()
+			return { root = root, bin_dir = derived_bin }
+		end)
+		return cache[root]
+	end
+
+	if util.has_file(vim.fs.joinpath(root, "pixi.toml")) or util.has_dir(vim.fs.joinpath(root, ".pixi")) then
 		local env_name, pixi_env = util.first_pixi_env(root)
 		cache[root] = {
 			type = "pixi",

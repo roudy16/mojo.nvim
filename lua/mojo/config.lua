@@ -1,5 +1,5 @@
 --- @class Mojo-lang.DetectedEnv
---- @field type "pixi"|"venv"|"manual"
+--- @field type "pixi"|"venv"|"manual"|"derived"
 --- @field root string
 --- @field env_name string|nil
 --- @field env_dir string|nil
