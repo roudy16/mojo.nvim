@@ -20,8 +20,8 @@
 set -euo pipefail
 
 DIR="${1:-}"
-FPS="${2:-12}"
-MAX_WIDTH="${3:-640}"
+FPS="${2:-4}"
+MAX_WIDTH="${3:-800}"
 
 if [ -z "$DIR" ]; then
 	echo "Usage: $0 <directory> [fps] [width]"
@@ -53,6 +53,10 @@ command -v magick &>/dev/null || {
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
+VIDEO_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$INPUT" 2>/dev/null)
+VIDEO_DUR=${VIDEO_DUR%.*}
+echo "Video duration: ${VIDEO_DUR}s"
+
 TEXT_COLOR="white"
 TEXT_BG="rgba(0,0,0,0.55)"
 FONT="/System/Library/Fonts/Helvetica.ttc"
@@ -72,8 +76,21 @@ while IFS='|' read -r START END LABEL; do
 
 	echo "  $START-$END → $LABEL"
 
-	ffmpeg -nostdin -y -i "$INPUT" -ss "$START" -to "$END" \
+	S_SEC=$(echo "$START" | awk -F: '{ print ($1*60)+$2 }')
+	E_SEC=$(echo "$END" | awk -F: '{ print ($1*60)+$2 }')
+	NUM_FRAMES=$(((E_SEC - S_SEC) * FPS))
+	if [ "$S_SEC" -ge "$VIDEO_DUR" ]; then
+		echo "    (past end of video, skipping)"
+		continue
+	fi
+	if [ "$NUM_FRAMES" -le 0 ]; then
+		echo "    (invalid times, skipping)"
+		continue
+	fi
+
+	ffmpeg -nostdin -y -i "$INPUT" -ss "$START" \
 		-vf "fps=$FPS,scale=$MAX_WIDTH:-1:flags=lanczos" \
+		-frames:v "$NUM_FRAMES" \
 		"$CLIP_DIR/f_%04d.png" 2>/dev/null
 
 	FRAMES=$(ls "$CLIP_DIR"/f_*.png 2>/dev/null | sort)
@@ -121,11 +138,11 @@ CMD=(magick)
 for f in "${ALL_FRAMES[@]}"; do
 	CMD+=(-delay "$DELAY" "$f")
 done
-CMD+=(-colors 128 -loop 0 -layers Optimize "$OUTPUT")
+CMD+=(-loop 0 "$OUTPUT")
 "${CMD[@]}"
 
 if command -v gifsicle &>/dev/null; then
-	gifsicle -O3 --colors 128 "$OUTPUT" -o "$OUTPUT"
+	gifsicle -O1 --colors 192 "$OUTPUT" -o "$OUTPUT"
 fi
 
 echo "Done! GIF saved to: $OUTPUT"
