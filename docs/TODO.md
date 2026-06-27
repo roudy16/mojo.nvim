@@ -167,16 +167,17 @@
 - lualine adapter shows runtime state with colored icons
 - Clickable menu with restart/stop options
 
-### 20. LSP crash detection & recovery
+### 20. LSP crash detection & recovery — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — plugin must handle LSP lifecycle, not just delegate.
 **Why:** 26.6.0 distinguishes capped-out (repeated crashes) from normal stopped.
 
-**Scope:**
+**Implementation:**
 
-- Track restart count per session
-- Surface capped-out state distinctly
-- Provide restart with backoff
+- Restart counter per session with cap at 3
+- Capped-out state `"capped"` in lsp_status
+- Exponential restart backoff: 5s → 30s → 60s
+- Backoff resets when LSP stays running >30s
 
 ### 21. Signature help keybinding & docs
 
