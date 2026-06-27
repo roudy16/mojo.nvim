@@ -228,16 +228,15 @@
 - `:MojoStopLSP` — stop only
 - Available via clickable menu and `:MojoMenu`
 
-### 26. Run Mojo file commands
+### 26. Run Mojo file commands — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — run/debug belongs in the plugin, not external.
 **Why:** VS Code provides run + dedicated terminal run.
 
-**Scope:**
+**Implementation:**
 
-- `:MojoRun` — run current file in shared terminal
-- `:MojoRunDedicated` — run in per-file terminal
-- Port of `mojo-terminal` code or reuse terminal.lua
+- `:MojoRun` — opens terminal split running `mojo run <file>`
+- `:MojoRunDedicated` — same, dedicated buffer per file
 
 ---
 

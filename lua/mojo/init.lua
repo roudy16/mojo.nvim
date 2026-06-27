@@ -124,6 +124,34 @@ function M.setup(user_config)
 		require("mojo.status").actions["Stop LSP"]()
 	end, { desc = "Stop Mojo LSP server" })
 
+	vim.api.nvim_create_user_command("MojoRun", function()
+		local file = vim.fn.expand("%:p")
+		if vim.bo.filetype ~= "mojo" then
+			vim.notify("mojo.nvim: not a Mojo file", vim.log.levels.ERROR)
+			return
+		end
+		local mojo = require("mojo.env").get_mojo_cmd()
+		if not mojo then
+			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
+			return
+		end
+		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+	end, { desc = "Run current Mojo file in terminal split" })
+
+	vim.api.nvim_create_user_command("MojoRunDedicated", function()
+		local file = vim.fn.expand("%:p")
+		if vim.bo.filetype ~= "mojo" then
+			vim.notify("mojo.nvim: not a Mojo file", vim.log.levels.ERROR)
+			return
+		end
+		local mojo = require("mojo.env").get_mojo_cmd()
+		if not mojo then
+			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
+			return
+		end
+		vim.cmd.belowright("terminal " .. mojo .. " run " .. vim.fn.shellescape(file))
+	end, { desc = "Run current Mojo file in terminal split" })
+
 	return opts
 end
 
