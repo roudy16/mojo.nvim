@@ -7,31 +7,47 @@ local M = {}
 --- @type boolean
 local lsp_has_crashed = false
 
+--- @type integer
+local lsp_restart_count = 0
+
+--- @type integer
+local LSP_RESTART_CAP = 3
+
 function M._track_lsp_exit(code, signal)
 	if code ~= 0 or (signal and signal ~= 0) then
 		lsp_has_crashed = true
+		lsp_restart_count = lsp_restart_count + 1
 		log.log("lsp_crashed", function()
-			return { code = code, signal = signal }
+			return { code = code, signal = signal, restart_count = lsp_restart_count }
 		end)
 	end
 end
 
 function M._reset_lsp_crash()
 	lsp_has_crashed = false
+	lsp_restart_count = 0
 end
 
---- @return "running"|"stopped"|"crashed"|"unavailable"
+--- @return "running"|"stopped"|"crashed"|"capped"|"unavailable"
 function M.lsp_status()
 	local clients = vim.lsp.get_clients({ bufnr = vim.fn.bufnr() })
 	for _, client in ipairs(clients) do
 		if client.name == "mojo" then
+			vim.g["mojo_lsp_status"] = "running"
 			return "running"
 		end
 	end
+	if lsp_has_crashed and lsp_restart_count >= LSP_RESTART_CAP then
+		vim.g["mojo_lsp_status"] = "capped"
+		return "capped"
+	end
 	if lsp_has_crashed then
+		vim.g["mojo_lsp_status"] = "crashed"
 		return "crashed"
 	end
-	return env.get_lsp_cmd() and "stopped" or "unavailable"
+	local result = env.get_lsp_cmd() and "stopped" or "unavailable"
+	vim.g["mojo_lsp_status"] = result
+	return result
 end
 
 --- @return "active"|"inactive"|"unavailable"

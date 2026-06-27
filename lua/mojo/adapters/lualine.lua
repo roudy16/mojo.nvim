@@ -67,7 +67,7 @@ local function _display(opts)
 		local hl = "MojoNeutral"
 		if state == "running" or state == "active" or state == "available" then
 			hl = "MojoGood"
-		elseif state == "crashed" or state == "unavailable" then
+		elseif state == "crashed" or state == "capped" or state == "unavailable" then
 			hl = "MojoErr"
 		end
 		table.insert(parts, "%#MojoSep#·%*")
