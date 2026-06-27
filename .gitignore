@@ -9,3 +9,4 @@ parser.so
 parser.dylib
 *.log
 posts/
+plans/

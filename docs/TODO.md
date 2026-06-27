@@ -109,23 +109,21 @@
 - Surfaces error via `vim.notify` on invalid path
 - Cached separately from auto-detected envs
 
-### 16. SDK refresh command
+### 16. SDK refresh command — [done]
 
 **Sovereignty:** Rule 6 (Environmental Autonomy) — recovery mechanism when env changes.
 **Why:** `Mojo: Refresh SDK Detection` clears cache and re-detects.
 
-**Scope:**
+**Implementation:**
 
-- Add `:MojoRefreshSDK` user command
-- Clear detect.lua cache
-- Re-trigger LSP restart if running
+- `:MojoRefreshSDK` user command clears detect cache and resets LSP crash state
 
-### 17. `.derived/` monorepo SDK detection
+### 17. `.derived/` monorepo SDK detection — [done]
 
 **Sovereignty:** Rule 6 (Environmental Autonomy) — missing SDK source = incomplete detection.
 **Why:** VS Code scans `.derived/` as an SDK source.
 
-**Scope:** Add `.derived/` dir check before pixi/venv in `detect.lua`.
+**Implementation:** Added `"derived"` type to `detect.lua` — checks `.derived/bin/` before pixi/venv.
 
 ### 18. nvim-dap integration (mojo-lldb-dap adapter) — [done]
 
@@ -157,17 +155,17 @@
 
 ## P1 — Feature Parity
 
-### 19. LSP status bar indicator
+### 19. LSP status bar indicator — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — central LSP management needs health visibility.
 **Why:** VS Code shows LSP server state (running/stopped/crashed) with click-to-restart.
 
-**Scope:**
+**Implementation:**
 
-- New module `lua/mojo/status.lua` for custom status components
-- Track LSP client state via `vim.lsp` handlers
-- Expose as viml `g:mojo_lsp_status` or function
-- Create adapter for lualine (and maybe for upstream statuscol.nvim etc.)
+- `status.lua` tracks LSP state via `vim.lsp.get_clients` and crash flag
+- `g:mojo_lsp_status` viml variable set on each status check
+- lualine adapter shows runtime state with colored icons
+- Clickable menu with restart/stop options
 
 ### 20. LSP crash detection & recovery
 
@@ -217,16 +215,16 @@
 - Add `lsp.include_dirs` to config
 - Pass via `settings` in LSP config
 
-### 25. Restart & stop LSP commands
+### 25. Restart & stop LSP commands — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — central LSP lifecycle management.
 **Why:** `Mojo: Restart the extension` is a documented VS Code troubleshooting tool.
 
-**Scope:**
+**Implementation:**
 
-- `:MojoRestartLSP` — stop + start LSP
-- `:MojoStopLSP` — stop only (26.2.0 feature)
-- Bind to `<leader>mr` or similar
+- `:MojoRestartLSP` — stop + start LSP (delegates to status.actions)
+- `:MojoStopLSP` — stop only
+- Available via clickable menu and `:MojoMenu`
 
 ### 26. Run Mojo file commands
 
