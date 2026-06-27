@@ -72,35 +72,7 @@ Sets 4-space indentation for Mojo files (matching Python-style conventions) via 
 
 ## Statusline
 
-The statusline provides comprehensive Mojo environment and tooling status with easy visibility and control.
-
-**Default display:** `🔥 pixi 24.4.0 · lsp · fmt · dbg · e3 w2`
-
-**Icons (Nerd Font required for check/cross symbols):**
-
-**Features:**
-
-- Environment type and name display (Pixi/dev, venv, manual)
-- SDK version from `mojo --version`
-- LSP status tracking (running/stopped/crashed) with auto-restart capability
-- Debugger status (active/inactive/unavailable)
-- Formatter availability status
-- Diagnostic counts (errors and warnings)
-
-**Clickability:** The entire statusline block is clickable and opens a menu with Mojo actions:
-
-- Restart LSP server
-- Stop LSP server
-- Refresh SDK detection
-
-**Customization:** Each indicator can be individually controlled via the `statusline` configuration options:
-
-- `show_lsp`, `show_dbg`, `show_fmt`, `show_diag` (defaults: true)
-- `show_env_name`, `show_sdk_version` (defaults: true)
-- `clickable` (default: true)
-- Colors and icon colors customizable via `color` and `icon_color` options
-
-For non-lualine statuslines, use `require("mojo.status").display()`.
+Shows environment, SDK version, and tool status with clickable menu (restart LSP, stop LSP, refresh SDK). Configure per-indicator with `statusline` options or use `require("mojo.status").display()` for non-lualine statuslines.
 
 ## Installation
 
