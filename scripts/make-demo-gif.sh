@@ -64,7 +64,6 @@ echo "Processing clips..."
 while IFS='|' read -r START END LABEL; do
 	START=$(echo "$START" | xargs)
 	END=$(echo "$END" | xargs)
-	LABEL=$(echo "$LABEL" | xargs)
 	[ -z "$START" ] && continue
 
 	SAFE=$(echo "$LABEL" | tr ' ' '_' | tr -cd '[:alnum:]_')
