@@ -89,6 +89,10 @@ function M.setup(user_config)
 		end
 	end
 
+	vim.api.nvim_create_user_command("MojoMenu", function()
+		require("mojo.status").show_menu()
+	end, { desc = "Open Mojo actions menu" })
+
 	return opts
 end
 

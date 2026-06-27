@@ -1,29 +1,30 @@
 #!/usr/bin/env bash
 # make-demo-gif.sh
 #
-# Creates a demo GIF from a screen recording with overlay descriptions.
+# Creates a demo GIF from a screen recording. Each entry in specs.txt
+# becomes a short animated clip with an overlay description.
 #
 # Usage:
-#   ./scripts/make-demo-gif.sh <directory>
+#   ./scripts/make-demo-gif.sh <directory> [fps] [width]
 #
-# The directory must contain:
-#   video.mov    — screen recording
-#   specs.txt    — one frame per line:  start|end|Description
+#   <directory>  must contain video.mov and specs.txt
+#   fps          frames per second (default: 12)
+#   width        max width in pixels (default: 640)
 #
 # Example specs.txt:
-#   00:05|00:08|Code completion
-#   00:12|00:15|Hover documentation
-#   00:20|00:25|Go to definition
+#   00:05|00:09|Code completion
+#   00:12|00:16|Hover documentation
 #
 # Requires: ffmpeg, magick (ImageMagick 7+)
 
 set -euo pipefail
 
 DIR="${1:-}"
+FPS="${2:-12}"
+MAX_WIDTH="${3:-640}"
+
 if [ -z "$DIR" ]; then
-	echo "Usage: $0 <directory>"
-	echo ""
-	echo "  The directory must contain video.mov and specs.txt"
+	echo "Usage: $0 <directory> [fps] [width]"
 	exit 1
 fi
 
@@ -31,86 +32,101 @@ INPUT="$DIR/video.mov"
 SPECS="$DIR/specs.txt"
 OUTPUT="$DIR/demo.gif"
 
-if [ ! -f "$INPUT" ]; then
+[ -f "$INPUT" ] || {
 	echo "Error: $INPUT not found"
 	exit 1
-fi
-if [ ! -f "$SPECS" ]; then
+}
+[ -f "$SPECS" ] || {
 	echo "Error: $SPECS not found"
 	exit 1
-fi
+}
 
-if ! command -v ffmpeg &> /dev/null; then
-	echo "Error: ffmpeg not found. Install with: brew install ffmpeg"
+command -v ffmpeg &>/dev/null || {
+	echo "Error: install ffmpeg"
 	exit 1
-fi
-if ! command -v magick &> /dev/null; then
-	echo "Error: ImageMagick not found. Install with: brew install imagemagick"
+}
+command -v magick &>/dev/null || {
+	echo "Error: install ImageMagick"
 	exit 1
-fi
+}
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 TEXT_COLOR="white"
-TEXT_BG="rgba(0,0,0,0.6)"
+TEXT_BG="rgba(0,0,0,0.55)"
 FONT="/System/Library/Fonts/Helvetica.ttc"
 
-FRAME_FILES=()
-DELAYS=()
+ALL_FRAMES=()
 
-echo "Processing specs..."
+echo "Processing clips..."
+
 while IFS='|' read -r START END LABEL; do
-	# Trim whitespace
 	START=$(echo "$START" | xargs)
 	END=$(echo "$END" | xargs)
 	LABEL=$(echo "$LABEL" | xargs)
-
 	[ -z "$START" ] && continue
 
-	echo "  $START → $LABEL"
-
 	SAFE=$(echo "$LABEL" | tr ' ' '_' | tr -cd '[:alnum:]_')
-	RAW="${TMPDIR}/${SAFE}.png"
-	LABELED="${TMPDIR}/${SAFE}_labeled.png"
+	CLIP_DIR="$TMPDIR/${SAFE}"
+	mkdir -p "$CLIP_DIR"
 
-	# Extract frame at start timestamp
-	ffmpeg -y -ss "$START" -i "$INPUT" -vframes 1 -q:v 1 "$RAW" 2>/dev/null
+	echo "  $START-$END → $LABEL"
 
-	# Calculate delay: (end - start) in seconds * 100
-	# ffmpeg timestamp to seconds helper
-	S_SEC=$(echo "$START" | awk -F: '{ print ($1*60)+$2 }')
-	E_SEC=$(echo "$END" | awk -F: '{ print ($1*60)+$2 }')
-	DUR=$(( (E_SEC - S_SEC) * 100 ))
-	DELAYS+=("$DUR")
+	ffmpeg -nostdin -y -i "$INPUT" -ss "$START" -to "$END" \
+		-vf "fps=$FPS,scale=$MAX_WIDTH:-1:flags=lanczos" \
+		"$CLIP_DIR/f_%04d.png" 2>/dev/null
 
-	# Add label overlay
-	W=$(magick identify -format "%w" "$RAW")
-	H=$(magick identify -format "%h" "$RAW")
-	PAD=$((H / 20))
+	FRAMES=$(ls "$CLIP_DIR"/f_*.png 2>/dev/null | sort)
+	COUNT=$(echo "$FRAMES" | wc -l | tr -d ' ')
+	[ "$COUNT" -eq 0 ] && {
+		echo "    (no frames)"
+		continue
+	}
 
-	magick "$RAW" \
-		-fill "$TEXT_BG" \
-		-draw "rectangle 0,$((H - PAD * 2)) $W,$H" \
-		-fill "$TEXT_COLOR" \
-		-font "$FONT" \
-		-pointsize $((H / 28)) \
-		-gravity southwest \
-		-annotate "+${PAD}+${PAD}" "$LABEL" \
-		"$LABELED"
+	FIRST=$(echo "$FRAMES" | head -1)
+	H=$(magick identify -format "%h" "$FIRST")
 
-	FRAME_FILES+=("$LABELED")
-done < "$SPECS"
+	BAR_H=$((H / 10))
+	BAR_Y=$(((H * 3 / 4) - (BAR_H / 2)))
+	PT=$((H / 30))
+	TEXT_Y=$(((H / 4) - (PT / 4)))
 
-if [ ${#FRAME_FILES[@]} -eq 0 ]; then
-	echo "Error: no frames found in specs.txt"
+	for f in $FRAMES; do
+		labeled="${f%.png}_l.png"
+		magick "$f" \
+			-fill "$TEXT_BG" \
+			-draw "rectangle 0,${BAR_Y} ${MAX_WIDTH},$((BAR_Y + BAR_H))" \
+			-fill "$TEXT_COLOR" \
+			-font "$FONT" \
+			-pointsize "$PT" \
+			-gravity center \
+			-annotate "+0+${TEXT_Y}" "$LABEL" \
+			"$labeled"
+		ALL_FRAMES+=("$labeled")
+	done
+done <"$SPECS"
+
+TOTAL=${#ALL_FRAMES[@]}
+if [ "$TOTAL" -eq 0 ]; then
+	echo "Error: no frames extracted"
 	exit 1
 fi
 
-echo "Creating GIF (${#FRAME_FILES[@]} frames)..."
-magick "${FRAME_FILES[@]}" \
-	-delay "${DELAYS[@]}" \
-	-loop 0 \
-	"$OUTPUT"
+# Remove old GIF if it exists
+[ -f "$OUTPUT" ] && rm "$OUTPUT"
+
+echo "Creating GIF ($TOTAL frames) at ${FPS}fps ${MAX_WIDTH}px..."
+DELAY=$((100 / FPS))
+CMD=(magick)
+for f in "${ALL_FRAMES[@]}"; do
+	CMD+=(-delay "$DELAY" "$f")
+done
+CMD+=(-colors 128 -loop 0 -layers Optimize "$OUTPUT")
+"${CMD[@]}"
+
+if command -v gifsicle &>/dev/null; then
+	gifsicle -O3 --colors 128 "$OUTPUT" -o "$OUTPUT"
+fi
 
 echo "Done! GIF saved to: $OUTPUT"
