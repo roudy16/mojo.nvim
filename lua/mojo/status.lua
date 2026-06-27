@@ -13,10 +13,23 @@ local lsp_restart_count = 0
 --- @type integer
 local LSP_RESTART_CAP = 3
 
+--- @type integer
+local lsp_backoff_level = 0
+
+--- @type number
+local lsp_last_restart_time = 0
+
+--- @type number
+local lsp_stable_since = 0
+
+--- @type table<integer, integer>
+local BACKOFF_DELAYS = { [0] = 0, [1] = 5, [2] = 30, [3] = 60 }
+
 function M._track_lsp_exit(code, signal)
 	if code ~= 0 or (signal and signal ~= 0) then
 		lsp_has_crashed = true
 		lsp_restart_count = lsp_restart_count + 1
+		lsp_stable_since = 0
 		log.log("lsp_crashed", function()
 			return { code = code, signal = signal, restart_count = lsp_restart_count }
 		end)
@@ -26,6 +39,9 @@ end
 function M._reset_lsp_crash()
 	lsp_has_crashed = false
 	lsp_restart_count = 0
+	lsp_backoff_level = 0
+	lsp_last_restart_time = 0
+	lsp_stable_since = 0
 end
 
 --- @return "running"|"stopped"|"crashed"|"capped"|"unavailable"
@@ -33,10 +49,19 @@ function M.lsp_status()
 	local clients = vim.lsp.get_clients({ bufnr = vim.fn.bufnr() })
 	for _, client in ipairs(clients) do
 		if client.name == "mojo" then
+			if lsp_stable_since == 0 then
+				lsp_stable_since = vim.loop.now()
+			elseif vim.loop.now() - lsp_stable_since > 30000 then
+				-- Running stable for >30s: reset backoff
+				lsp_backoff_level = 0
+				lsp_restart_count = 0
+				lsp_has_crashed = false
+			end
 			vim.g["mojo_lsp_status"] = "running"
 			return "running"
 		end
 	end
+	lsp_stable_since = 0
 	if lsp_has_crashed and lsp_restart_count >= LSP_RESTART_CAP then
 		vim.g["mojo_lsp_status"] = "capped"
 		return "capped"
@@ -193,7 +218,24 @@ end
 
 M.actions = {
 	["Restart LSP"] = function()
-		M._reset_lsp_crash()
+		if lsp_has_crashed and lsp_restart_count >= LSP_RESTART_CAP then
+			local delay = BACKOFF_DELAYS[lsp_backoff_level] or 60
+			local elapsed = vim.loop.now() - lsp_last_restart_time
+			if elapsed < delay * 1000 then
+				local remaining = math.ceil(delay - elapsed / 1000)
+				vim.notify(
+					string.format("mojo.nvim: LSP restart backoff — wait %ds", remaining),
+					vim.log.levels.WARN
+				)
+				return
+			end
+			lsp_backoff_level = math.min(lsp_backoff_level + 1, 3)
+		end
+		lsp_last_restart_time = vim.loop.now()
+		lsp_has_crashed = false
+		lsp_restart_count = 0
+		lsp_stable_since = 0
+
 		local clients = vim.lsp.get_clients({ name = "mojo" })
 		if #clients == 0 then
 			vim.schedule(function()
