@@ -128,7 +128,7 @@ M.defaults = {
 		spread = false,
 	},
 	dap = {
-		enabled = false,
+		enabled = true,
 	},
 	sdk_path = nil,
 	debug = false,

@@ -268,7 +268,7 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
     adapter = nil, -- custom adapter function
   },
   dap = {
-    enabled = false,
+    enabled = true,
     adapter = nil, -- custom adapter function
   },
   debug = false,
@@ -299,7 +299,7 @@ Each adapter can be replaced via its feature's `adapter` config field for custom
 ## Notes
 
 - The plugin does not ship the Mojo LSP binary or official toolchain
-- Debugging is opt-in (`dap.enabled = true`)
+- Debugging is enabled by default; degrades gracefully if `nvim-dap` is not installed
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers
 - Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds
