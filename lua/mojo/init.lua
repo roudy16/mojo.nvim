@@ -93,6 +93,25 @@ function M.setup(user_config)
 		require("mojo.status").show_menu()
 	end, { desc = "Open Mojo actions menu" })
 
+	vim.api.nvim_create_user_command("MojoRefreshSDK", function()
+		local detect = require("mojo.env.detect")
+		local cache = detect._cache()
+		for k in pairs(cache) do
+			cache[k] = nil
+		end
+		require("mojo.status")._reset_lsp_crash()
+		require("mojo.env.version").clear_cache()
+		vim.notify("mojo.nvim: SDK cache cleared", vim.log.levels.INFO)
+	end, { desc = "Clear SDK cache and re-detect environment" })
+
+	vim.api.nvim_create_user_command("MojoRestartLSP", function()
+		require("mojo.status").actions["Restart LSP"]()
+	end, { desc = "Restart Mojo LSP server" })
+
+	vim.api.nvim_create_user_command("MojoStopLSP", function()
+		require("mojo.status").actions["Stop LSP"]()
+	end, { desc = "Stop Mojo LSP server" })
+
 	return opts
 end
 
