@@ -35,7 +35,8 @@ config.setup({ sdk_path = "/nonexistent/mojo" })
 
 local warned = false
 local orig_notify = vim.notify
-vim.notify = function(msg, level)
+--- @diagnostic disable-next-line: duplicate-set-field
+vim.notify = function(msg, _)
 	if msg:find("sdk_path") then
 		warned = true
 	end

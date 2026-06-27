@@ -16,13 +16,21 @@ Centralizes filetype detection, Treesitter, LSP, formatting, and environment act
   - [LSP](#lsp)
   - [Format](#format)
   - [Terminal](#terminal)
+  - [Completion](#completion)
+  - [Run](#run)
   - [Indentation](#indentation)
+- [Commands](#commands)
+- [Keymaps](#keymaps)
 - [Statusline](#statusline)
 - [Installation](#installation)
 - [Setup](#setup)
 - [Configuration](#configuration)
 - [Integrations](#integrations)
 - [Notes](#notes)
+  - [Environment detection chain](#environment-detection-chain)
+  - [LSP crash recovery](#lsp-crash-recovery)
+  - [Hooks](#hooks)
+  - [Adapter overrides](#adapter-overrides)
   - [Tools that work without config](#tools-that-work-without-mojo-specific-config)
 
 ## What it provides
@@ -36,9 +44,12 @@ Centralizes filetype detection, Treesitter, LSP, formatting, and environment act
 - lualine.nvim statusline integration with SDK version display
 - `MojoVersion` component for non-lualine statuslines
 - Debugging support via nvim-dap + mojo-lldb-dap
+- Run current Mojo file with `:Mojo run` / `:Mojo dedicated`
+- LSP lifecycle management (`:Mojo menu`, `:Mojo restart`, `:Mojo stop`, `:Mojo refresh`)
 - 4-space indentation for Mojo files
 - LazyVim, AstroNvim, NvChad, and kickstart.nvim adapter helpers
 - EmmyLua type annotations (module: `Mojo-lang`)
+- Adapter pattern for every integration — swap any backend without changing config
 
 ## Features
 
@@ -52,7 +63,7 @@ Detects Pixi (`pixi.toml` / `.pixi/`) and virtualenv (`.venv/`) projects and act
 
 ### Treesitter
 
-Registers the self-hosted Mojo parser grammar with `nvim-treesitter`. The grammar files live in `tree-sitter/mojo/` — no external parser repo required. Automatically checks for grammar updates and recompiles when needed, with a `:MojoRebuildParser` command for manual rebuilds.
+Registers the self-hosted Mojo parser grammar with `nvim-treesitter`. The grammar files live in `tree-sitter/mojo/` — no external parser repo required. Automatically checks for grammar updates and recompiles when needed, with `:Mojo rebuild` (or `:MojoRebuildParser` when `commands.spread = true`) for manual rebuilds.
 
 ### LSP
 
@@ -66,13 +77,56 @@ Configures `mojo format` via `conform.nvim` with environment-aware binary resolu
 
 Auto-activates the project environment in new shell terminal buffers. Detects shell terminals and applies the correct activation command before they start.
 
+### Completion
+
+Provides keyword autocompletion for Mojo-specific keywords (53), builtin functions (38), standard library types (30), and snippets (12). Integrates with nvim-cmp and blink.cmp via dedicated adapters. Completion is context-aware — it defers to LSP completions after `.` and `:`.
+
+### Run
+
+Execute the current Mojo file with `:Mojo run` (opens a terminal split) or `:Mojo dedicated` (opens or reuses a dedicated terminal buffer). Both commands resolve the `mojo` binary through the active environment and display a winbar with close instructions. If `commands.spread = true`, the individual `:MojoRun` and `:MojoRunDedicated` commands are also available.
+
 ### Indentation
 
 Sets 4-space indentation for Mojo files (matching Python-style conventions) via `ftplugin/mojo.lua`.
 
+## Commands
+
+Commands are configured via the `commands` option. By default only the master `:Mojo` command is created (`commands.spread = false`). Set `commands.spread = true` to also register the individual commands.
+
+| Command              | Description                                                |
+| -------------------- | ---------------------------------------------------------- |
+| `:Mojo {subcommand}` | Master command with tab-completion (see below)             |
+| `:MojoMenu`          | Open floating actions menu (restart/stop LSP, refresh SDK) |
+| `:MojoRefreshSDK`    | Clear SDK cache and re-detect environment                  |
+| `:MojoRestartLSP`    | Restart Mojo LSP server                                    |
+| `:MojoStopLSP`       | Stop Mojo LSP server                                       |
+| `:MojoRun`           | Run current `.mojo` file in a terminal split               |
+| `:MojoRunDedicated`  | Run current `.mojo` file in a dedicated terminal buffer    |
+| `:MojoRebuildParser` | Manually rebuild the self-hosted tree-sitter Mojo parser   |
+
+`:Mojo` subcommands: `menu`, `run`, `dedicated`, `restart`, `stop`, `refresh`, `rebuild`, `keymaps`, `help`. Press `<Tab>` after `:Mojo ` to cycle through them.
+
+## Keymaps
+
+Default keymaps for Mojo buffers. These can be overridden or disabled per-keymap via the `keymaps` config section — set any entry to `false` to disable it, or change the LHS string to rebind.
+
+| Keymap               | Modes            | Context           | Description                                   |
+| -------------------- | ---------------- | ----------------- | --------------------------------------------- |
+| `K`                  | Normal           | `FileType mojo`   | Signature help inside parens, hover otherwise |
+| `<leader>ca`         | Normal, Visual   | `FileType mojo`   | Code action (`vim.lsp.buf.code_action`)       |
+| `q`, `<Esc>`, `<CR>` | Normal, Terminal | `:MojoRun` buffer | Close run terminal                            |
+
+The `:MojoMenu` floating window also has numbered keymaps `1`, `2`, `3` mapped to each action, and `q` / `<Esc>` to close.
+
 ## Statusline
 
-Shows environment, SDK version, and tool status with clickable menu (restart LSP, stop LSP, refresh SDK). Configure per-indicator with `statusline` options or use `require("mojo.status").display()` for non-lualine statuslines.
+Shows environment name, SDK version, and tool status indicators (LSP, formatter, debugger, diagnostics). Indicators are clickable — click on any to open the `:MojoMenu` floating window with restart/stop LSP and refresh SDK actions.
+
+Status icons: `󰄬` (active/green), `○` (inactive/yellow), `󰅖` (error/red).
+
+Highlight groups: `MojoIcon`, `MojoText`, `MojoSep`, `MojoGood`, `MojoNeutral`, `MojoWarn`, `MojoErr`.
+
+Configure per-indicator with `statusline` options or use `require("mojo.status").display()` for non-lualine statuslines.
 
 ## Installation
 
@@ -170,17 +224,32 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
   },
   treesitter = {
     enabled = true,
+    adapter = nil, -- custom adapter function
   },
   lsp = {
     enabled = true,
     root_markers = { "pixi.toml", "pyproject.toml", ".pixi", ".venv" },
+    include_dirs = nil, -- extra include directories
+    filter_docstring_diagnostics = nil, -- filter diagnostics in docstrings
+    adapter = nil, -- custom adapter function
   },
   format = {
     enabled = true,
     formatter_name = "mojo",
+    adapter = nil, -- custom adapter function
   },
   completion = {
     enabled = true,
+    adapter = nil, -- custom adapter function
+  },
+  keymaps = {
+    enabled = true,
+    signature_help = "K", -- LHS string, or false to disable
+    code_action = "<leader>ca", -- LHS string, or false to disable
+  },
+  commands = {
+    master = true, -- creates :Mojo {subcommand} with tab-completion
+    spread = false, -- creates individual :MojoMenu, :MojoRun, etc.
   },
   sdk_path = nil, -- or "/path/to/mojo/sdk"
   statusline = {
@@ -196,9 +265,11 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
     colored = true,
     color = "#ff9e64",
     icon_color = "#ff6f00",
+    adapter = nil, -- custom adapter function
   },
   dap = {
     enabled = false,
+    adapter = nil, -- custom adapter function
   },
   debug = false,
   hooks = {},
@@ -209,23 +280,54 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
 
 ## Integrations
 
-- LSP (nvim-lspconfig)
-- Formatting (conform.nvim)
-- Treesitter (nvim-treesitter)
-- Completion (nvim-cmp / blink.cmp)
-- Debugging (nvim-dap)
-- Statusline (lualine.nvim)
-- LazyVim
-- AstroNvim, NvChad, kickstart.nvim — just add `{ "Sarctiann/mojo.nvim" }` to your plugins
+All integrations are optional — the plugin degrades gracefully if the backend is not installed.
+
+| Integration  | Backend                  | Adapter                                                          |
+| ------------ | ------------------------ | ---------------------------------------------------------------- |
+| LSP          | `nvim-lspconfig`         | `lua/mojo/adapters/lspconfig.lua`                                |
+| Formatting   | `conform.nvim`           | `lua/mojo/adapters/conform.lua`                                  |
+| Treesitter   | `nvim-treesitter`        | `lua/mojo/adapters/treesitter.lua`                               |
+| Completion   | `nvim-cmp` / `blink.cmp` | `lua/mojo/adapters/nvim-cmp.lua` / `lua/mojo/adapters/blink.lua` |
+| Debugging    | `nvim-dap`               | `lua/mojo/adapters/dap.lua`                                      |
+| Statusline   | `lualine.nvim`           | `lua/mojo/adapters/lualine.lua`                                  |
+| Distribution | LazyVim                  | `lua/mojo/adapters/lazyvim.lua`                                  |
+
+AstroNvim, NvChad, and kickstart.nvim work by just adding `{ "Sarctiann/mojo.nvim" }` to your plugins — no adapter needed.
+
+Each adapter can be replaced via its feature's `adapter` config field for custom behavior.
 
 ## Notes
 
 - The plugin does not ship the Mojo LSP binary or official toolchain
-- Debugging is opt-in
+- Debugging is opt-in (`dap.enabled = true`)
 - When `debug = true`, logs are written to `mojo-debug.log` in the current working directory
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers
 - Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds
 - Mojo files use 4-space indentation (configured via `ftplugin/mojo.lua`)
+
+### Environment detection chain
+
+1. **Manual SDK path** — `config.sdk_path` or `$MOJO_SDK_PATH` env var
+2. **Derived environment** — `.derived/bin/` directory
+3. **Pixi environment** — `pixi.toml` or `.pixi/` directory
+4. **Virtual environment** — `.venv/bin/`
+5. **No environment** — falls back to system PATH
+
+Detection results are cached per project root. Clear cache with `:MojoRefreshSDK`.
+
+### LSP crash recovery
+
+The plugin tracks LSP server exits and applies exponential backoff on restart (0s → 5s → 30s → 60s) with a cap at 3 restarts. The counter resets after 30 seconds of stable running.
+
+### Hooks
+
+The plugin exposes a `hooks` system for extensibility. Currently available hook:
+
+- `resolve_root(path, markers)` — override root directory detection (defaults to `vim.fs.root()`)
+
+### Adapter overrides
+
+Every feature accepts an optional `adapter` field in its config table. When set, the plugin calls `adapter(opts)` instead of its default adapter, allowing complete swapping of any backend without changing the rest of the config.
 
 ### Tools that work without Mojo-specific config
 

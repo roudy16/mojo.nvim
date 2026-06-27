@@ -33,6 +33,7 @@ local function valid_sdk_path(sdk_path)
 	end
 	return util.has_file(vim.fs.joinpath(sdk_path, "bin", "mojo"))
 		or util.has_file(vim.fs.joinpath(sdk_path, "bin", "mojo-lsp-server"))
+		or false
 end
 
 --- @param path string|nil
@@ -67,7 +68,7 @@ function M.detect(path)
 		log.log("detect_manual", function()
 			return { sdk_path = sdk_path, bin_dir = bin_dir }
 		end)
-		return cache[MANUAL_KEY]
+		return cache[MANUAL_KEY] or nil
 	end
 
 	-- Auto-detection (original logic)
@@ -97,7 +98,7 @@ function M.detect(path)
 		log.log("detect_derived", function()
 			return { root = root, bin_dir = derived_bin }
 		end)
-		return cache[root]
+		return cache[root] or nil
 	end
 
 	if util.has_file(vim.fs.joinpath(root, "pixi.toml")) or util.has_dir(vim.fs.joinpath(root, ".pixi")) then

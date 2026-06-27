@@ -114,7 +114,7 @@ function M.setup(opts)
 	end
 
 	local user_opts = M.opts(opts)
-	local existing_providers = blink.config and blink.config.providers or {}
+	local existing_providers = vim.tbl_get(blink, "config", "providers") or {}
 	local providers = vim.tbl_deep_extend("force", existing_providers, user_opts.providers or {})
 
 	blink.setup({

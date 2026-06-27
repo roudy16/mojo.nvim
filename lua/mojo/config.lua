@@ -53,6 +53,15 @@
 --- @field icon_color string|nil
 --- @field adapter (fun(opts: Mojo-lang.StatuslineConfig): boolean)|nil
 
+--- @class Mojo-lang.KeymapsConfig
+--- @field enabled boolean|nil
+--- @field signature_help string|false|nil
+--- @field code_action string|false|nil
+
+--- @class Mojo-lang.CommandsConfig
+--- @field master boolean|nil
+--- @field spread boolean|nil
+
 --- @class Mojo-lang.Hooks
 --- @field resolve_root (fun(path: string|nil, markers: string[]|nil): string|nil)|nil
 
@@ -63,6 +72,8 @@
 --- @field lsp Mojo-lang.LspConfig|nil
 --- @field format Mojo-lang.FormatConfig|nil
 --- @field completion Mojo-lang.CompletionConfig|nil
+--- @field keymaps Mojo-lang.KeymapsConfig|nil
+--- @field commands Mojo-lang.CommandsConfig|nil
 --- @field statusline Mojo-lang.StatuslineConfig|nil
 --- @field dap Mojo-lang.DapConfig|nil
 --- @field sdk_path string|nil
@@ -106,6 +117,15 @@ M.defaults = {
 		colored = true,
 		color = "#ff9e64",
 		icon_color = "#ff6f00",
+	},
+	keymaps = {
+		enabled = true,
+		signature_help = "K",
+		code_action = "<leader>ca",
+	},
+	commands = {
+		master = true,
+		spread = false,
 	},
 	dap = {
 		enabled = false,

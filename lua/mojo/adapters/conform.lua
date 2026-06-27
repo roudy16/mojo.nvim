@@ -9,6 +9,7 @@ function M.setup(opts)
 	end
 
 	local config = require("mojo.config").options
+	--- @diagnostic disable-next-line: param-type-mismatch
 	conform.setup(require("mojo.format").opts(opts or config.format))
 
 	return true

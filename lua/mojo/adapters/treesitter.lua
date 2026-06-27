@@ -35,13 +35,6 @@ function M.setup(opts)
 		end,
 	})
 
-	vim.api.nvim_create_user_command("MojoRebuildParser", function()
-		if ts.compile_parser() then
-			vim.notify("[mojo.nvim] Parser rebuilt.", vim.log.levels.INFO)
-			vim.cmd("edit!")
-		end
-	end, { desc = "Rebuild the self-hosted tree-sitter Mojo parser" })
-
 	return true
 end
 

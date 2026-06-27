@@ -51,7 +51,7 @@ for _, filepath in ipairs(mojo_files) do
 
   local parser = vim.treesitter.get_parser(buf, "mojo", {error = true})
   local ok, tree
-  ok, tree = pcall(function() return parser:parse()[1] end)
+  ok, tree = pcall(function() local result = parser and parser:parse() return result and result[1] end)
   if not ok then
     print(string.rep("=", 60))
     print("FILE: " .. filename .. " — NO PARSER")
