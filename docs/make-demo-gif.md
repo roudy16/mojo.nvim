@@ -18,9 +18,9 @@ brew install ffmpeg imagemagick gifsicle
 
 Each directory must contain:
 
-| File | Description |
-|------|-------------|
-| `video.mov` | Screen recording (QuickTime or similar) |
+| File        | Description                                  |
+| ----------- | -------------------------------------------- |
+| `video.mov` | Screen recording (QuickTime or similar)      |
 | `specs.txt` | One clip per line: `start\|end\|Description` |
 
 ## specs.txt format
@@ -38,12 +38,14 @@ Each directory must contain:
 
 Each line creates an animated clip showing that segment with an overlay label.
 
+**Note:** avoid consecutive entries with the same description — the GIF may interpolate frames between them causing visual glitches. If the same feature appears in separate segments, add a brief distinguishing detail to each label.
+
 ## Defaults
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| fps | 12 | frames per second per clip |
-| width | 640 | max width in pixels |
+| Parameter | Default | Description                |
+| --------- | ------- | -------------------------- |
+| fps       | 12      | frames per second per clip |
+| width     | 640     | max width in pixels        |
 
 ## Examples
 
