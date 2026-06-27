@@ -89,6 +89,18 @@ function M.setup(user_config)
 		end
 	end
 
+	local mojo_augroup = vim.api.nvim_create_augroup("MojoKeymaps", { clear = true })
+	vim.api.nvim_create_autocmd("FileType", {
+		group = mojo_augroup,
+		pattern = "mojo",
+		callback = function()
+			vim.keymap.set("n", "<C-S-space>", vim.lsp.buf.signature_help,
+				{ buffer = true, desc = "Signature help" })
+			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
+				{ buffer = true, desc = "Code action" })
+		end,
+	})
+
 	vim.api.nvim_create_user_command("MojoMenu", function()
 		require("mojo.status").show_menu()
 	end, { desc = "Open Mojo actions menu" })

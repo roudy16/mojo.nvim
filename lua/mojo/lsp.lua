@@ -26,6 +26,12 @@ function M.opts(user_opts)
 			if cmd then
 				new_config.cmd = cmd
 			end
+			if user_opts.include_dirs then
+				new_config.settings = vim.tbl_deep_extend("force",
+					new_config.settings or {}, {
+						mojo = { includeDirs = user_opts.include_dirs },
+					})
+			end
 		end,
 		on_exit = function(code, signal, _)
 			require("mojo.status")._track_lsp_exit(code, signal)

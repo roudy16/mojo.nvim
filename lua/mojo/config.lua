@@ -21,6 +21,7 @@
 --- @class Mojo-lang.LspConfig
 --- @field enabled boolean|nil
 --- @field root_markers string[]|nil
+--- @field include_dirs string[]|nil
 --- @field adapter (fun(opts: Mojo-lang.LspConfig): boolean)|nil
 
 --- @class Mojo-lang.FormatConfig

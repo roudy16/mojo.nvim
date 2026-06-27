@@ -179,22 +179,23 @@
 - Exponential restart backoff: 5s → 30s → 60s
 - Backoff resets when LSP stays running >30s
 
-### 21. Signature help keybinding & docs
+### 21. Signature help keybinding & docs — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — all LSP affordances must be documented centrally.
 **Why:** VS Code documents `ctrl+shift+space` for overloaded function scrolling.
 
-**Scope:**
+**Implementation:**
 
-- Map `<C-S-space>` or document that `<C-x><C-o>` shows it
-- Add to README or docs
+- `<C-S-space>` mapped to `vim.lsp.buf.signature_help` for mojo filetype
 
-### 22. Code actions / quick fixes
+### 22. Code actions / quick fixes — [done]
 
 **Sovereignty:** Rule 1 (Centralization) — must document all LSP capabilities.
 **Why:** LSP provides textDocument/codeAction but no mojo.nvim adapter exposes it.
 
-**Scope:** Document `vim.lsp.buf.code_action()` mapping, or provide a wrapper.
+**Implementation:**
+
+- `<leader>ca` mapped to `vim.lsp.buf.code_action` for mojo filetype (n + v modes)
 
 ### 23. Doc string diagnostics filter
 
@@ -206,15 +207,15 @@
 - Add `lsp.filter_docstring_diagnostics` config option
 - Implement filter in LSP handler
 
-### 24. `mojo.lsp.includeDirs` setting
+### 24. `mojo.lsp.includeDirs` setting — [done]
 
 **Sovereignty:** Rule 2 (Official Replacement Path) — LSP config must expose all server options.
 **Why:** Lets users add extra include paths for LSP.
 
-**Scope:**
+**Implementation:**
 
-- Add `lsp.include_dirs` to config
-- Pass via `settings` in LSP config
+- `config.lua`: `lsp.include_dirs` field
+- `lsp.lua`: passed via `settings.mojo.includeDirs` on new_config
 
 ### 25. Restart & stop LSP commands — [done]
 
