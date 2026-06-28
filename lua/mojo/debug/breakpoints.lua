@@ -94,7 +94,7 @@ function M.watch()
 	watch_augroup = vim.api.nvim_create_augroup("MojoDebugBPs", { clear = true })
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		group = watch_augroup,
-		pattern = "*.mojo",
+		pattern = { "*.mojo", "*.🔥" },
 		callback = function()
 			if native.is_active() then
 				M.sync_all()
