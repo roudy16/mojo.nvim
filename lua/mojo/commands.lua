@@ -20,11 +20,27 @@ local function setup_debug_terminal()
 	local win = vim.api.nvim_get_current_win()
 	vim.bo[buf].buflisted = false
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
-	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars  |  <C-\\><C-N> then q to close  "
+	vim.wo[win].winbar =
+		"%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars  |  Press [q] [Esc] or [Enter] to close this pane  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
-	vim.keymap.set("n", "q", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
-	vim.keymap.set("n", "<Esc>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
-	vim.keymap.set("n", "<CR>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
+	vim.keymap.set(
+		"n",
+		"q",
+		":close<CR>",
+		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
+	)
+	vim.keymap.set(
+		"n",
+		"<Esc>",
+		":close<CR>",
+		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
+	)
+	vim.keymap.set(
+		"n",
+		"<CR>",
+		":close<CR>",
+		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
+	)
 	local function lldb(cmd)
 		return function()
 			local job = vim.b[buf].terminal_job_id
@@ -33,11 +49,11 @@ local function setup_debug_terminal()
 			end
 		end
 	end
-	vim.keymap.set("t", "r", lldb("run"), { buffer = buf, desc = "LLDB: run" })
-	vim.keymap.set("t", "n", lldb("next"), { buffer = buf, desc = "LLDB: next" })
-	vim.keymap.set("t", "s", lldb("step"), { buffer = buf, desc = "LLDB: step" })
-	vim.keymap.set("t", "c", lldb("continue"), { buffer = buf, desc = "LLDB: continue" })
-	vim.keymap.set("t", "v", lldb("frame variable"), { buffer = buf, desc = "LLDB: variables" })
+	vim.keymap.set("n", "r", lldb("run"), { buffer = buf, desc = "LLDB: run" })
+	vim.keymap.set("n", "n", lldb("next"), { buffer = buf, desc = "LLDB: next" })
+	vim.keymap.set("n", "s", lldb("step"), { buffer = buf, desc = "LLDB: step" })
+	vim.keymap.set("n", "c", lldb("continue"), { buffer = buf, desc = "LLDB: continue" })
+	vim.keymap.set("n", "v", lldb("frame variable"), { buffer = buf, desc = "LLDB: variables" })
 end
 
 local function do_menu()
@@ -125,7 +141,8 @@ local function do_debug()
 		if bps then
 			local fname = vim.fn.fnamemodify(file, ":t")
 			for _, bp in ipairs(bps) do
-				parts[#parts + 1] = "--X -o --X " .. vim.fn.shellescape(("breakpoint set --file %s --line %d"):format(fname, bp.line))
+				parts[#parts + 1] = "--X -o --X "
+					.. vim.fn.shellescape(("breakpoint set --file %s --line %d"):format(fname, bp.line))
 			end
 		end
 	end
@@ -158,24 +175,24 @@ local function show_keymaps()
 	)
 end
 
-		local function show_help()
-			vim.notify(
-				table.concat({
-					"mojo.nvim subcommands:",
-					"  menu       Open floating actions menu",
-					"  run        Run current file in terminal split",
-					"  dedicated  Run current file in dedicated buffer",
-					"  debug      Debug current file in terminal via mojo debug",
-					"  restart    Restart Mojo LSP server",
-					"  stop       Stop Mojo LSP server",
-					"  refresh    Clear SDK cache and re-detect",
-					"  rebuild    Rebuild tree-sitter parser",
-					"  keymaps    Show available keymaps",
-					"  help       Show this help",
-				}, "\n"),
-				vim.log.levels.INFO
-			)
-		end
+local function show_help()
+	vim.notify(
+		table.concat({
+			"mojo.nvim subcommands:",
+			"  menu       Open floating actions menu",
+			"  run        Run current file in terminal split",
+			"  dedicated  Run current file in dedicated buffer",
+			"  debug      Debug current file in terminal via mojo debug",
+			"  restart    Restart Mojo LSP server",
+			"  stop       Stop Mojo LSP server",
+			"  refresh    Clear SDK cache and re-detect",
+			"  rebuild    Rebuild tree-sitter parser",
+			"  keymaps    Show available keymaps",
+			"  help       Show this help",
+		}, "\n"),
+		vim.log.levels.INFO
+	)
+end
 
 --- @param opts Mojo-lang.Config
 function M.setup(opts)
@@ -183,13 +200,29 @@ function M.setup(opts)
 
 	if cmds.spread then
 		vim.api.nvim_create_user_command("MojoMenu", do_menu, { desc = "Open Mojo actions menu" })
-		vim.api.nvim_create_user_command("MojoRefreshSDK", do_refresh, { desc = "Clear SDK cache and re-detect environment" })
+		vim.api.nvim_create_user_command(
+			"MojoRefreshSDK",
+			do_refresh,
+			{ desc = "Clear SDK cache and re-detect environment" }
+		)
 		vim.api.nvim_create_user_command("MojoRestartLSP", do_restart, { desc = "Restart Mojo LSP server" })
 		vim.api.nvim_create_user_command("MojoStopLSP", do_stop, { desc = "Stop Mojo LSP server" })
 		vim.api.nvim_create_user_command("MojoRun", do_run, { desc = "Run current Mojo file in terminal split" })
-		vim.api.nvim_create_user_command("MojoRunDedicated", do_dedicated, { desc = "Run current Mojo file in dedicated terminal buffer" })
-		vim.api.nvim_create_user_command("MojoDebug", do_debug, { desc = "Debug current Mojo file in terminal via mojo debug" })
-		vim.api.nvim_create_user_command("MojoRebuildParser", do_rebuild, { desc = "Rebuild the self-hosted tree-sitter Mojo parser" })
+		vim.api.nvim_create_user_command(
+			"MojoRunDedicated",
+			do_dedicated,
+			{ desc = "Run current Mojo file in dedicated terminal buffer" }
+		)
+		vim.api.nvim_create_user_command(
+			"MojoDebug",
+			do_debug,
+			{ desc = "Debug current Mojo file in terminal via mojo debug" }
+		)
+		vim.api.nvim_create_user_command(
+			"MojoRebuildParser",
+			do_rebuild,
+			{ desc = "Rebuild the self-hosted tree-sitter Mojo parser" }
+		)
 	end
 
 	if cmds.master then
@@ -217,15 +250,21 @@ function M.setup(opts)
 			elseif subcommand == "keymaps" then
 				show_keymaps()
 			else
-				vim.notify("mojo.nvim: unknown subcommand '" .. subcommand .. "'. See ':Mojo help'", vim.log.levels.ERROR)
+				vim.notify(
+					"mojo.nvim: unknown subcommand '" .. subcommand .. "'. See ':Mojo help'",
+					vim.log.levels.ERROR
+				)
 			end
 		end, {
 			nargs = "?",
 			complete = function(ArgLead)
-				local all = { "menu", "run", "dedicated", "debug", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
-				return vim.iter(all):filter(function(s)
-					return s:find(ArgLead) ~= nil
-				end):totable()
+				local all =
+					{ "menu", "run", "dedicated", "debug", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
+				return vim.iter(all)
+					:filter(function(s)
+						return s:find(ArgLead) ~= nil
+					end)
+					:totable()
 			end,
 			desc = "Mojo plugin master command",
 		})
