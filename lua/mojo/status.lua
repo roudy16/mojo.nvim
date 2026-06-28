@@ -99,13 +99,8 @@ end
 
 --- @param state string
 --- @return string
-function M.status_icon(state)
-	if state == "running" or state == "active" or state == "available" then
-		return "󰄬"
-	elseif state == "stopped" or state == "inactive" then
-		return "○"
-	end
-	return "󰅖"
+function M.status_icon(_)
+	return (config.options.statusline or {}).icon or "🔥"
 end
 
 --- @param state string
