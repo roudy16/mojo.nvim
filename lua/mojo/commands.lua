@@ -22,9 +22,9 @@ local function setup_debug_terminal()
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
 	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [bt] [v]ars  |  <C-\\><C-N> then q to close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
-	vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { noremap = true, silent = true })
-	vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", ":close<CR>", { noremap = true, silent = true })
-	vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", ":close<CR>", { noremap = true, silent = true })
+	vim.keymap.set("n", "q", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
+	vim.keymap.set("n", "<Esc>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
+	vim.keymap.set("n", "<CR>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
 end
 
 local function do_menu()
