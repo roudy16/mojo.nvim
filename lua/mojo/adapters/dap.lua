@@ -35,6 +35,7 @@ function M.setup(opts)
 			type = "mojo-lldb",
 			request = "launch",
 			name = name,
+			runInTerminal = true,
 			cwd = "${workspaceFolder}",
 		}
 		if opts.args_fn then
