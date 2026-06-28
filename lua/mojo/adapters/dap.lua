@@ -14,12 +14,17 @@ function M.setup(opts)
 		return false
 	end
 
+	local dap_cmd = env.get_dap_cmd()
+	if not dap_cmd then
+		vim.notify(
+			"mojo.nvim: mojo-lldb-dap not found — DAP integration disabled for this project",
+			vim.log.levels.WARN
+		)
+		return false
+	end
+
 	dap.adapters["mojo-lldb"] = function(callback, _)
 		local cmd, env_dir = env.get_dap_cmd()
-		if not cmd then
-			callback(nil)
-			return
-		end
 		local adapter_env = {}
 		if env_dir then
 			local detect = require("mojo.env.detect")
