@@ -18,10 +18,12 @@ local function get_lines(buf)
 	buf = buf or vim.fn.bufnr()
 	local seen = {}
 	for _, group in ipairs(BP_GROUPS) do
-		local placed = vim.fn.sign_getplaced(buf, { group = group })
-		for _, sign in ipairs(placed) do
-			if is_breakpoint_name(sign.name) then
-				seen[sign.lnum] = true
+		local result = vim.fn.sign_getplaced(buf, { group = group })
+		for _, entry in ipairs(result) do
+			for _, sign in ipairs(entry.signs or {}) do
+				if is_breakpoint_name(sign.name) then
+					seen[sign.lnum] = true
+				end
 			end
 		end
 	end
@@ -39,11 +41,13 @@ function M.toggle()
 
 	-- Check if there's already a breakpoint sign at this line
 	for _, group in ipairs(BP_GROUPS) do
-		local placed = vim.fn.sign_getplaced(buf, { group = group, lnum = line })
-		for _, sign in ipairs(placed) do
-			if is_breakpoint_name(sign.name) then
-				vim.fn.sign_unplace(group, { buffer = buf, id = sign.id })
-				return
+		local result = vim.fn.sign_getplaced(buf, { group = group, lnum = line })
+		for _, entry in ipairs(result) do
+			for _, sign in ipairs(entry.signs or {}) do
+				if is_breakpoint_name(sign.name) then
+					vim.fn.sign_unplace(group, { buffer = buf, id = sign.id })
+					return
+				end
 			end
 		end
 	end
