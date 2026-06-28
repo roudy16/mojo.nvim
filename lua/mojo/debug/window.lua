@@ -5,11 +5,13 @@ local M = {}
 --- @param job integer|nil
 function M.setup(buf, win, job)
 	vim.bo[buf].buflisted = false
+	vim.b[buf].mojo_debug = true
 
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
 	vim.wo[win].winbar =
 		"%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars [b]ps  |  [q] [Esc] [Enter] close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
+	vim.wo[win].statusline = " "
 
 	M._map(buf, "n", "q", function()
 		require("mojo.debug.native").close()

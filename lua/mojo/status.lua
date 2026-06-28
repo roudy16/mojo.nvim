@@ -184,7 +184,7 @@ end
 --- Single-string display for non-lualine statuslines.
 --- @return string
 function M.display()
-	if vim.bo.filetype ~= "mojo" then
+	if vim.bo.filetype ~= "mojo" and not vim.b.mojo_debug and not vim.b.mojo_run then
 		return ""
 	end
 
@@ -225,7 +225,17 @@ function M.display()
 	end
 
 	if opts.show_dbg ~= false then
-		table.insert(status_parts, M.dbg_icon() .. " dbg")
+		local ok, debug = pcall(require, "mojo.debug")
+		local label = " dbg"
+		if ok then
+			local st = debug.status()
+			if st.active == "native" then
+				label = " dbg_ntv"
+			elseif st.active == "dap" then
+				label = " dbg_dap"
+			end
+		end
+		table.insert(status_parts, M.dbg_icon() .. label)
 	end
 
 	if opts.show_diag ~= false then
