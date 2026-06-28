@@ -20,11 +20,28 @@ function M.setup(opts)
 			callback(nil)
 			return
 		end
+		local adapter_env = {}
+		if env_dir then
+			local detect = require("mojo.env.detect")
+			local detected = detect.detect()
+			adapter_env.CONDA_PREFIX = env_dir
+			adapter_env.MODULAR_HOME = vim.fs.joinpath(env_dir, "share", "max")
+			if detected and detected.bin_dir then
+				adapter_env.PATH = detected.bin_dir .. ":" .. (vim.env.PATH or "")
+			end
+			local lib = vim.fs.joinpath(env_dir, "lib")
+			local swift = vim.fs.joinpath(lib, "swift")
+			if vim.fn.has("mac") == 1 then
+				adapter_env.DYLD_FALLBACK_LIBRARY_PATH = lib .. ":" .. swift
+			else
+				adapter_env.LD_LIBRARY_PATH = lib .. ":" .. swift
+			end
+		end
 		callback({
 			type = "executable",
 			command = cmd[1],
 			options = {
-				env = env_dir and { CONDA_PREFIX = env_dir } or {},
+				env = adapter_env,
 			},
 		})
 	end
