@@ -29,6 +29,20 @@ function M.start()
 		return
 	end
 
+	if vim.fn.has("mac") == 1 and mojo:sub(1, 1) == "/" then
+		pcall(function()
+			vim.fn.system({ "xattr", "-p", "com.apple.quarantine", mojo })
+			if vim.v.shell_error == 0 then
+				local dir = vim.fs.dirname(mojo)
+				vim.notify(
+					"mojo.nvim: mojo binary has quarantine — run:\n  xattr -dr com.apple.quarantine "
+						.. dir,
+					vim.log.levels.WARN
+				)
+			end
+		end)
+	end
+
 	vim.cmd("belowright terminal " .. mojo .. " debug " .. vim.fn.shellescape(file))
 	term_buf = vim.api.nvim_get_current_buf()
 	term_win = vim.api.nvim_get_current_win()
