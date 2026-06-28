@@ -33,6 +33,21 @@ function M.activate_for_dir(path)
 		end
 	elseif env.type == "venv" then
 		vim.env.VIRTUAL_ENV = env.env_dir
+		if vim.fn.has("mac") == 1 then
+			local bin = require("mojo.env.bin").get_mojo_cmd()
+			if bin and bin:sub(1, 1) == "/" then
+				local resolved = vim.fn.resolve(bin)
+				local lib_dir = vim.fs.joinpath(vim.fs.dirname(resolved), "..", "lib")
+				if util.has_dir(lib_dir) then
+					util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", lib_dir)
+				else
+					local site_lib = vim.fs.joinpath(env.env_dir, "lib")
+					if util.has_dir(site_lib) then
+						util.env_prepend("DYLD_FALLBACK_LIBRARY_PATH", site_lib)
+					end
+				end
+			end
+		end
 	end
 
 	log.log("activate", function()
