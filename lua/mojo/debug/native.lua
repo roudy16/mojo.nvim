@@ -78,6 +78,43 @@ function M._wait_for_prompt()
 	end))
 end
 
+local ATTACH_ERROR_MSG = "Not allowed to attach to process"
+
+function M.run()
+	M.send("run")
+	local lib = vim.uv or vim.loop
+	local timer = lib.new_timer()
+	local elapsed = 0
+	timer:start(300, 300, vim.schedule_wrap(function()
+		elapsed = elapsed + 1
+		if not M.is_active() or elapsed > 15 then
+			timer:stop()
+			timer:close()
+			return
+		end
+		local lines = vim.api.nvim_buf_get_lines(term_buf, 0, -1, false)
+		for _, line in ipairs(lines) do
+			if line:find(ATTACH_ERROR_MSG, 1, true) then
+				timer:stop()
+				timer:close()
+				vim.notify(
+					table.concat({
+						"mojo.nvim: LLDB cannot attach to mojo process.",
+						"",
+						"The mojo binary installed via uv/PyPI lacks macOS debugger entitlements.",
+						"Use pixi projects for debugging, or re-sign the binary with:",
+						"  codesign --force --sign - --entitlements debug.plist <binary>",
+						"",
+						"See :Mojo help for details.",
+					}, "\n"),
+					vim.log.levels.WARN
+				)
+				return
+			end
+		end
+	end))
+end
+
 --- @param cmd string
 function M.send(cmd)
 	if not term_job or term_job <= 0 then

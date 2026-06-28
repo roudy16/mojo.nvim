@@ -44,7 +44,9 @@ function M.setup(buf, win, job)
 			require("mojo.debug.native").send(cmd)
 		end
 	end
-	M._map(buf, "n", "r", lldb("run"), "LLDB: run")
+	M._map(buf, "n", "r", function()
+		require("mojo.debug.native").run()
+	end, "LLDB: run")
 	M._map(buf, "n", "n", lldb("next"), "LLDB: next")
 	M._map(buf, "n", "s", lldb("step"), "LLDB: step")
 	M._map(buf, "n", "c", lldb("continue"), "LLDB: continue")
