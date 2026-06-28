@@ -12,6 +12,7 @@ M.activate_in_terminal = activate.activate_in_terminal
 M.get_mojo_cmd = bin.get_mojo_cmd
 M.get_lsp_cmd = bin.get_lsp_cmd
 M.get_dap_cmd = bin.get_dap_cmd
+M.get_dbg_native_cmd = bin.get_dbg_native_cmd
 M.get_version = version.get_version
 M.clear_version_cache = version.clear_cache
 

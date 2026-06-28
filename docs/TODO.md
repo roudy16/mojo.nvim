@@ -7,19 +7,19 @@
 
 ### SDK Detection & Status Bar
 
-| VS Code Feature                             | Status | Notes                                                       |
-| ------------------------------------------- | ------ | ----------------------------------------------------------- |
-| SDK auto-detection (pixi + venv + PATH)     | ✅     | `env/detect.lua` — pixi `.pixi` + `.venv`, filesystem-first |
+| VS Code Feature                             | Status | Notes                                                           |
+| ------------------------------------------- | ------ | --------------------------------------------------------------- |
+| SDK auto-detection (pixi + venv + PATH)     | ✅     | `env/detect.lua` — pixi `.pixi` + `.venv`, filesystem-first     |
 | Status bar: SDK version / clickable warning | ✅     | lualine adapter shows env + SDK version; `status.MojoVersion()` |
-| LSP status bar (running/stopped/crashed)    | ✅     | `status.lua` — lsp_status() runtime tracking in statusline  |
-| Crashed-state distinction (26.6.0)          | 🟡     | Basic crash flag via on_exit; no capped-out/count yet       |
-| Click-to-restart LSP from status bar        | ✅     | Clickable status component with action menu                 |
-| `Mojo: Refresh SDK Detection` command       | ❌     | No user-facing command to re-detect                         |
-| `mojo.sdk.path` override setting            | ✅     | `config.sdk_path` + `$MOJO_SDK_PATH` env var               |
-| `mojo.preferWorkspaceEnv` setting           | 🟡     | sdk_path override bypasses auto-detect; no soft priority    |
-| `.derived/` monorepo SDK detection          | ❌     | Not scanned                                                 |
-| Python extension integration                | ❌     | Doesn't use Python extension at all (good for autonomy)     |
-| SDK version display                         | ✅     | `env/version.lua` — `mojo --version` parsing with caching   |
+| LSP status bar (running/stopped/crashed)    | ✅     | `status.lua` — lsp_status() runtime tracking in statusline      |
+| Crashed-state distinction (26.6.0)          | 🟡     | Basic crash flag via on_exit; no capped-out/count yet           |
+| Click-to-restart LSP from status bar        | ✅     | Clickable status component with action menu                     |
+| `Mojo: Refresh SDK Detection` command       | ❌     | No user-facing command to re-detect                             |
+| `mojo.sdk.path` override setting            | ✅     | `config.sdk_path` + `$MOJO_SDK_PATH` env var                    |
+| `mojo.preferWorkspaceEnv` setting           | 🟡     | sdk_path override bypasses auto-detect; no soft priority        |
+| `.derived/` monorepo SDK detection          | ❌     | Not scanned                                                     |
+| Python extension integration                | ❌     | Doesn't use Python extension at all (good for autonomy)         |
+| SDK version display                         | ✅     | `env/version.lua` — `mojo --version` parsing with caching       |
 
 ### LSP Features
 
@@ -264,3 +264,17 @@
 | ftplugin/mojo  | Yes            | Done          | 4-space indentation                                                     |
 
 **Remaining work:** lualine icon docs.
+
+### 28. Debug UX — env-adaptive debugger (uv vs pixi)
+
+**Sovereignty:** Rule 1 (Centralization) + Rule 6 (Environmental Autonomy)
+
+**Why:** `uv` projects only provide `mojo-lldb` (basic LLDB CLI). `pixi` projects provide both `mojo-lldb` + `mojo-lldb-dap` (DAP server con compile-on-launch, visualizers, AOT). El plugin debe detectar disponibilidad y adaptar la experiencia.
+
+**Scope:**
+
+- Detectar `mojo-lldb-dap` availability en env module
+- DAP adapter fallback: deshabilitar configs `mojoFile`/`program` cuando falte el server
+- Exponer `mojo-lldb` como proveedor básico para uv envs (integración vía terminal)
+- `:MojoDebug` command que elija el mejor debugger disponible
+- Documentar diferencias uv vs pixi en README

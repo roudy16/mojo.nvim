@@ -115,4 +115,41 @@ function M.get_dap_cmd(path)
 	return nil, nil
 end
 
+--- @param path string|nil
+--- @return string|nil
+function M.get_dbg_native_cmd(path)
+	local env = detect.detect(path)
+	if env and env.bin_dir then
+		local bin = vim.fs.joinpath(env.bin_dir, "mojo-lldb")
+		if util.has_file(bin) then
+			log.log("dbg_native_cmd", function()
+				return { path = path or vim.fn.getcwd(), cmd = bin, source = "bin_dir" }
+			end)
+			return bin
+		end
+	end
+
+	if env and env.type == "pixi" then
+		local bin = util.find_pixi_binary(env.root, "mojo-lldb")
+		if bin then
+			log.log("dbg_native_cmd", function()
+				return { path = path or vim.fn.getcwd(), cmd = bin, source = "pixi_envs" }
+			end)
+			return bin
+		end
+	end
+
+	if vim.fn.executable("mojo-lldb") == 1 then
+		log.log("dbg_native_cmd", function()
+			return { path = path or vim.fn.getcwd(), cmd = "mojo-lldb", source = "path" }
+		end)
+		return "mojo-lldb"
+	end
+
+	log.log("dbg_native_cmd_miss", function()
+		return { path = path or vim.fn.getcwd() }
+	end)
+	return nil
+end
+
 return M
