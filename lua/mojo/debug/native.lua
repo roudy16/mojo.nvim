@@ -35,6 +35,13 @@ function M.start()
 	term_job = vim.bo[term_buf].channel
 
 	window.setup(term_buf, term_win, term_job)
+
+	-- Esperar a que LLDB inicie antes de enviar breakpoints
+	vim.defer_fn(function()
+		if M.is_active() then
+			require("mojo.debug.breakpoints").sync_all()
+		end
+	end, 500)
 end
 
 --- @param cmd string

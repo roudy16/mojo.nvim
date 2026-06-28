@@ -2,74 +2,73 @@ local native = require("mojo.debug.native")
 
 local M = {}
 
---- @type table<integer, integer>
-local lldb_bps = {}
-
 --- @type integer|nil
 local watch_augroup = nil
 
-local SIGN_NAME = "MojoBreakpoint"
-local SIGN_TEXT = "●"
-local SIGN_HIGHLIGHT = "DiagnosticSignError"
+local BP_GROUPS = { "mojo", "dap" }
 
-local function ensure_sign()
-	local defined = vim.fn.sign_defined(SIGN_NAME)
-	if defined == 0 then
-		vim.fn.sign_define(SIGN_NAME, { text = SIGN_TEXT, texthl = SIGN_HIGHLIGHT })
-	end
+local function is_breakpoint_name(name)
+	return name == "MojoBreakpoint" or name:find("^DapBreakpoint") ~= nil
 end
 
-local function get_signs(buf)
-	buf = buf or vim.fn.bufnr()
-	local placed = vim.fn.sign_getplaced(buf, { group = "mojo" })
-	local lines = {}
-	for _, sign in ipairs(placed) do
-		if sign.name == SIGN_NAME then
-			lines[sign.lnum] = true
-		end
-	end
-	return lines
-end
-
-function M.toggle()
-	ensure_sign()
-	local buf = vim.fn.bufnr()
-	local line = vim.fn.line(".")
-	local placed = vim.fn.sign_getplaced(buf, {
-		group = "mojo",
-		name = SIGN_NAME,
-		lnum = line,
-	})
-	if placed and #placed > 0 then
-		vim.fn.sign_unplace("mojo", { buffer = buf, id = placed[1].id })
-	else
-		vim.fn.sign_place(0, "mojo", SIGN_NAME, buf, { lnum = line })
-	end
-end
-
-function M.clear()
-	local buf = vim.fn.bufnr()
-	vim.fn.sign_unplace("mojo", { buffer = buf })
-	lldb_bps = {}
-end
-
+--- Read breakpoint signs from all known groups.
 --- @param buf integer|nil
 --- @return integer[]
-function M.get_lines(buf)
+local function get_lines(buf)
 	buf = buf or vim.fn.bufnr()
+	local seen = {}
+	for _, group in ipairs(BP_GROUPS) do
+		local placed = vim.fn.sign_getplaced(buf, { group = group })
+		for _, sign in ipairs(placed) do
+			if is_breakpoint_name(sign.name) then
+				seen[sign.lnum] = true
+			end
+		end
+	end
 	local lines = {}
-	for line, _ in pairs(get_signs(buf)) do
+	for line, _ in pairs(seen) do
 		table.insert(lines, line)
 	end
 	table.sort(lines)
 	return lines
 end
 
---- @return integer
-function M.count()
-	return #M.get_lines()
+function M.toggle()
+	local buf = vim.fn.bufnr()
+	local line = vim.fn.line(".")
+
+	-- Check if there's already a breakpoint sign at this line
+	for _, group in ipairs(BP_GROUPS) do
+		local placed = vim.fn.sign_getplaced(buf, { group = group, lnum = line })
+		for _, sign in ipairs(placed) do
+			if is_breakpoint_name(sign.name) then
+				vim.fn.sign_unplace(group, { buffer = buf, id = sign.id })
+				return
+			end
+		end
+	end
+
+	-- No existing BP, place one in our group
+	local defined = vim.fn.sign_defined("MojoBreakpoint")
+	if defined == 0 then
+		vim.fn.sign_define("MojoBreakpoint", { text = "●", texthl = "DiagnosticSignError" })
+	end
+	vim.fn.sign_place(0, "mojo", "MojoBreakpoint", buf, { lnum = line })
 end
 
+function M.clear()
+	local buf = vim.fn.bufnr()
+	for _, group in ipairs(BP_GROUPS) do
+		vim.fn.sign_unplace(group, { buffer = buf })
+	end
+end
+
+--- @return integer
+function M.count()
+	return #get_lines()
+end
+
+--- Send all current breakpoints to the native debugger.
 function M.sync_all()
 	if not native.is_active() then
 		return
@@ -78,27 +77,9 @@ function M.sync_all()
 	if not file then
 		return
 	end
-	local buf = vim.fn.bufnr()
-	local lines = M.get_lines(buf)
-
+	local lines = get_lines()
 	for _, line in ipairs(lines) do
-		if not lldb_bps[line] then
-			native.send_breakpoint(line)
-		end
-	end
-
-	for line, lldb_id in pairs(lldb_bps) do
-		local found = false
-		for _, l in ipairs(lines) do
-			if l == line then
-				found = true
-				break
-			end
-		end
-		if not found then
-			native.remove_breakpoint(lldb_id)
-			lldb_bps[line] = nil
-		end
+		native.send_breakpoint(line)
 	end
 end
 

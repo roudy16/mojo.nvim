@@ -30,7 +30,6 @@ function M.start(backend)
 	elseif backend == "native" then
 		active_backend = "native"
 		require("mojo.debug.native").start()
-		require("mojo.debug.breakpoints").sync_all()
 		require("mojo.debug.breakpoints").watch()
 	else
 		vim.notify("mojo.nvim: unknown debug backend: " .. tostring(backend), vim.log.levels.ERROR)
