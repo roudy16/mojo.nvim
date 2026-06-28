@@ -61,6 +61,9 @@ Project conventions:
 
 Then load `mojo-todo-update` to mark the task as `[done]` and re-number.
 
+Finally, load `update-docs` to audit cross-document consistency and suggest
+any remaining doc improvements before merging.
+
 ### 6. Merge to main
 
 Load `finishing-a-development-branch` skill.

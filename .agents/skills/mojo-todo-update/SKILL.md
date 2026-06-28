@@ -70,6 +70,7 @@ Triggers: nvim-dap, nvim-lspconfig, nvim-treesitter, conform.nvim, blink.cmp, nv
 - Mark the task as `[done]` in TODO.md
 - Re-number all remaining items
 - Update the P2 tools table if the completed task involved a Neovim tool
+- Load `update-docs` to audit docs consistency after the TODO change
 
 ### 6. New feature gap discovered
 

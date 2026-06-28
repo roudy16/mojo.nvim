@@ -42,7 +42,7 @@ library paths, and environment variables without user intervention.
 ### 7. One Breaking-Change Point
 When Modular ships a breaking change or an official tool, the update surface is the
 single module that wraps that concern. The design spec and README must be updated
-to reflect the new recommended path.
+to reflect the new recommended path (load `update-docs` to audit).
 
 ## Coding Conventions
 
@@ -85,5 +85,6 @@ starting a task:
 | `mojo-task-workflow` | When executing any task from `docs/TODO.md` |
 | `mojo-todo-update` | When updating `docs/TODO.md` after an audit or completed task |
 | `mojo-community-post` | When drafting a community update post |
+| `update-docs` | When auditing docs for accuracy and consistency after features land |
 
 Each skill contains the full workflow and conventions for that concern.

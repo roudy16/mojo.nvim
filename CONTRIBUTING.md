@@ -143,6 +143,9 @@ redefining.
 | `docs/superpowers/plans/` | Contributors | Implementation plans. |
 | `docs/TODO.md` | All | Feature tracking against VS Code extension. |
 
+Keep all docs consistent by running `update-docs` after features land, after
+TODO updates, or periodically as a maintenance pass.
+
 Commit messages use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`.
 
 ## Testing
@@ -178,5 +181,6 @@ The plugin uses skills (in `.agents/skills/`) to automate workflows:
 | `mojo-task-workflow` | Executing a task from `docs/TODO.md` |
 | `mojo-todo-update` | Updating `docs/TODO.md` after audit or task completion |
 | `mojo-community-post` | Drafting community update posts |
+| `update-docs` | Auditing docs for accuracy and consistency after features land |
 
 For AI agents: load the relevant skill before starting a task.
