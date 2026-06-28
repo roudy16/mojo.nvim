@@ -62,13 +62,25 @@ function M.get_lsp_cmd(path)
 	return nil
 end
 
+local function first_dap_in(dir)
+	local real = vim.fs.joinpath(dir, "_mojo-lldb-dap")
+	if util.has_file(real) then
+		return real
+	end
+	local wrapper = vim.fs.joinpath(dir, "mojo-lldb-dap")
+	if util.has_file(wrapper) then
+		return wrapper
+	end
+	return nil
+end
+
 --- @param path string|nil
 --- @return string[]|nil, string|nil
 function M.get_dap_cmd(path)
 	local env = detect.detect(path)
 	if env and env.bin_dir then
-		local bin = vim.fs.joinpath(env.bin_dir, "mojo-lldb-dap")
-		if util.has_file(bin) then
+		local bin = first_dap_in(env.bin_dir)
+		if bin then
 			log.log("dap_cmd", function()
 				return { path = path or vim.fn.getcwd(), cmd = bin, source = "bin_dir" }
 			end)
@@ -77,13 +89,23 @@ function M.get_dap_cmd(path)
 	end
 
 	if env and env.type == "pixi" then
-		local bin = util.find_pixi_binary(env.root, "mojo-lldb-dap")
+		local bin = util.find_pixi_binary(env.root, "_mojo-lldb-dap")
+		if not bin then
+			bin = util.find_pixi_binary(env.root, "mojo-lldb-dap")
+		end
 		if bin then
 			log.log("dap_cmd", function()
 				return { path = path or vim.fn.getcwd(), cmd = bin, source = "pixi_envs" }
 			end)
 			return { bin }, env.env_dir
 		end
+	end
+
+	if vim.fn.executable("_mojo-lldb-dap") == 1 then
+		log.log("dap_cmd", function()
+			return { path = path or vim.fn.getcwd(), cmd = "_mojo-lldb-dap", source = "path" }
+		end)
+		return { "_mojo-lldb-dap" }, nil
 	end
 
 	if vim.fn.executable("mojo-lldb-dap") == 1 then

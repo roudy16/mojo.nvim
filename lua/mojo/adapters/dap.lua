@@ -14,22 +14,20 @@ function M.setup(opts)
 		return false
 	end
 
-	dap.adapters.mojo = {
-		type = "executable",
-		command = function()
-			local cmd, _ = env.get_dap_cmd()
-			return (cmd and cmd[1]) or "mojo-lldb-dap"
-		end,
-		options = {
-			env = function()
-				local _, env_dir = env.get_dap_cmd()
-				if env_dir then
-					return { CONDA_PREFIX = env_dir }
-				end
-				return {}
-			end,
-		},
-	}
+	dap.adapters.mojo = function(callback, _)
+		local cmd, env_dir = env.get_dap_cmd()
+		if not cmd then
+			callback(nil)
+			return
+		end
+		callback({
+			type = "executable",
+			command = cmd[1],
+			options = {
+				env = env_dir and { CONDA_PREFIX = env_dir } or {},
+			},
+		})
+	end
 
 	dap.configurations.mojo = {
 		{
