@@ -61,7 +61,10 @@ function M.setup(opts)
 			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
 			return nil, nil
 		end
-		local out = file .. ".mojo-dap-bin"
+		local dbg_dir = vim.fs.joinpath(vim.fn.getcwd(), "_mojo-debug")
+		vim.fn.mkdir(dbg_dir, "p")
+		local base = vim.fn.fnamemodify(file, ":t:r")
+		local out = vim.fs.joinpath(dbg_dir, base .. ".bin")
 		local result = vim.fn.system({ mojo, "build", "--debug-level=full", "-O0", file, "-o", out })
 		if vim.v.shell_error ~= 0 then
 			vim.notify("mojo.nvim: build failed before debugging:\n" .. result, vim.log.levels.ERROR)
