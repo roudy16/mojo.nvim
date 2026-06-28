@@ -14,12 +14,7 @@ function M.setup(opts)
 		return false
 	end
 
-	local dap_cmd = env.get_dap_cmd()
-	if not dap_cmd then
-		vim.notify(
-			"mojo.nvim: mojo-lldb-dap not found — DAP integration disabled for this project",
-			vim.log.levels.WARN
-		)
+	if not env.get_dap_cmd() then
 		return false
 	end
 

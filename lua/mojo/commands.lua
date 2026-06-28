@@ -20,14 +20,11 @@ local function setup_debug_terminal()
 	local win = vim.api.nvim_get_current_win()
 	vim.bo[buf].buflisted = false
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
-	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [bt] [v]ars  |  [q] [Esc] [Enter] close  "
+	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [bt] [v]ars  |  <C-\\><C-N> then q to close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
 	vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { noremap = true, silent = true })
 	vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", ":close<CR>", { noremap = true, silent = true })
 	vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", ":close<CR>", { noremap = true, silent = true })
-	vim.api.nvim_buf_set_keymap(buf, "t", "q", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
-	vim.api.nvim_buf_set_keymap(buf, "t", "<Esc>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
-	vim.api.nvim_buf_set_keymap(buf, "t", "<CR>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
 end
 
 local function do_menu()
