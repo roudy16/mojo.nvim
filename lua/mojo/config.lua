@@ -34,10 +34,15 @@
 --- @field enabled boolean|nil
 --- @field adapter (fun(opts: Mojo-lang.CompletionConfig): boolean)|nil
 
+--- @class Mojo-lang.DebugBinary
+--- @field name string
+--- @field role "dap"|"native"
+
 --- @class Mojo-lang.DebugConfig
 --- @field enabled boolean|nil
 --- @field auto_scroll boolean|nil
 --- @field auto_backend "native"|"dap"|nil
+--- @field search_for Mojo-lang.DebugBinary[]|nil
 --- @field adapter (fun(opts: Mojo-lang.DebugConfig): boolean)|nil
 
 --- @class Mojo-lang.StatuslineConfig
@@ -133,6 +138,13 @@ M.defaults = {
 		enabled = true,
 		auto_scroll = true,
 		auto_backend = nil,
+		search_for = {
+			{ name = "_mojo-lldb-dap", role = "dap" },
+			{ name = "mojo-lldb-dap", role = "dap" },
+			{ name = "lldb-dap", role = "dap" },
+			{ name = "mojo-lldb", role = "native" },
+			{ name = "lldb", role = "native" },
+		},
 	},
 	sdk_path = nil,
 	verbose = false,
