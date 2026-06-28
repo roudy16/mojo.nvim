@@ -134,19 +134,7 @@ local function do_debug()
 		return
 	end
 
-	local parts = { mojo, "debug" }
-	local ok, bp_mod = pcall(require, "dap.breakpoints")
-	if ok then
-		local bps = bp_mod.get(file)
-		if bps then
-			local fname = vim.fn.fnamemodify(file, ":t")
-			for _, bp in ipairs(bps) do
-				parts[#parts + 1] = "--X -o --X "
-					.. vim.fn.shellescape(("breakpoint set --file %s --line %d"):format(fname, bp.line))
-			end
-		end
-	end
-	parts[#parts + 1] = vim.fn.shellescape(file)
+	local parts = { mojo, "debug", vim.fn.shellescape(file) }
 
 	vim.cmd("belowright terminal " .. table.concat(parts, " "))
 	setup_debug_terminal()
