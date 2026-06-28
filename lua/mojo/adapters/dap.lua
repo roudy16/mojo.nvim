@@ -46,6 +46,26 @@ function M.setup(opts)
 		})
 	end
 
+	local function build_mojo_file()
+		local file = vim.fn.expand("%:p")
+		if file == "" then
+			vim.notify("mojo.nvim: no file to debug", vim.log.levels.ERROR)
+			return nil, nil
+		end
+		local mojo = require("mojo.env").get_mojo_cmd()
+		if not mojo then
+			vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
+			return nil, nil
+		end
+		local out = file .. ".mojo-dap-bin"
+		local result = vim.fn.system({ mojo, "build", "--debug-level=full", "-O0", file, "-o", out })
+		if vim.v.shell_error ~= 0 then
+			vim.notify("mojo.nvim: build failed before debugging:\n" .. result, vim.log.levels.ERROR)
+			return nil, nil
+		end
+		return out, file
+	end
+
 	local function build_config(name, opts)
 		opts = opts or {}
 		local cwd = vim.fn.getcwd()
@@ -67,24 +87,13 @@ function M.setup(opts)
 			config.program = opts.program_fn
 		end
 		if opts.mojo_file then
+			config.mojoFile = function()
+				local _, src = build_mojo_file()
+				return src
+			end
 			config.program = function()
-				local file = vim.fn.expand("%:p")
-				if file == "" then
-					vim.notify("mojo.nvim: no file to debug", vim.log.levels.ERROR)
-					return nil
-				end
-				local mojo = require("mojo.env").get_mojo_cmd()
-				if not mojo then
-					vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
-					return nil
-				end
-				local out = file .. ".mojo-dap-bin"
-				local result = vim.fn.system({ mojo, "build", "--debug-level=full", "-O0", file, "-o", out })
-				if vim.v.shell_error ~= 0 then
-					vim.notify("mojo.nvim: build failed before debugging:\n" .. result, vim.log.levels.ERROR)
-					return nil
-				end
-				return out
+				local bin, _ = build_mojo_file()
+				return bin
 			end
 		end
 		return config
