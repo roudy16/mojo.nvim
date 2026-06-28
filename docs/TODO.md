@@ -45,11 +45,11 @@
 | ---------------------------------- | ------ | ------------------------------------------------------------------ |
 | LLDB debug adapter                 | ✅     | `mojo-lldb-dap` → DAP server nativo LLDB, `_mojo-lldb-dap` (arm64) |
 | AOT compile + LLDB attach (26.6.0) | ✅     | Soportado vía `mojoFile` — DAP server compila `.mojo` internamente |
-| Debug Mojo File action             | ❌     | Falta adapter/config nvim-dap                                      |
-| `mojoFile` (JIT compile on launch) | ❌     | Propiedad `mojoFile` soportada por el DAP server                   |
+| Debug Mojo File action             | ✅     | `:MojoDebug` / `:MojoDebugNative` / `:MojoDebugDap`                |
+| `mojoFile` (JIT compile on launch) | 🟡     | DAP via `adapters/dap.lua`; native via `mojo debug <file>`         |
 | `buildArgs` in debug config        | ❌     | Propiedad `buildArgs` soportada por el DAP server                  |
-| Attach to process                  | ❌     | Propiedad `pid`/`program`/`waitFor` soportada                      |
-| `mojo debug --vscode` support      | 🟡     | No necesario; DAP server es más directo                            |
+| Attach to process                  | ✅     | Via `adapters/dap.lua` config `Attach to Process`                  |
+| `mojo debug --vscode` support      | 🟡     | No necesario; DAP server + `mojo debug` nativa cubren el caso      |
 | Mojo data formatters (visualizers) | ❌     | `lldbDataFormatters.py` + `mlirDataFormatters.py` en lib/          |
 | LLDB init/pre-run/post-run cmds    | ❌     | Comandos LLDB pre/post lanzamiento soportados                      |
 
@@ -265,16 +265,20 @@
 
 **Remaining work:** lualine icon docs.
 
-### 28. Debug UX — env-adaptive debugger (uv vs pixi) — [in progress]
+### 28. Debug UX — env-adaptive debugger (uv vs pixi) — [done]
 
 **Sovereignty:** Rule 1 (Centralization) + Rule 6 (Environmental Autonomy)
 
-**Why:** `uv` projects only provide `mojo-lldb` (basic LLDB CLI). `pixi` projects provide both `mojo-lldb` + `mojo-lldb-dap` (DAP server con compile-on-launch, visualizers, AOT). El plugin debe detectar disponibilidad y adaptar la experiencia.
+**Why:** `uv` projects only provide `mojo` CLI (via `mojo debug`). `pixi` projects provide both `mojo-lldb` + `mojo-lldb-dap` (DAP server). El plugin detecta disponibilidad y adapta la experiencia.
 
-**Scope:**
+**Implementation:**
 
-- Detectar `mojo-lldb-dap` availability en env module
-- DAP adapter fallback: deshabilitar configs `mojoFile`/`program` cuando falte el server
-- Exponer `mojo-lldb` como proveedor básico para uv envs (integración vía terminal)
-- `:MojoDebug` command que elija el mejor debugger disponible
-- Documentar diferencias uv vs pixi en README
+- `debug/init.lua` — entry point unificado: `start(auto|native|dap)`, `toggle_bp()`, `clear_bps()`, `status()`
+- `debug/native.lua` — backend nativo: terminal `mojo debug <file>`, envío de comandos LLDB via chan_send
+- `debug/breakpoints.lua` — breakpoints via signs (lee grupos `mojo` y `dap`), sync a LLDB, watcher en BufWritePost
+- `debug/window.lua` — winbar con keymaps, auto-scroll configurable
+- `env/bin.lua` — `get_dbg_native_cmd()` para detectar `mojo-lldb`
+- `config.lua` — `Mojo-lang.DebugConfig` con `auto_scroll`, `auto_backend`
+- `commands.lua` — `:Mojo debug`, `:Mojo debug-native`, `:Mojo debug-dap` + spread variants
+- `status.lua` — `dbg_status()` refleja ambos backends, labels `dbg_ntv`/`dbg_dap`
+- `adapters/lualine.lua` — muestra status mojo también en terminales de debug/run

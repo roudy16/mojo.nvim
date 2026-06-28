@@ -130,7 +130,7 @@ M.defaults = {
 		spread = false,
 	},
 	debug = {
-		enabled = false,
+		enabled = true,
 		auto_scroll = true,
 		auto_backend = nil,
 	},
