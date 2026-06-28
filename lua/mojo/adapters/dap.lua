@@ -20,6 +20,10 @@ function M.setup(opts)
 
 	dap.adapters["mojo-lldb"] = function(callback, _)
 		local cmd, env_dir = env.get_dap_cmd()
+		if not cmd then
+			callback(nil)
+			return
+		end
 		local adapter_env = {}
 		if env_dir then
 			local detect = require("mojo.env.detect")
@@ -66,8 +70,8 @@ function M.setup(opts)
 		return out, file
 	end
 
-	local function build_config(name, opts)
-		opts = opts or {}
+	local function build_config(name, user_opts)
+		local opts = user_opts or {}
 		local cwd = vim.fn.getcwd()
 		local config = {
 			type = "mojo-lldb",
