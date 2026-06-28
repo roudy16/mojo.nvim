@@ -41,8 +41,12 @@ function M._pick_backend()
 	if config.options.debug and config.options.debug.auto_backend then
 		return config.options.debug.auto_backend
 	end
-	if env.get_dap_cmd() then
-		return "dap"
+	local dap_cmd = env.get_dap_cmd()
+	if dap_cmd then
+		local name = vim.fn.fnamemodify(dap_cmd[1], ":t")
+		if name:match("^_?mojo%-lldb%-dap") then
+			return "dap"
+		end
 	end
 	if env.get_dbg_native_cmd() or env.get_mojo_cmd() then
 		return "native"
@@ -63,7 +67,7 @@ function M._start_dap()
 		active_backend = nil
 		return
 	end
-	dap.run({ type = "mojo", request = "launch", name = "Debug Mojo File", mojoFile = file })
+	dap.run({ type = "mojo-lldb", request = "launch", name = "Debug Mojo File", mojoFile = file })
 end
 
 function M.toggle_bp()
