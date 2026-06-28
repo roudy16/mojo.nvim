@@ -34,14 +34,14 @@ function M.setup(opts)
 			type = "mojo",
 			request = "launch",
 			name = "Debug Mojo File",
-			mojoFile = "${file}",
+			program = "${file}",
 			cwd = "${workspaceFolder}",
 		},
 		{
 			type = "mojo",
 			request = "launch",
 			name = "Debug Mojo File (with args)",
-			mojoFile = "${file}",
+			program = "${file}",
 			args = function()
 				local args_str = vim.fn.input("Program args: ")
 				return vim.split(args_str, "%s+")
