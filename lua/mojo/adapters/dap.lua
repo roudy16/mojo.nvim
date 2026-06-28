@@ -14,7 +14,7 @@ function M.setup(opts)
 		return false
 	end
 
-	dap.adapters.mojo = function(callback, _)
+	dap.adapters["mojo-lldb"] = function(callback, _)
 		local cmd, env_dir = env.get_dap_cmd()
 		if not cmd then
 			callback(nil)
@@ -29,19 +29,19 @@ function M.setup(opts)
 		})
 	end
 
-	dap.configurations.mojo = {
+	dap.configurations["mojo-lldb"] = {
 		{
-			type = "mojo",
+			type = "mojo-lldb",
 			request = "launch",
 			name = "Debug Mojo File",
-			program = "${file}",
+			mojoFile = "${file}",
 			cwd = "${workspaceFolder}",
 		},
 		{
-			type = "mojo",
+			type = "mojo-lldb",
 			request = "launch",
 			name = "Debug Mojo File (with args)",
-			program = "${file}",
+			mojoFile = "${file}",
 			args = function()
 				local args_str = vim.fn.input("Program args: ")
 				return vim.split(args_str, "%s+")
@@ -49,7 +49,7 @@ function M.setup(opts)
 			cwd = "${workspaceFolder}",
 		},
 		{
-			type = "mojo",
+			type = "mojo-lldb",
 			request = "launch",
 			name = "Debug Binary",
 			program = function()
@@ -58,7 +58,7 @@ function M.setup(opts)
 			cwd = "${workspaceFolder}",
 		},
 		{
-			type = "mojo",
+			type = "mojo-lldb",
 			request = "attach",
 			name = "Attach to Process",
 			pid = require("dap.utils").pick_process,
