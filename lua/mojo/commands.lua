@@ -15,6 +15,15 @@ local function setup_run_terminal()
 	vim.api.nvim_buf_set_keymap(buf, "t", "q", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
 	vim.api.nvim_buf_set_keymap(buf, "t", "<Esc>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
 	vim.api.nvim_buf_set_keymap(buf, "t", "<CR>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
+	vim.api.nvim_create_autocmd("WinEnter", {
+		buffer = buf,
+		callback = function()
+			local cur_win = vim.api.nvim_get_current_win()
+			if vim.api.nvim_win_is_valid(cur_win) and vim.api.nvim_win_get_buf(cur_win) == buf then
+				vim.wo[cur_win].statusline = " "
+			end
+		end,
+	})
 end
 
 local function do_menu()

@@ -31,7 +31,7 @@ end
 --- @param opts Mojo-lang.StatuslineConfig
 --- @return string
 local function _display(opts)
-	if vim.bo.filetype ~= "mojo" then
+	if vim.bo.filetype ~= "mojo" and not vim.b.mojo_debug and not vim.b.mojo_run then
 		return ""
 	end
 
@@ -91,8 +91,18 @@ local function _display(opts)
 		elseif state == "unavailable" then
 			hl = "MojoErr"
 		end
+		local ok, debug = pcall(require, "mojo.debug")
+		local label = " dbg"
+		if ok then
+			local st = debug.status()
+			if st.active == "native" then
+				label = " dbg_ntv"
+			elseif st.active == "dap" then
+				label = " dbg_dap"
+			end
+		end
 		table.insert(parts, "%#MojoSep#·%*")
-		table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. " dbg")
+		table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. label)
 	end
 
 	if opts.show_diag ~= false then

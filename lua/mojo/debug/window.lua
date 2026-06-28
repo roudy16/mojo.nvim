@@ -12,6 +12,15 @@ function M.setup(buf, win, job)
 		"%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars [b]ps  |  [q] [Esc] [Enter] close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
 	vim.wo[win].statusline = " "
+	vim.api.nvim_create_autocmd("WinEnter", {
+		buffer = buf,
+		callback = function()
+			local cur_win = vim.api.nvim_get_current_win()
+			if vim.api.nvim_win_is_valid(cur_win) and vim.api.nvim_win_get_buf(cur_win) == buf then
+				vim.wo[cur_win].statusline = " "
+			end
+		end,
+	})
 
 	M._map(buf, "n", "q", function()
 		require("mojo.debug.native").close()
