@@ -13,17 +13,17 @@ function M.setup(user_config)
 	local opts = config.setup(user_config)
 	M.hooks = hooks.merge(opts.hooks)
 
-	log.setup({ debug = opts.debug })
+	log.setup({ debug = opts.verbose })
 	log.log("setup", function()
 		return {
-			debug = opts.debug or false,
+			verbose = opts.verbose or false,
 			filetype = opts.filetype and opts.filetype.enabled ~= false,
 			treesitter = opts.treesitter and opts.treesitter.enabled ~= false,
 			lsp = opts.lsp and opts.lsp.enabled ~= false,
 			format = opts.format and opts.format.enabled ~= false,
 			terminal = opts.terminal and opts.terminal.enabled ~= false,
 			statusline = opts.statusline and opts.statusline.enabled ~= false,
-			dap = opts.dap and opts.dap.enabled == true,
+			debug = opts.debug and opts.debug.enabled == true,
 		}
 	end)
 
@@ -80,12 +80,12 @@ function M.setup(user_config)
 		require("mojo.terminal").setup(opts.terminal)
 	end
 
-	if opts.dap and opts.dap.enabled then
-		local dap_opts = opts.dap
-		if dap_opts and dap_opts.adapter then
-			dap_opts.adapter(dap_opts)
+	if opts.debug and opts.debug.enabled then
+		local debug_opts = opts.debug
+		if debug_opts and debug_opts.adapter then
+			debug_opts.adapter(debug_opts)
 		else
-			require("mojo.adapters.dap").setup(dap_opts)
+			require("mojo.adapters.dap").setup(debug_opts)
 		end
 	end
 

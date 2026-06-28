@@ -13,7 +13,7 @@ local function pass(msg)
 end
 
 local mojo = require("mojo")
-mojo.setup({ debug = false })
+mojo.setup({ verbose = false })
 
 local commands = { "MojoRefreshSDK", "MojoRestartLSP", "MojoStopLSP", "MojoMenu" }
 for _, name in ipairs(commands) do

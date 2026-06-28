@@ -34,9 +34,11 @@
 --- @field enabled boolean|nil
 --- @field adapter (fun(opts: Mojo-lang.CompletionConfig): boolean)|nil
 
---- @class Mojo-lang.DapConfig
+--- @class Mojo-lang.DebugConfig
 --- @field enabled boolean|nil
---- @field adapter (fun(opts: Mojo-lang.DapConfig): boolean)|nil
+--- @field auto_scroll boolean|nil
+--- @field auto_backend "native"|"dap"|nil
+--- @field adapter (fun(opts: Mojo-lang.DebugConfig): boolean)|nil
 
 --- @class Mojo-lang.StatuslineConfig
 --- @field enabled boolean|nil
@@ -75,9 +77,9 @@
 --- @field keymaps Mojo-lang.KeymapsConfig|nil
 --- @field commands Mojo-lang.CommandsConfig|nil
 --- @field statusline Mojo-lang.StatuslineConfig|nil
---- @field dap Mojo-lang.DapConfig|nil
+--- @field debug Mojo-lang.DebugConfig|nil
 --- @field sdk_path string|nil
---- @field debug boolean|nil
+--- @field verbose boolean|nil
 --- @field hooks Mojo-lang.Hooks|nil
 
 local M = {}
@@ -127,11 +129,13 @@ M.defaults = {
 		master = true,
 		spread = false,
 	},
-	dap = {
-		enabled = true,
+	debug = {
+		enabled = false,
+		auto_scroll = true,
+		auto_backend = nil,
 	},
 	sdk_path = nil,
-	debug = false,
+	verbose = false,
 	hooks = {},
 }
 

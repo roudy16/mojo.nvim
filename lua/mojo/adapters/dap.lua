@@ -2,7 +2,7 @@ local env = require("mojo.env")
 
 local M = {}
 
---- @param opts Mojo-lang.DapConfig|nil
+--- @param opts Mojo-lang.DebugConfig|nil
 --- @return boolean
 function M.setup(opts)
 	if not opts or opts.enabled ~= true then

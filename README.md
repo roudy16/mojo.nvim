@@ -202,7 +202,7 @@ require("mojo").setup({})
 
 ```lua
 require("mojo").setup({
-  debug = true, -- writes mojo-debug.log to cwd
+  verbose = true, -- writes mojo-debug.log to cwd
 })
 ```
 
@@ -268,11 +268,13 @@ All features are enabled by default. Pass `enabled = false` to disable any featu
     icon_color = "#ff6f00",
     adapter = nil, -- custom adapter function
   },
-  dap = {
-    enabled = true,
+  debug = {
+    enabled = false,
+    auto_scroll = true,
+    auto_backend = nil, -- nil = auto, "native", "dap"
     adapter = nil, -- custom adapter function
   },
-  debug = false,
+  verbose = false,
   hooks = {},
 }
 ```
@@ -301,7 +303,7 @@ Each adapter can be replaced via its feature's `adapter` config field for custom
 
 - The plugin does not ship the Mojo LSP binary or official toolchain
 - Debugging is enabled by default; degrades gracefully if `nvim-dap` is not installed
-- When `debug = true`, logs are written to `mojo-debug.log` in the current working directory
+- When `verbose = true`, logs are written to `mojo-debug.log` in the current working directory
 - The plugin auto-activates Pixi or venv project environments before Mojo LSP startup and in terminal buffers
 - Treesitter is isolated behind `lua/mojo/treesitter.lua`. The parser grammar is self-hosted in `tree-sitter/mojo/`. The plugin auto-rebuilds the parser when the grammar source changes; `:MojoRebuildParser` is available for manual rebuilds
 - Mojo files use 4-space indentation (configured via `ftplugin/mojo.lua`)
