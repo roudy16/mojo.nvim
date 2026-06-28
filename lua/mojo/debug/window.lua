@@ -8,7 +8,7 @@ function M.setup(buf, win, job)
 
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
 	vim.wo[win].winbar =
-		"%#MojoDebugWinBar%  [r]un [n]ext [s]tep [c]ontinue [v]ars [b]ps [q]uit  "
+		"%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars [b]ps  |  [q] [Esc] [Enter] close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
 
 	M._map(buf, "n", "q", function()
@@ -16,22 +16,17 @@ function M.setup(buf, win, job)
 	end, "Close debug terminal")
 	M._map(buf, "n", "<Esc>", function()
 		require("mojo.debug.native").close()
-	end, "Close debug terminal (esc)")
+	end, "Close debug terminal")
 	M._map(buf, "n", "<CR>", function()
 		require("mojo.debug.native").close()
-	end, "Close debug terminal (enter)")
-	M._map(buf, "t", "q", function()
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-N>", true, false, true), "n", false)
+	end, "Close debug terminal")
+	local function close_term()
+		vim.cmd("stopinsert")
 		require("mojo.debug.native").close()
-	end, "Close debug terminal (term)")
-	M._map(buf, "t", "<Esc>", function()
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-N>", true, false, true), "n", false)
-		require("mojo.debug.native").close()
-	end, "Close debug terminal (term esc)")
-	M._map(buf, "t", "<CR>", function()
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-N>", true, false, true), "n", false)
-		require("mojo.debug.native").close()
-	end, "Close debug terminal (term cr)")
+	end
+	M._map(buf, "t", "q", close_term, "Close debug terminal")
+	M._map(buf, "t", "<Esc>", close_term, "Close debug terminal")
+	M._map(buf, "t", "<CR>", close_term, "Close debug terminal")
 
 	local function lldb(cmd)
 		return function()

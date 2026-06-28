@@ -50,13 +50,19 @@ lua/mojo/
       ▼
 debug.start("auto")
       │
-      ├── env.get_dbg_dap_cmd() trouve mojo-lldb-dap?
+      ├── env.get_dap_cmd() trouve mojo-lldb-dap?
       │        └── sí → adapters/dap.lua (nvim-dap, sin cambios)
       │
-      └── env.get_dbg_native_cmd("mojo-lldb") existe?
+      └── env.get_dbg_native_cmd("mojo-lldb") ou get_mojo_cmd() existe?
+               │
+               ├── Nota: en pixi → mojo-lldb (LLDB CLI completo + breakpoints)
+               ├── Nota: en uv   → mojo debug (vía mojo CLI, sin mojo-lldb)
+               │
                └── sí → debug/native.lua
                           │
                           ├── debug/window.lua: abre terminal mojo debug <file>
+                          │   - winbar con keymaps [r][n][s][c][v][b][q]
+                          │   - auto-scroll configurable
                           ├── debug/breakpoints.lua: lee signs → envía commands LLDB
                           └── debug/breakpoints.lua: activa watcher para cambios
 ```

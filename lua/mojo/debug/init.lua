@@ -18,7 +18,7 @@ function M.start(backend)
 	end
 	if not backend then
 		vim.notify(
-			"mojo.nvim: no debugger available (mojo-lldb or mojo-lldb-dap not found)",
+			"mojo.nvim: no debugger available (mojo not found in PATH)",
 			vim.log.levels.ERROR
 		)
 		return
@@ -45,7 +45,7 @@ function M._pick_backend()
 	if env.get_dap_cmd() then
 		return "dap"
 	end
-	if env.get_dbg_native_cmd() then
+	if env.get_dbg_native_cmd() or env.get_mojo_cmd() then
 		return "native"
 	end
 	return nil
@@ -84,7 +84,7 @@ end
 --- @return { native: boolean, dap: boolean, active: string|nil }
 function M.status()
 	return {
-		native = env.get_dbg_native_cmd() ~= nil,
+		native = env.get_dbg_native_cmd() ~= nil or env.get_mojo_cmd() ~= nil,
 		dap = env.get_dap_cmd() ~= nil,
 		active = active_backend,
 	}
