@@ -70,8 +70,8 @@ function M.setup(opts)
 		return out, file
 	end
 
-	local function build_config(name, user_opts)
-		local opts = user_opts or {}
+	local function build_config(name, build_opts)
+		build_opts = build_opts or {}
 		local cwd = vim.fn.getcwd()
 		local config = {
 			type = "mojo-lldb",
@@ -84,16 +84,16 @@ function M.setup(opts)
 				"settings set target.source-map . " .. cwd,
 			},
 		}
-		if opts.stop_on_entry then
+		if build_opts.stop_on_entry then
 			config.stopOnEntry = true
 		end
-		if opts.args_fn then
-			config.args = opts.args_fn
+		if build_opts.args_fn then
+			config.args = build_opts.args_fn
 		end
-		if opts.program_fn then
-			config.program = opts.program_fn
+		if build_opts.program_fn then
+			config.program = build_opts.program_fn
 		end
-		if opts.mojo_file then
+		if build_opts.mojo_file then
 			config.mojoFile = function()
 				local _, src = build_mojo_file()
 				return src
