@@ -61,13 +61,20 @@ function M._start_dap()
 		active_backend = nil
 		return
 	end
-	local file = vim.fn.expand("%:p")
-	if file == "" then
-		vim.notify("mojo.nvim: no file to debug", vim.log.levels.ERROR)
+	local ok_build, bin = pcall(require("mojo.adapters.dap").build)
+	if not ok_build or not bin then
 		active_backend = nil
 		return
 	end
-	dap.run({ type = "mojo-lldb", request = "launch", name = "Debug Mojo File", mojoFile = file })
+	local file = vim.fn.expand("%:p")
+	dap.run({
+		type = "mojo-lldb",
+		request = "launch",
+		name = "Debug Mojo File",
+		program = bin,
+		cwd = vim.fn.getcwd(),
+		runInTerminal = true,
+	})
 end
 
 function M.toggle_bp()

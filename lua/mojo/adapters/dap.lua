@@ -134,4 +134,11 @@ function M.setup(opts)
 	return true
 end
 
+--- Build current .mojo file and return the binary path.
+--- @return string|nil
+function M.build()
+	local bin, _ = build_mojo_file()
+	return bin
+end
+
 return M
