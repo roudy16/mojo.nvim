@@ -77,15 +77,19 @@ end
 
 --- @return "active"|"inactive"|"unavailable"
 function M.dbg_status()
-	local lsp_ok = env.get_dap_cmd() ~= nil
-	if not lsp_ok then
-		return "unavailable"
+	local dap_ok = env.get_dap_cmd() ~= nil
+	if dap_ok then
+		local ok, dap = pcall(require, "dap")
+		if ok and dap.session and dap.session() then
+			return "active"
+		end
+		return "inactive"
 	end
-	local ok, dap = pcall(require, "dap")
-	if ok and dap.session and dap.session() then
-		return "active"
+	local mojo = env.get_mojo_cmd()
+	if mojo then
+		return "inactive"
 	end
-	return "inactive"
+	return "unavailable"
 end
 
 --- @return "available"|"unavailable"
