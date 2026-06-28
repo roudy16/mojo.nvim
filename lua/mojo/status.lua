@@ -118,7 +118,7 @@ function M.dbg_icon()
 		return "○"
 	end
 	if env.get_mojo_cmd() then
-		return "🔥"
+		return (config.options.statusline or {}).icon or "🔥"
 	end
 	return "󰅖"
 end
