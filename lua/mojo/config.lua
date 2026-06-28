@@ -106,7 +106,7 @@ M.defaults = {
 	},
 	statusline = {
 		enabled = true,
-		icon = "🔥",
+		icon = "󰈸",
 		show_env_name = true,
 		show_sdk_version = true,
 		show_lsp = true,
