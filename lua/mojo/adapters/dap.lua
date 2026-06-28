@@ -48,12 +48,14 @@ function M.setup(opts)
 
 	local function build_config(name, opts)
 		opts = opts or {}
+		local cwd = vim.fn.getcwd()
 		local config = {
 			type = "mojo-lldb",
 			request = "launch",
 			name = name,
 			runInTerminal = true,
-			cwd = "${workspaceFolder}",
+			cwd = cwd,
+			sourceMap = { { ".", cwd } },
 		}
 		if opts.args_fn then
 			config.args = opts.args_fn
