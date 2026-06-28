@@ -62,7 +62,7 @@ function M.get_lsp_cmd(path)
 	return nil
 end
 
-local DAP_NAMES = { "_mojo-lldb-dap", "mojo-lldb-dap", "mojo-lldb" }
+local DAP_NAMES = { "_mojo-lldb-dap", "mojo-lldb-dap" }
 
 local function first_dap_in(dir)
 	for _, name in ipairs(DAP_NAMES) do
