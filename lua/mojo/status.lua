@@ -77,16 +77,15 @@ end
 
 --- @return "active"|"inactive"|"unavailable"
 function M.dbg_status()
-	local dap_ok = env.get_dap_cmd() ~= nil
-	if dap_ok then
-		local ok, dap = pcall(require, "dap")
-		if ok and dap.session and dap.session() then
-			return "active"
-		end
-		return "inactive"
+	local ok, debug = pcall(require, "mojo.debug")
+	if not ok then
+		return "unavailable"
 	end
-	local mojo = env.get_mojo_cmd()
-	if mojo then
+	local st = debug.status()
+	if st.active then
+		return "active"
+	end
+	if st.dap or st.native then
 		return "inactive"
 	end
 	return "unavailable"
@@ -110,15 +109,23 @@ end
 
 --- @return string
 function M.dbg_icon()
-	if env.get_dap_cmd() then
-		local ok, dap = pcall(require, "dap")
-		if ok and dap.session and dap.session() then
+	local ok, debug = pcall(require, "mojo.debug")
+	if not ok then
+		return "󰅖"
+	end
+	local st = debug.status()
+	if st.active == "dap" then
+		local ok_dap, dap = pcall(require, "dap")
+		if ok_dap and dap.session and dap.session() then
 			return "󰄬"
 		end
 		return "○"
 	end
-	if env.get_mojo_cmd() then
-		return (config.options.statusline or {}).icon or "🔥"
+	if st.active == "native" then
+		return "󰄬"
+	end
+	if st.dap or st.native then
+		return "○"
 	end
 	return "󰅖"
 end

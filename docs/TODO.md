@@ -265,7 +265,7 @@
 
 **Remaining work:** lualine icon docs.
 
-### 28. Debug UX — env-adaptive debugger (uv vs pixi)
+### 28. Debug UX — env-adaptive debugger (uv vs pixi) — [in progress]
 
 **Sovereignty:** Rule 1 (Centralization) + Rule 6 (Environmental Autonomy)
 

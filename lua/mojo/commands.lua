@@ -15,47 +15,6 @@ local function setup_run_terminal()
 	vim.api.nvim_buf_set_keymap(buf, "t", "<CR>", "<C-\\><C-N>:close<CR>", { noremap = true, silent = true })
 end
 
-local function setup_debug_terminal()
-	local buf = vim.api.nvim_get_current_buf()
-	local win = vim.api.nvim_get_current_win()
-	vim.bo[buf].buflisted = false
-	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
-	vim.wo[win].winbar =
-		"%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars  |  Press [q] [Esc] or [Enter] to close this pane  "
-	vim.wo[win].winhl = "Normal:NormalFloat"
-	vim.keymap.set(
-		"n",
-		"q",
-		":close<CR>",
-		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
-	)
-	vim.keymap.set(
-		"n",
-		"<Esc>",
-		":close<CR>",
-		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
-	)
-	vim.keymap.set(
-		"n",
-		"<CR>",
-		":close<CR>",
-		{ buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" }
-	)
-	local function lldb(cmd)
-		return function()
-			local job = vim.b[buf].terminal_job_id
-			if job then
-				vim.api.nvim_chan_send(job, cmd .. "\n")
-			end
-		end
-	end
-	vim.keymap.set("n", "r", lldb("run"), { buffer = buf, desc = "LLDB: run" })
-	vim.keymap.set("n", "n", lldb("next"), { buffer = buf, desc = "LLDB: next" })
-	vim.keymap.set("n", "s", lldb("step"), { buffer = buf, desc = "LLDB: step" })
-	vim.keymap.set("n", "c", lldb("continue"), { buffer = buf, desc = "LLDB: continue" })
-	vim.keymap.set("n", "v", lldb("frame variable"), { buffer = buf, desc = "LLDB: variables" })
-end
-
 local function do_menu()
 	require("mojo.status").show_menu()
 end
@@ -122,22 +81,12 @@ local function do_dedicated()
 	setup_run_terminal()
 end
 
-local function do_debug()
-	local file = vim.fn.expand("%:p")
+local function do_debug(backend)
 	if vim.bo.filetype ~= "mojo" then
 		vim.notify("mojo.nvim: not a Mojo file", vim.log.levels.ERROR)
 		return
 	end
-	local mojo = require("mojo.env").get_mojo_cmd()
-	if not mojo then
-		vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
-		return
-	end
-
-	local parts = { mojo, "debug", vim.fn.shellescape(file) }
-
-	vim.cmd("belowright terminal " .. table.concat(parts, " "))
-	setup_debug_terminal()
+	require("mojo.debug").start(backend)
 end
 
 local function do_rebuild()
@@ -170,7 +119,9 @@ local function show_help()
 			"  menu       Open floating actions menu",
 			"  run        Run current file in terminal split",
 			"  dedicated  Run current file in dedicated buffer",
-			"  debug      Debug current file in terminal via mojo debug",
+			"  debug         Debug current file (auto-select backend)",
+	"  debug-native  Debug current file via mojo-lldb terminal",
+	"  debug-dap     Debug current file via nvim-dap (mojo-lldb-dap)",
 			"  restart    Restart Mojo LSP server",
 			"  stop       Stop Mojo LSP server",
 			"  refresh    Clear SDK cache and re-detect",
@@ -201,11 +152,27 @@ function M.setup(opts)
 			do_dedicated,
 			{ desc = "Run current Mojo file in dedicated terminal buffer" }
 		)
-		vim.api.nvim_create_user_command(
-			"MojoDebug",
-			do_debug,
-			{ desc = "Debug current Mojo file in terminal via mojo debug" }
-		)
+	vim.api.nvim_create_user_command(
+		"MojoDebug",
+		function()
+			do_debug("auto")
+		end,
+		{ desc = "Debug current Mojo file (auto-select backend)" }
+	)
+	vim.api.nvim_create_user_command(
+		"MojoDebugNative",
+		function()
+			do_debug("native")
+		end,
+		{ desc = "Debug current Mojo file via mojo-lldb terminal" }
+	)
+	vim.api.nvim_create_user_command(
+		"MojoDebugDap",
+		function()
+			do_debug("dap")
+		end,
+		{ desc = "Debug current Mojo file via nvim-dap (mojo-lldb-dap)" }
+	)
 		vim.api.nvim_create_user_command(
 			"MojoRebuildParser",
 			do_rebuild,
@@ -222,7 +189,15 @@ function M.setup(opts)
 			stop = do_stop,
 			refresh = do_refresh,
 			rebuild = do_rebuild,
-			["debug"] = do_debug,
+			["debug"] = function()
+			do_debug("auto")
+		end,
+		["debug-native"] = function()
+			do_debug("native")
+		end,
+		["debug-dap"] = function()
+			do_debug("dap")
+		end,
 		}
 
 		vim.api.nvim_create_user_command("Mojo", function(info)
@@ -247,7 +222,7 @@ function M.setup(opts)
 			nargs = "?",
 			complete = function(ArgLead)
 				local all =
-					{ "menu", "run", "dedicated", "debug", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
+					{ "menu", "run", "dedicated", "debug", "debug-native", "debug-dap", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
 				return vim.iter(all)
 					:filter(function(s)
 						return s:find(ArgLead) ~= nil
