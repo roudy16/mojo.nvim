@@ -83,7 +83,16 @@ local function _display(opts)
 	end
 
 	if opts.show_dbg ~= false then
-		add_indicator(status.dbg_status(), "dbg")
+		local state = status.dbg_status()
+		local icon = status.dbg_icon()
+		local hl = "MojoNeutral"
+		if state == "active" then
+			hl = "MojoGood"
+		elseif state == "unavailable" then
+			hl = "MojoErr"
+		end
+		table.insert(parts, "%#MojoSep#·%*")
+		table.insert(parts, "%#" .. hl .. "#" .. icon .. "%*" .. " dbg")
 	end
 
 	if opts.show_diag ~= false then

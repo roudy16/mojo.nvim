@@ -99,8 +99,28 @@ end
 
 --- @param state string
 --- @return string
-function M.status_icon(_)
-	return (config.options.statusline or {}).icon or "🔥"
+function M.status_icon(state)
+	if state == "running" or state == "active" or state == "available" then
+		return "󰄬"
+	elseif state == "stopped" or state == "inactive" then
+		return "○"
+	end
+	return "󰅖"
+end
+
+--- @return string
+function M.dbg_icon()
+	if env.get_dap_cmd() then
+		local ok, dap = pcall(require, "dap")
+		if ok and dap.session and dap.session() then
+			return "󰄬"
+		end
+		return "○"
+	end
+	if env.get_mojo_cmd() then
+		return "🔥"
+	end
+	return "󰅖"
 end
 
 --- @param state string
@@ -198,7 +218,7 @@ function M.display()
 	end
 
 	if opts.show_dbg ~= false then
-		table.insert(status_parts, M.status_icon(M.dbg_status()) .. " dbg")
+		table.insert(status_parts, M.dbg_icon() .. " dbg")
 	end
 
 	if opts.show_diag ~= false then
