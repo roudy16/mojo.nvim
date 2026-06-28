@@ -56,6 +56,9 @@ function M.setup(opts)
 			runInTerminal = true,
 			cwd = cwd,
 			sourceMap = { { ".", cwd } },
+			initCommands = {
+				"settings set target.source-map . " .. cwd,
+			},
 		}
 		if opts.args_fn then
 			config.args = opts.args_fn
