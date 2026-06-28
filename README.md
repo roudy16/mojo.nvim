@@ -102,9 +102,10 @@ Commands are configured via the `commands` option. By default only the master `:
 | `:MojoStopLSP`       | Stop Mojo LSP server                                       |
 | `:MojoRun`           | Run current `.mojo` file in a terminal split               |
 | `:MojoRunDedicated`  | Run current `.mojo` file in a dedicated terminal buffer    |
+| `:MojoDebug`         | Debug current `.mojo` file via `mojo debug` in terminal    |
 | `:MojoRebuildParser` | Manually rebuild the self-hosted tree-sitter Mojo parser   |
 
-`:Mojo` subcommands: `menu`, `run`, `dedicated`, `restart`, `stop`, `refresh`, `rebuild`, `keymaps`, `help`. Press `<Tab>` after `:Mojo ` to cycle through them.
+`:Mojo` subcommands: `menu`, `run`, `dedicated`, `debug`, `restart`, `stop`, `refresh`, `rebuild`, `keymaps`, `help`. Press `<Tab>` after `:Mojo ` to cycle through them.
 
 ## Keymaps
 

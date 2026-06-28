@@ -81,6 +81,21 @@ local function do_dedicated()
 	setup_run_terminal()
 end
 
+local function do_debug()
+	local file = vim.fn.expand("%:p")
+	if vim.bo.filetype ~= "mojo" then
+		vim.notify("mojo.nvim: not a Mojo file", vim.log.levels.ERROR)
+		return
+	end
+	local mojo = require("mojo.env").get_mojo_cmd()
+	if not mojo then
+		vim.notify("mojo.nvim: mojo binary not found", vim.log.levels.ERROR)
+		return
+	end
+	vim.cmd("belowright terminal " .. mojo .. " debug " .. vim.fn.shellescape(file))
+	setup_run_terminal()
+end
+
 local function do_rebuild()
 	local ts = require("mojo.treesitter")
 	if ts.compile_parser() then
@@ -104,23 +119,24 @@ local function show_keymaps()
 	)
 end
 
-local function show_help()
-	vim.notify(
-		table.concat({
-			"mojo.nvim subcommands:",
-			"  menu       Open floating actions menu",
-			"  run        Run current file in terminal split",
-			"  dedicated  Run current file in dedicated buffer",
-			"  restart    Restart Mojo LSP server",
-			"  stop       Stop Mojo LSP server",
-			"  refresh    Clear SDK cache and re-detect",
-			"  rebuild    Rebuild tree-sitter parser",
-			"  keymaps    Show available keymaps",
-			"  help       Show this help",
-		}, "\n"),
-		vim.log.levels.INFO
-	)
-end
+		local function show_help()
+			vim.notify(
+				table.concat({
+					"mojo.nvim subcommands:",
+					"  menu       Open floating actions menu",
+					"  run        Run current file in terminal split",
+					"  dedicated  Run current file in dedicated buffer",
+					"  debug      Debug current file in terminal via mojo debug",
+					"  restart    Restart Mojo LSP server",
+					"  stop       Stop Mojo LSP server",
+					"  refresh    Clear SDK cache and re-detect",
+					"  rebuild    Rebuild tree-sitter parser",
+					"  keymaps    Show available keymaps",
+					"  help       Show this help",
+				}, "\n"),
+				vim.log.levels.INFO
+			)
+		end
 
 --- @param opts Mojo-lang.Config
 function M.setup(opts)
@@ -133,6 +149,7 @@ function M.setup(opts)
 		vim.api.nvim_create_user_command("MojoStopLSP", do_stop, { desc = "Stop Mojo LSP server" })
 		vim.api.nvim_create_user_command("MojoRun", do_run, { desc = "Run current Mojo file in terminal split" })
 		vim.api.nvim_create_user_command("MojoRunDedicated", do_dedicated, { desc = "Run current Mojo file in dedicated terminal buffer" })
+		vim.api.nvim_create_user_command("MojoDebug", do_debug, { desc = "Debug current Mojo file in terminal via mojo debug" })
 		vim.api.nvim_create_user_command("MojoRebuildParser", do_rebuild, { desc = "Rebuild the self-hosted tree-sitter Mojo parser" })
 	end
 
@@ -145,6 +162,7 @@ function M.setup(opts)
 			stop = do_stop,
 			refresh = do_refresh,
 			rebuild = do_rebuild,
+			["debug"] = do_debug,
 		}
 
 		vim.api.nvim_create_user_command("Mojo", function(info)
@@ -165,7 +183,7 @@ function M.setup(opts)
 		end, {
 			nargs = "?",
 			complete = function(ArgLead)
-				local all = { "menu", "run", "dedicated", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
+				local all = { "menu", "run", "dedicated", "debug", "restart", "stop", "refresh", "rebuild", "keymaps", "help" }
 				return vim.iter(all):filter(function(s)
 					return s:find(ArgLead) ~= nil
 				end):totable()
