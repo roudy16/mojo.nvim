@@ -36,12 +36,32 @@ function M.start()
 
 	window.setup(term_buf, term_win, term_job)
 
-	-- Esperar a que LLDB inicie antes de enviar breakpoints
-	vim.defer_fn(function()
-		if M.is_active() then
-			require("mojo.debug.breakpoints").sync_all()
+	-- Esperar el prompt (lldb) antes de enviar breakpoints
+	M._wait_for_prompt()
+end
+
+--- Poll the terminal buffer until LLDB prompt appears, then sync BPs.
+function M._wait_for_prompt()
+	local lib = vim.uv or vim.loop
+	local timer = lib.new_timer()
+	local elapsed = 0
+	timer:start(100, 200, vim.schedule_wrap(function()
+		elapsed = elapsed + 1
+		if not M.is_active() or elapsed > 50 then
+			timer:stop()
+			timer:close()
+			return
 		end
-	end, 500)
+		local lines = vim.api.nvim_buf_get_lines(term_buf, 0, -1, false)
+		for _, line in ipairs(lines) do
+			if line:match("%(lldb%)") then
+				timer:stop()
+				timer:close()
+				require("mojo.debug.breakpoints").sync_all()
+				return
+			end
+		end
+	end))
 end
 
 --- @param cmd string
