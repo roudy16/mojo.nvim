@@ -29,7 +29,7 @@ function M.setup(opts)
 		})
 	end
 
-	dap.configurations["mojo-lldb"] = {
+	dap.configurations.mojo = {
 		{
 			type = "mojo-lldb",
 			request = "launch",
