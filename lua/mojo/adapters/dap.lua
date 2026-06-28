@@ -80,6 +80,9 @@ function M.setup(opts)
 				"settings set target.source-map . " .. cwd,
 			},
 		}
+		if opts.stop_on_entry then
+			config.stopOnEntry = true
+		end
 		if opts.args_fn then
 			config.args = opts.args_fn
 		end
@@ -100,7 +103,7 @@ function M.setup(opts)
 	end
 
 	dap.configurations.mojo = {
-		build_config("Debug Mojo File", { mojo_file = true }),
+		build_config("Debug Mojo File", { mojo_file = true, stop_on_entry = true }),
 		build_config("Debug Mojo File (with args)", {
 			mojo_file = true,
 			args_fn = function()
