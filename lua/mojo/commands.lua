@@ -20,11 +20,24 @@ local function setup_debug_terminal()
 	local win = vim.api.nvim_get_current_win()
 	vim.bo[buf].buflisted = false
 	vim.api.nvim_set_hl(0, "MojoDebugWinBar", { bg = "#4e8cbf", fg = "#ffffff" })
-	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [bt] [v]ars  |  <C-\\><C-N> then q to close  "
+	vim.wo[win].winbar = "%#MojoDebugWinBar#  [r]un [n]ext [s]tep [c]ontinue [v]ars  |  <C-\\><C-N> then q to close  "
 	vim.wo[win].winhl = "Normal:NormalFloat"
 	vim.keymap.set("n", "q", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
 	vim.keymap.set("n", "<Esc>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
 	vim.keymap.set("n", "<CR>", ":close<CR>", { buffer = buf, noremap = true, silent = true, desc = "Close debug terminal" })
+	local function lldb(cmd)
+		return function()
+			local job = vim.b[buf].terminal_job_id
+			if job then
+				vim.api.nvim_chan_send(job, cmd .. "\n")
+			end
+		end
+	end
+	vim.keymap.set("t", "r", lldb("run"), { buffer = buf, desc = "LLDB: run" })
+	vim.keymap.set("t", "n", lldb("next"), { buffer = buf, desc = "LLDB: next" })
+	vim.keymap.set("t", "s", lldb("step"), { buffer = buf, desc = "LLDB: step" })
+	vim.keymap.set("t", "c", lldb("continue"), { buffer = buf, desc = "LLDB: continue" })
+	vim.keymap.set("t", "v", lldb("frame variable"), { buffer = buf, desc = "LLDB: variables" })
 end
 
 local function do_menu()
