@@ -1,14 +1,30 @@
 # Contributing to mojo.nvim
 
-## Project Stewardship
+## Issues & PRs
 
-I am the circumstantial owner of this plugin — I maintain it because nobody else
-has stepped up yet. My intention is to align with the structural will of the Mojo
-community.
+Issues and pull requests are always welcome and appreciated — whether it's a bug
+report, a feature request, or a code contribution. Every merged PR makes you a
+contributor. Thank you.
 
-If you are a member of the Mojo/Modular community with a meaningful role in it
-and you also use Neovim, you may request contributor access to this project.
-I will gladly grant it.
+## Repository Access
+
+Contributors who demonstrate consistent, high-quality contributions can request
+**Write-level collaborator access** to the repository. This is a trust-based
+invitation, not an entitlement — I'll offer it when I see a pattern of solid
+work.
+
+Write access allows:
+
+| Capability                 | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| **Review PRs**             | Approve, request changes, comment                 |
+| **Merge to `main`**        | Merge approved PRs (subject to branch protection) |
+| **Push branches**          | Push feature/fix branches directly                |
+| **Manage issues & labels** | Triage, assign, label, close                      |
+| **Edit wiki & settings**   | Non-sensitive repo settings                       |
+
+Note: Write is _not_ admin. Sensitive operations (branch protection rules,
+secrets, collaborator management) remain with maintainers.
 
 ## Project Purpose
 
@@ -116,6 +132,7 @@ Type annotations use EmmyLua format:
 ```
 
 Optional function types must be parenthesized before `|nil`:
+
 ```lua
 --- @field adapter (fun(opts: Mojo-lang.MyFeatureConfig): boolean)|nil
 ```
@@ -135,14 +152,14 @@ redefining.
 
 ## Documentation
 
-| File | Audience | Content |
-|------|----------|---------|
-| `README.md` | Users | Installation, setup, features. No internal rules. |
-| `AGENTS.md` | Contributors & AI agents | Sovereignty rules, conventions. |
-| `CONTRIBUTING.md` | Contributors | This file — governance, structure, workflow. |
-| `docs/superpowers/specs/` | Contributors | Design documents for new subsystems. |
-| `docs/superpowers/plans/` | Contributors | Implementation plans. |
-| `docs/TODO.md` | All | Feature tracking against VS Code extension. |
+| File                      | Audience                 | Content                                           |
+| ------------------------- | ------------------------ | ------------------------------------------------- |
+| `README.md`               | Users                    | Installation, setup, features. No internal rules. |
+| `AGENTS.md`               | Contributors & AI agents | Sovereignty rules, conventions.                   |
+| `CONTRIBUTING.md`         | Contributors             | This file — governance, structure, workflow.      |
+| `docs/superpowers/specs/` | Contributors             | Design documents for new subsystems.              |
+| `docs/superpowers/plans/` | Contributors             | Implementation plans.                             |
+| `docs/TODO.md`            | All                      | Feature tracking against VS Code extension.       |
 
 Keep all docs consistent by running `update-docs` after features land, after
 TODO updates, or periodically as a maintenance pass.
@@ -154,6 +171,7 @@ Commit messages use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`.
 Tests live in `tests/` and run via Neovim's headless mode.
 
 **Running tests:**
+
 ```bash
 nvim --headless -c "luafile tests/<test_file>.lua" -c "qa!"
 ```
@@ -162,6 +180,7 @@ nvim --headless -c "luafile tests/<test_file>.lua" -c "qa!"
 Tree-sitter ERROR nodes, and runs capture assertions.
 
 **Test pattern:**
+
 - Tests are standalone Lua files executed by `luafile`.
 - They report PASS/FAIL per assertion and aggregate errors.
 - On failure, exit with code `cq <error_count>` (non-zero).
@@ -177,11 +196,11 @@ New tests should follow this pattern.
 
 The plugin uses skills (in `.agents/skills/`) to automate workflows:
 
-| Skill | When to use |
-|-------|-------------|
-| `mojo-task-workflow` | Executing a task from `docs/TODO.md` |
-| `mojo-todo-update` | Updating `docs/TODO.md` after audit or task completion |
-| `mojo-community-post` | Drafting community update posts |
-| `update-docs` | Auditing docs for accuracy and consistency after features land |
+| Skill                 | When to use                                                    |
+| --------------------- | -------------------------------------------------------------- |
+| `mojo-task-workflow`  | Executing a task from `docs/TODO.md`                           |
+| `mojo-todo-update`    | Updating `docs/TODO.md` after audit or task completion         |
+| `mojo-community-post` | Drafting community update posts                                |
+| `update-docs`         | Auditing docs for accuracy and consistency after features land |
 
 For AI agents: load the relevant skill before starting a task.
