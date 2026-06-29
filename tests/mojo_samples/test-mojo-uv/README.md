@@ -44,7 +44,7 @@ If `mojo-lldb` is not available in the uv venv, native debug falls back to
 
 ## Workflow 2 — DAP Debugger (`dbg_dap`)
 
-Requires [nvim-dap]. Uses `mojo-lldb-dap` with nvim-dap UI.
+Requires [nvim-dap]. Uses `lldb-dap` (uv venv) with nvim-dap UI.
 
 | Step | Action                 | Expected                                                          |
 | ---- | ---------------------- | ----------------------------------------------------------------- |

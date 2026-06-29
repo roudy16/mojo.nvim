@@ -10,7 +10,7 @@ using the sample projects in `tests/mojo_samples/`.
 - Mojo SDK 1.0.0b2+
 - For **pixi**: [`pixi`] installed
 - For **uv**: [`uv`] installed
-- For **dbg_dap**: [nvim-dap] + `mojo-lldb-dap`
+- For **dbg_dap**: [nvim-dap] + DAP binary (`mojo-lldb-dap` on pixi, `lldb-dap` on uv)
 
 ## Test Projects
 
@@ -41,7 +41,8 @@ def main():
 :checkhealth mojo
 ```
 
-Verify `mojo` and `mojo-lldb` (or `mojo-lldb-dap`) are found.
+Verify `mojo` and a debug binary are found (`mojo-lldb` / `mojo-lldb-dap` on pixi,
+`mojo-lldb` / `lldb-dap` on uv).
 
 ## Test Matrix
 
@@ -61,10 +62,11 @@ Activate the correct environment before launching Neovim:
 - pixi: `pixi shell -e nvim`
 - uv: `source .venv/bin/activate`
 
-### "mojo-lldb not found" / "mojo-lldb-dap not found"
+### Debug binary not found
 
-The pixi-installed mojo includes both. uv-installed mojo may not include them.
-Use pixi for debug testing.
+- **pixi**: `mojo-lldb` and `mojo-lldb-dap` are included.
+- **uv**: `mojo-lldb` and `lldb-dap` may not be included. Use pixi for full debug
+  or fall back to `:Mojo debug` (terminal `mojo debug`).
 
 ### Build failure
 
