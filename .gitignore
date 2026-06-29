@@ -10,6 +10,8 @@ parser.dylib
 *.log
 posts/
 plans/
+.pixi/
 _mojo-debug/
+.venv/
 *.mojo-dap-bin
 *.mojo-dap-bin.dSYM

@@ -1,0 +1,5 @@
+# Python/Mojo virtual environment
+.venv/
+
+# Mojo build artifacts
+_mojo-debug/

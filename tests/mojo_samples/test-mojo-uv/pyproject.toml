@@ -1,0 +1,12 @@
+[project]
+name = "test-mojo-uv"
+version = "0.1.0"
+description = "Mojo debug test project (uv)"
+requires-python = ">=3.12"
+dependencies = [
+    "mojo>=1.0.0b2",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
