@@ -27,6 +27,7 @@ Uses `mojo-lldb` in a terminal split. Keybindings (normal mode): `r` run,
 ## Workflow 2 — DAP Debugger (`dbg_dap`)
 
 Requires [nvim-dap]. Uses `mojo-lldb-dap` with nvim-dap UI.
+Binary discovery is configurable via `debug.search_for` in the plugin config.
 
 | Step | Action                      | Expected                                          |
 | ---- | --------------------------- | ------------------------------------------------- |

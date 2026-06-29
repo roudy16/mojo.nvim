@@ -68,6 +68,9 @@ Activate the correct environment before launching Neovim:
 - **uv**: `mojo-lldb` and `lldb-dap` may not be included. Use pixi for full debug
   or fall back to `:Mojo debug` (terminal `mojo debug`).
 
+Binary names are configurable via `debug.search_for` in the plugin config
+(default: `lldb-dap`, `_mojo-lldb-dap`, `mojo-lldb-dap`, `mojo-lldb`, `lldb`).
+
 ### Build failure
 
 ```bash
