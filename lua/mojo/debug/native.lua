@@ -15,6 +15,9 @@ local term_job = nil
 --- @type string|nil
 local current_file = nil
 
+--- @type integer|nil
+local source_buf = nil
+
 function M.start()
 	local file = vim.fn.expand("%:p")
 	if file == "" then
@@ -22,6 +25,7 @@ function M.start()
 		return
 	end
 	current_file = file
+	source_buf = vim.fn.bufnr(file)
 
 	local mojo = require("mojo.env").get_mojo_cmd()
 	if not mojo then
@@ -29,6 +33,21 @@ function M.start()
 		return
 	end
 
+	-- Build the .mojo file to a binary with full debug info
+	local build_ok, bin = pcall(require("mojo.adapters.dap").build)
+	if not build_ok or not bin then
+		vim.notify("mojo.nvim: failed to build .mojo for debug", vim.log.levels.ERROR)
+		return
+	end
+
+	-- Find the mojo-lldb binary (native LLDB CLI adapted for Mojo)
+	local lldb_bin = require("mojo.env").get_dbg_native_cmd()
+	if not lldb_bin then
+		vim.notify("mojo.nvim: mojo-lldb not found — cannot start native debug", vim.log.levels.ERROR)
+		return
+	end
+
+	-- Quarantine check (only meaningful for the mojo binary, kept for parity)
 	if vim.fn.has("mac") == 1 and mojo:sub(1, 1) == "/" then
 		pcall(function()
 			vim.fn.system({ "xattr", "-p", "com.apple.quarantine", mojo })
@@ -43,14 +62,14 @@ function M.start()
 		end)
 	end
 
-	vim.cmd("belowright terminal " .. mojo .. " debug " .. vim.fn.shellescape(file))
+	vim.cmd("belowright terminal " .. lldb_bin .. " " .. bin)
 	term_buf = vim.api.nvim_get_current_buf()
 	term_win = vim.api.nvim_get_current_win()
 	term_job = vim.bo[term_buf].channel
 
-	window.setup(term_buf, term_win, term_job)
+	window.setup(term_buf, term_win)
 
-	-- Esperar el prompt (lldb) antes de enviar breakpoints
+	-- Wait for the (lldb) prompt before sending breakpoints
 	M._wait_for_prompt()
 end
 
@@ -58,6 +77,9 @@ end
 function M._wait_for_prompt()
 	local lib = vim.uv or vim.loop
 	local timer = lib.new_timer()
+	if not timer then
+		return
+	end
 	local elapsed = 0
 	timer:start(100, 200, vim.schedule_wrap(function()
 		elapsed = elapsed + 1
@@ -66,7 +88,13 @@ function M._wait_for_prompt()
 			timer:close()
 			return
 		end
-		local lines = vim.api.nvim_buf_get_lines(term_buf, 0, -1, false)
+		local buf = term_buf
+		if not buf then
+			timer:stop()
+			timer:close()
+			return
+		end
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 		for _, line in ipairs(lines) do
 			if line:match("%(lldb%)") then
 				timer:stop()
@@ -84,6 +112,9 @@ function M.run()
 	M.send("run")
 	local lib = vim.uv or vim.loop
 	local timer = lib.new_timer()
+	if not timer then
+		return
+	end
 	local elapsed = 0
 	timer:start(300, 300, vim.schedule_wrap(function()
 		elapsed = elapsed + 1
@@ -92,7 +123,13 @@ function M.run()
 			timer:close()
 			return
 		end
-		local lines = vim.api.nvim_buf_get_lines(term_buf, 0, -1, false)
+		local buf = term_buf
+		if not buf then
+			timer:stop()
+			timer:close()
+			return
+		end
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 		for _, line in ipairs(lines) do
 			if line:find(ATTACH_ERROR_MSG, 1, true) then
 				timer:stop()
@@ -123,7 +160,11 @@ function M.send(cmd)
 	vim.api.nvim_chan_send(term_job, cmd .. "\n")
 	local opts = config.options.debug or {}
 	if opts.auto_scroll ~= false then
-		window.auto_scroll(term_buf, term_win)
+		local buf = term_buf
+		local win = term_win
+		if buf and win then
+			window.auto_scroll(buf, win)
+		end
 	end
 end
 
@@ -132,8 +173,7 @@ function M.send_breakpoint(line)
 	if not current_file then
 		return
 	end
-	local escaped = vim.fn.shellescape(current_file)
-	M.send(string.format('breakpoint set --file %s --line %d', escaped, line))
+	M.send(string.format('breakpoint set --file %s --line %d', current_file, line))
 end
 
 --- @param lldb_id integer
@@ -152,6 +192,7 @@ function M.close()
 	term_win = nil
 	term_job = nil
 	current_file = nil
+	source_buf = nil
 	require("mojo.debug.breakpoints").unwatch()
 end
 
@@ -167,6 +208,11 @@ end
 --- @return string|nil
 function M.get_file()
 	return current_file
+end
+
+--- @return integer|nil
+function M.get_source_buf()
+	return source_buf
 end
 
 return M
