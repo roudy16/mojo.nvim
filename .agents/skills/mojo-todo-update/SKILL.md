@@ -18,6 +18,7 @@ TODO entry. Nothing is adopted silently.
 ## North Star
 
 Achieve full Mojo editor sovereignty in Neovim:
+
 - Every VS Code feature has a Neovim equivalent wired through mojo.nvim
 - No Mojo-specific third-party plugin required
 - When Modular ships an official tool, only one module changes
@@ -80,11 +81,11 @@ Triggers: nvim-dap, nvim-lspconfig, nvim-treesitter, conform.nvim, blink.cmp, nv
 
 ## Priority definitions
 
-| Priority | Meaning | Sovereignty rules |
-|----------|---------|-------------------|
-| **P0** | Sovereignty gaps — blocks autonomy, env detection, core architecture | Rules 1-7 |
-| **P1** | VS Code feature parity, high user impact | Rule 1 (centralization) |
-| **P2** | Quality, polish, docs, minor features | Rules 4, 7 |
+| Priority | Meaning                                                              | Sovereignty rules       |
+| -------- | -------------------------------------------------------------------- | ----------------------- |
+| **P0**   | Sovereignty gaps — blocks autonomy, env detection, core architecture | Rules 1-7               |
+| **P1**   | VS Code feature parity, high user impact                             | Rule 1 (centralization) |
+| **P2**   | Quality, polish, docs, minor features                                | Rules 4, 7              |
 
 ## TODO output format
 
@@ -95,7 +96,7 @@ The TODO.md document has two kinds of content:
 After each VS Code release audit:
 
 ```
-### <Feature Area>
+### <Feature Area> (audited: YYYY-MM-DD)
 
 | VS Code Feature | Status | Notes |
 | --------------- | ------ | ----- |
@@ -104,10 +105,13 @@ After each VS Code release audit:
 
 Status: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstream
 
+Each audit table group MUST include the investigation date in the heading.
+
 ### Task entries
 
 ```
 ### N. Task name
+**Created:** YYYY-MM-DD | **Updated:** YYYY-MM-DD
 **Sovereignty:** Rule X (name) — how it relates.
 **Why:** Context and motivation.
 
@@ -116,6 +120,10 @@ Status: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstream
 - Action item 2
 ```
 
+Every task MUST have a `Created` date (when first added) and an `Updated` date
+(when last modified). When creating a new task, both dates are the same. When
+updating an existing task, only bump the `Updated` date.
+
 ## Maintenance rules
 
 - Re-number all items after adding/removing any entry
@@ -123,3 +131,7 @@ Status: ✅ implemented | 🟡 partial | ❌ missing | ⏳ blocked by upstream
 - Never delete a completed task — mark `[done]` inline
 - P2 tools table uses columns: Tool, Needs adapter?, Needs README?, Notes
 - Each task references the sovereignty rule it serves
+- Every task group (audit table or task group) MUST have a timestamp
+- Every individual task MUST have `Created` and `Updated` date fields
+- When investigation is triggered (Mojo release, VS Code release, new tool, API change),
+  record the investigation date in the corresponding section heading
