@@ -83,6 +83,47 @@
 
 ---
 
+## Mojo Language Changelog Audit
+
+> Based on Mojo v1.0.0b2 (2026-06-18). Investigated: 2026-06-29.
+> Key: ✅ handled | 🟡 partial | ❌ gap | ⏳ blocked
+
+### Keywords & Syntax
+
+| Mojo Change                                | Status | Notes                                                    |
+| ------------------------------------------ | ------ | -------------------------------------------------------- |
+| `fn` keyword now a compilation error       | ❌     | Still in completion keywords, snippets, treesitter       |
+| `register_passable` effect keyword removed | ❌     | Still in completion keywords; spec says keep but removed |
+| Trailing `where` on struct declarations    | 🟡     | Treesitter may not parse it yet                          |
+| Trailing `where` on `comptime` alias       | 🟡     | Treesitter may not parse it yet                          |
+| `@unavailable` decorator                   | 🟡     | Not in completion keywords                               |
+| Conditional ImplicitlyDestructible         | 🟡     | `where conforms_to` on struct traits                     |
+| `@export` must have explicit `abi` effect  | 🟡     | Warning in v1.0.0b2, error in future release             |
+| `where` clauses in param lists deprecated  | 🟡     | Move to trailing `where` on declaration                  |
+
+### Tooling
+
+| Mojo Change                                        | Status | Notes                                         |
+| -------------------------------------------------- | ------ | --------------------------------------------- |
+| `mojo package` → `mojo precompile`                 | 🟡     | No references in codebase; terminal cmds fine |
+| `.mojopkg` deprecated → `.mojoc`                   | ❌     | `.mojoc` not registered in filetype detection |
+| `mojo --print-cache-location`                      | ❌     | No user command exposed                       |
+| `mojo --clear-cache`                               | ❌     | No user command exposed                       |
+| LSP: `ContentModified` instead of `InvalidRequest` | ✅     | Server fix; benefits Neovim's built-in LSP    |
+
+### Stdlib
+
+| Mojo Change                                    | Status | Notes                                 |
+| ---------------------------------------------- | ------ | ------------------------------------- |
+| Movable `__init__` arg: `take` → `move`        | 🟡     | Keyword completion may need updating  |
+| New: `BinaryHeap`, `WeakPointer`, `Allocation` | 🟡     | Not in completion builtins            |
+| `ExternalOrigin` → `UntrackedOrigin`           | 🟡     | Completion updated needed             |
+| Reflection API: `reflect[T]` (no parens)       | 🟡     | Completion snippets may need updating |
+| Deprecated free-func reflection removed        | 🟡     | No user-facing impact                 |
+| `UnsafePointer` default null ctor removed      | 🟡     | No user-facing impact                 |
+
+---
+
 ## P0 — Sovereignty Gaps
 
 ### 14. SDK version detection in status bar — [done]
@@ -239,11 +280,44 @@
 - `:MojoRun` — opens terminal split running `mojo run <file>`
 - `:MojoRunDedicated` — same, dedicated buffer per file
 
+### 27. Remove `fn` keyword from completion source & snippets
+
+**Created:** 2026-06-29 | **Updated:** 2026-06-29
+**Sovereignty:** Rule 1 (Centralization) — completion must reflect the current language.
+**Why:** Mojo v1.0.0b2 made `fn` a compilation error (was a warning). `def` is now the single function-declaration keyword.
+
+**Scope:**
+
+- Remove `"fn"` from `completion.lua` keywords list
+- Change `fn` snippet trigger to `def` with `def` body
+- Change `sfn` snippet trigger to `sdef` with `def` body
+
+### 28. Remove `register_passable` keyword from completion source
+
+**Created:** 2026-06-29 | **Updated:** 2026-06-29
+**Sovereignty:** Rule 1 (Centralization) — completion must reflect the current language.
+**Why:** Mojo v1.0.0b2 removed the `register_passable` effect keyword. Register passability is now computed implicitly.
+
+**Scope:**
+
+- Remove `"register_passable"` from `completion.lua` keywords list
+- Update design spec `2026-06-06-mojo-grammar-1.0-update-design.md` to note the removal
+
+### 29. Add `.mojoc` file extension to filetype detection
+
+**Created:** 2026-06-29 | **Updated:** 2026-06-29
+**Sovereignty:** Rule 1 (Centralization) — all Mojo file types must be recognized.
+**Why:** Mojo v1.0.0b2 renamed `mojo package` → `mojo precompile` and deprecated `.mojopkg` in favor of `.mojoc`.
+
+**Scope:**
+
+- Add `.mojoc` extension mapping to `mojo` filetype in `filetype.lua`
+
 ---
 
 ## P2 — Quality & Completeness
 
-### 27. Support popular Neovim tools with README documentation — [done]
+### 30. Support popular Neovim tools with README documentation — [done]
 
 **Scope:** Ongoing — new tools are added here as they're identified.
 
@@ -266,7 +340,7 @@
 
 **Remaining work:** lualine icon docs.
 
-### 28. Debug UX — env-adaptive debugger (uv vs pixi) — [done]
+### 31. Debug UX — env-adaptive debugger (uv vs pixi) — [done]
 
 **Sovereignty:** Rule 1 (Centralization) + Rule 6 (Environmental Autonomy)
 
@@ -302,3 +376,31 @@ lua/mojo/debug/
 - **Step into stdlib**: stepping into functions like `range()` opens Mojo's standard library files (`std/range.mojo`, etc.). Use step over to stay in user code.
 
 **Status:** Implementation complete. Native debug and DAP debug both work end-to-end on pixi projects. uv projects can run `mojo` but full debug requires pixi. The breakpoint sync from editor signs to native LLDB remains unreliable — see "Known limitations".
+
+### 32. Re-audit completion builtins for Mojo v1.0.0b2 stdlib
+
+**Created:** 2026-06-29 | **Updated:** 2026-06-29
+**Sovereignty:** Rule 1 (Centralization) — completion builtins must match the current stdlib.
+**Why:** The completion builtins were last audited against v1.0.0b1. v1.0.0b2 added new stdlib APIs (`BinaryHeap`, `WeakPointer`, `Allocation`), renamed others (`Movable.__init__` `take` → `move`), and removed deprecated APIs (`ExternalOrigin` → `UntrackedOrigin`).
+
+**Scope:**
+
+- Compare current `completion.lua` builtins/attrs/types lists against v1.0.0b2 stdlib
+- Add new types: `BinaryHeap`, `WeakPointer`, `Allocation`, `ThinAllocation`, `Layout`, `UntrackedOrigin`, `UnsafeAnyOrigin`, `CompletionFlag`, `DevicePointer`, `DeviceContextList`, `ReflectedFn`
+- Remove/deprecate: `ExternalOrigin` → `UntrackedOrigin`, `AnyOrigin` → `UnsafeAnyOrigin`
+- Update audit comment in `completion.lua` to reference v1.0.0b2
+
+### 33. Update treesitter grammar for Mojo v1.0.0b2 syntax changes
+
+**Created:** 2026-06-29 | **Updated:** 2026-06-29
+**Sovereignty:** Rule 3 (No Third-Party) — treesitter grammar bundled in the repo.
+**Why:** Mojo v1.0.0b2 changed several syntax rules: `fn` is an error, `register_passable` removed, trailing `where` on struct/comptime declarations added, `@unavailable` decorator added, param-`where` deprecated.
+
+**Scope:**
+
+- Deprecate `fn` in grammar (keep parsing for legacy code, mark as `@keyword.error` in highlights)
+- Remove `register_passable` from effect keywords
+- Add trailing `where` clause support to struct and comptime alias declarations
+- Add `@unavailable` decorator parsing
+- Mark param-list `where` as `@keyword.deprecated` in highlights
+- ⏳ Blocked if upstream `tree-sitter-mojo` hasn't released these updates
