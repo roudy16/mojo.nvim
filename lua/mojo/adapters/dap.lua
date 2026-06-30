@@ -129,11 +129,19 @@ function M.setup(opts)
 				adapter_env.LD_LIBRARY_PATH = lib .. ":" .. swift
 			end
 		end
+		-- convert to an array of "KEY=VALUE" strings
+		local env_list = nil
+		if next(adapter_env) then
+			env_list = {}
+			for k, v in pairs(adapter_env) do
+				env_list[#env_list + 1] = k .. "=" .. tostring(v)
+			end
+		end
 		callback({
 			type = "executable",
 			command = cmd[1],
 			options = {
-				env = adapter_env,
+				env = env_list,
 			},
 		})
 	end
